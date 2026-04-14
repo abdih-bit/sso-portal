@@ -1,0 +1,603 @@
+const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
+const { prisma } = require('../database/client');
+const { createAuditLog } = require('../utils/audit.utils');
+
+/**
+ * GET /api/admin/users
+ */
+async function getUsers(req, res) {
+  try {
+    const { page = 1, limit = 20, search, role, isActive } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const where = {};
+    if (search) {
+      where.OR = [
+        { username: { contains: search, mode: 'insensitive' } },
+        { fullName: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+    if (role) where.role = role;
+    if (isActive !== undefined) where.isActive = isActive === 'true';
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        skip,
+        take: parseInt(limit),
+        select: {
+          id: true,
+          username: true,
+          fullName: true,
+          role: true,
+          pt: true,
+          area: true,
+          jabatan: true,
+          divisi: true,
+          isActive: true,
+          isVerified: true,
+          lastLoginAt: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.user.count({ where })
+    ]);
+
+    return res.json({
+      users,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * POST /api/admin/users
+ */
+async function createUser(req, res) {
+  try {
+    const { username, password, fullName, role, pt, area, jabatan, divisi } = req.body;
+
+    if (!username || !password || !fullName) {
+      return res.status(400).json({ error: 'Nama lengkap, username, dan password wajib diisi.' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password minimal 6 karakter.' });
+    }
+
+    // Head ACC tidak wajib area (akses lintas PT), jabatan lain wajib area
+    const requiresArea = jabatan !== 'Head ACC';
+    if (!pt || (requiresArea && !area) || !jabatan || !divisi) {
+      return res.status(400).json({ error: requiresArea ? 'PT, Area/DC, Jabatan, dan Departemen wajib dipilih.' : 'PT, Jabatan, dan Departemen wajib dipilih.' });
+    }
+
+    // Batasi: role SUPERADMIN hanya boleh ada 1
+    if (role === 'SUPERADMIN') {
+      const existingSuperadmin = await prisma.user.findFirst({ where: { role: 'SUPERADMIN' } });
+      if (existingSuperadmin) {
+        return res.status(403).json({ error: 'Hanya boleh ada 1 akun SUPERADMIN.' });
+      }
+    }
+
+    // Hanya SUPERADMIN yang boleh membuat akun ADMIN atau SUPERADMIN
+    if (['ADMIN', 'SUPERADMIN'].includes(role) && req.user.role !== 'SUPERADMIN') {
+      return res.status(403).json({ error: 'Hanya SUPERADMIN yang dapat membuat akun dengan role ADMIN atau SUPERADMIN.' });
+    }
+
+    // Cek username duplikat
+    const existing = await prisma.user.findFirst({
+      where: { username: username.toLowerCase() }
+    });
+
+    if (existing) {
+      return res.status(400).json({ error: 'Username sudah terdaftar.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, parseInt(process.env.BCRYPT_ROUNDS) || 12);
+
+    const user = await prisma.user.create({
+      data: {
+        username: username.toLowerCase(),
+        password: hashedPassword,
+        fullName,
+        role: role || 'USER',
+        pt: pt || null,
+        area: area || null,
+        jabatan: jabatan || null,
+        divisi: divisi || null,
+        isVerified: true,
+      },
+      select: {
+        id: true, username: true, fullName: true, role: true,
+        pt: true, area: true, jabatan: true, divisi: true, createdAt: true
+      }
+    });
+
+    await createAuditLog({
+      userId: req.user.id,
+      action: 'USER_CREATED',
+      resource: user.username,
+      req
+    });
+
+    return res.status(201).json({ message: 'User berhasil dibuat.', user });
+  } catch (error) {
+    console.error('Create user error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * PUT /api/admin/users/:id
+ */
+async function updateUser(req, res) {
+  try {
+    const { id } = req.params;
+    const { fullName, role, isActive, pt, area, jabatan, divisi } = req.body;
+
+    // Cek user yang akan diupdate
+    const existing = await prisma.user.findUnique({ where: { id }, select: { role: true } });
+    if (!existing) return res.status(404).json({ error: 'User tidak ditemukan.' });
+
+    // SUPERADMIN tidak dapat dinonaktifkan
+    if (existing.role === 'SUPERADMIN' && isActive === false) {
+      return res.status(403).json({ error: 'User SUPERADMIN tidak dapat dinonaktifkan.' });
+    }
+
+    // ADMIN tidak dapat mengedit/menonaktifkan user ber-role ADMIN atau SUPERADMIN
+    if (req.user.role === 'ADMIN' && existing.role !== 'USER') {
+      return res.status(403).json({ error: 'ADMIN hanya dapat mengedit user dengan role USER.' });
+    }
+
+    // Hanya SUPERADMIN yang boleh mengubah role
+    if (role && role !== existing.role && req.user.role !== 'SUPERADMIN') {
+      return res.status(403).json({ error: 'Hanya SUPERADMIN yang dapat mengubah role user.' });
+    }
+
+    // Tidak boleh assign role SUPERADMIN ke user lain
+    if (role === 'SUPERADMIN' && existing.role !== 'SUPERADMIN') {
+      return res.status(403).json({ error: 'Role SUPERADMIN tidak dapat diberikan ke user lain.' });
+    }
+
+    // ADMIN hanya boleh edit data penempatan user (bukan role/status)
+    if (req.user.role === 'ADMIN') {
+      const allowedFields = { pt, area, jabatan, divisi, fullName };
+      const user = await prisma.user.update({
+        where: { id },
+        data: {
+          ...(fullName && { fullName }),
+          ...(pt !== undefined && { pt: pt || null }),
+          ...(area !== undefined && { area: area || null }),
+          ...(jabatan !== undefined && { jabatan: jabatan || null }),
+          ...(divisi !== undefined && { divisi: divisi || null }),
+        },
+        select: { id: true, username: true, fullName: true, role: true, pt: true, area: true, jabatan: true, divisi: true, isActive: true }
+      });
+      await createAuditLog({ userId: req.user.id, action: 'USER_UPDATED', resource: user.username, details: { changes: allowedFields }, req });
+      return res.json({ message: 'User berhasil diperbarui.', user });
+    }
+
+    const user = await prisma.user.update({
+      where: { id },
+      data: {
+        ...(fullName && { fullName }),
+        ...(role && { role }),
+        ...(isActive !== undefined && { isActive }),
+        ...(pt !== undefined && { pt: pt || null }),
+        ...(area !== undefined && { area: area || null }),
+        ...(jabatan !== undefined && { jabatan: jabatan || null }),
+        ...(divisi !== undefined && { divisi: divisi || null }),
+      },
+      select: {
+        id: true, username: true, fullName: true, role: true,
+        pt: true, area: true, jabatan: true, divisi: true, isActive: true
+      }
+    });
+
+    await createAuditLog({
+      userId: req.user.id,
+      action: 'USER_UPDATED',
+      resource: user.username,
+      details: { changes: req.body },
+      req
+    });
+
+    return res.json({ message: 'User berhasil diperbarui.', user });
+  } catch (error) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'User tidak ditemukan.' });
+    }
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * DELETE /api/admin/users/:id
+ */
+async function deleteUser(req, res) {
+  try {
+    const { id } = req.params;
+
+    if (id === req.user.id) {
+      return res.status(400).json({ error: 'Tidak bisa menghapus akun sendiri.' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id }, select: { id: true, username: true, role: true } });
+    if (!user) return res.status(404).json({ error: 'User tidak ditemukan.' });
+
+    // SUPERADMIN tidak bisa dihapus oleh siapa pun
+    if (user.role === 'SUPERADMIN') {
+      return res.status(403).json({ error: 'Akun SUPERADMIN tidak dapat dihapus.' });
+    }
+
+    // ADMIN hanya bisa menghapus user dengan role USER
+    if (req.user.role === 'ADMIN' && user.role !== 'USER') {
+      return res.status(403).json({ error: 'ADMIN hanya dapat menghapus akun dengan role USER.' });
+    }
+
+    await prisma.user.delete({ where: { id } });
+
+    await createAuditLog({
+      userId: req.user.id,
+      action: 'USER_DELETED',
+      resource: user.username,
+      req
+    });
+
+    return res.json({ message: 'User berhasil dihapus.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * GET /api/admin/applications
+ */
+async function getApplications(req, res) {
+  try {
+    const applications = await prisma.application.findMany({
+      orderBy: { sortOrder: 'asc' }
+    });
+    return res.json({ applications });
+  } catch (error) {
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * POST /api/admin/applications
+ */
+async function createApplication(req, res) {
+  try {
+    const { name, slug, description, url, callbackUrl, logoUrl, allowedRoles, allowedDepartemen, areaLinks, appType, sortOrder } = req.body;
+
+    // Link App hanya butuh name & slug; SSO App butuh url & callbackUrl juga
+    if (appType === 'LINK') {
+      if (!name || !slug) {
+        return res.status(400).json({ error: 'name dan slug wajib diisi.' });
+      }
+    } else {
+      if (!name || !slug || !url || !callbackUrl) {
+        return res.status(400).json({ error: 'name, slug, url, dan callbackUrl wajib diisi.' });
+      }
+    }
+
+    const app = await prisma.application.create({
+      data: {
+        name,
+        slug,
+        description,
+        url: url || '',
+        callbackUrl: callbackUrl || '',
+        logoUrl,
+        clientId: uuidv4(),
+        clientSecret: uuidv4(),
+        allowedRoles: allowedRoles || ['USER'],
+        allowedDepartemen: allowedDepartemen || [],
+        areaLinks: areaLinks || null,
+        sortOrder: sortOrder || 0,
+      }
+    });
+
+    await createAuditLog({
+      userId: req.user.id,
+      action: 'APP_CREATED',
+      resource: app.name,
+      req
+    });
+
+    return res.status(201).json({ message: 'Aplikasi berhasil ditambahkan.', application: app });
+  } catch (error) {
+    if (error.code === 'P2002') {
+      return res.status(400).json({ error: 'Slug sudah digunakan.' });
+    }
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * PUT /api/admin/applications/:id
+ */
+async function updateApplication(req, res) {
+  try {
+    const { id } = req.params;
+    const { name, description, url, callbackUrl, logoUrl, isActive, allowedRoles, allowedDepartemen, areaLinks, sortOrder } = req.body;
+
+    const app = await prisma.application.update({
+      where: { id },
+      data: {
+        ...(name && { name }),
+        ...(description !== undefined && { description }),
+        ...(url && { url }),
+        ...(callbackUrl && { callbackUrl }),
+        ...(logoUrl !== undefined && { logoUrl }),
+        ...(isActive !== undefined && { isActive }),
+        ...(allowedRoles && { allowedRoles }),
+        ...(allowedDepartemen !== undefined && { allowedDepartemen }),
+        ...(areaLinks !== undefined && { areaLinks: areaLinks || null }),
+        ...(sortOrder !== undefined && { sortOrder }),
+      }
+    });
+
+    await createAuditLog({
+      userId: req.user.id,
+      action: 'APP_UPDATED',
+      resource: app.name,
+      req
+    });
+
+    return res.json({ message: 'Aplikasi berhasil diperbarui.', application: app });
+  } catch (error) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Aplikasi tidak ditemukan.' });
+    }
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * DELETE /api/admin/applications/:id
+ */
+async function deleteApplication(req, res) {
+  try {
+    const { id } = req.params;
+    const app = await prisma.application.findUnique({ where: { id } });
+    if (!app) return res.status(404).json({ error: 'Aplikasi tidak ditemukan.' });
+
+    await prisma.application.delete({ where: { id } });
+
+    await createAuditLog({
+      userId: req.user.id,
+      action: 'APP_DELETED',
+      resource: app.name,
+      req
+    });
+
+    return res.json({ message: 'Aplikasi berhasil dihapus.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * GET /api/admin/audit-logs
+ */
+async function getAuditLogs(req, res) {
+  try {
+    const { page = 1, limit = 50, userId, action } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const where = {};
+    if (userId) where.userId = userId;
+    if (action) where.action = { contains: action, mode: 'insensitive' };
+
+    const [logs, total] = await Promise.all([
+      prisma.auditLog.findMany({
+        where,
+        skip,
+        take: parseInt(limit),
+        include: {
+          user: {
+            select: { username: true, fullName: true }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.auditLog.count({ where })
+    ]);
+
+    return res.json({
+      logs,
+      pagination: { total, page: parseInt(page), limit: parseInt(limit) }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * GET /api/admin/stats
+ */
+async function getStats(req, res) {
+  try {
+    const [totalUsers, activeUsers, totalApps, activeApps, totalLogins] = await Promise.all([
+      prisma.user.count(),
+      prisma.user.count({ where: { isActive: true } }),
+      prisma.application.count(),
+      prisma.application.count({ where: { isActive: true } }),
+      prisma.auditLog.count({ where: { action: 'LOGIN_SUCCESS' } }),
+    ]);
+
+    return res.json({
+      stats: {
+        totalUsers,
+        activeUsers,
+        totalApps,
+        activeApps,
+        totalLogins,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * GET /api/admin/password-reset-requests
+ */
+async function getPasswordResetRequests(req, res) {
+  try {
+    const { status } = req.query;
+    const where = {};
+    if (status) where.status = status;
+
+    const requests = await prisma.passwordResetRequest.findMany({
+      where,
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            fullName: true,
+            role: true,
+            divisi: true,
+          }
+        }
+      },
+      orderBy: { requestedAt: 'desc' }
+    });
+
+    return res.json({ requests });
+  } catch (error) {
+    console.error('Get reset requests error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * POST /api/admin/password-reset-requests/:id/approve
+ */
+async function approvePasswordReset(req, res) {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: 'Password baru minimal 6 karakter.' });
+    }
+
+    const request = await prisma.passwordResetRequest.findUnique({
+      where: { id },
+      include: { user: { select: { id: true, username: true, fullName: true } } }
+    });
+
+    if (!request) return res.status(404).json({ error: 'Request tidak ditemukan.' });
+    if (request.status !== 'PENDING') {
+      return res.status(400).json({ error: 'Request ini sudah diproses.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, parseInt(process.env.BCRYPT_ROUNDS) || 12);
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: request.userId },
+        data: { password: hashedPassword }
+      }),
+      prisma.passwordResetRequest.update({
+        where: { id },
+        data: {
+          status: 'APPROVED',
+          resolvedAt: new Date(),
+          resolvedBy: req.user.id,
+        }
+      }),
+      // Invalidate semua session aktif milik user tersebut
+      prisma.userSession.updateMany({
+        where: { userId: request.userId },
+        data: { isValid: false }
+      }),
+    ]);
+
+    await createAuditLog({
+      userId: req.user.id,
+      action: 'PASSWORD_RESET_APPROVED',
+      resource: 'password_reset_requests',
+      details: { requestId: id, targetUser: request.user.username },
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+    });
+
+    return res.json({ message: `Password untuk ${request.user.fullName} berhasil direset.` });
+  } catch (error) {
+    console.error('Approve reset error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * POST /api/admin/password-reset-requests/:id/reject
+ */
+async function rejectPasswordReset(req, res) {
+  try {
+    const { id } = req.params;
+
+    const request = await prisma.passwordResetRequest.findUnique({
+      where: { id },
+      include: { user: { select: { username: true } } }
+    });
+
+    if (!request) return res.status(404).json({ error: 'Request tidak ditemukan.' });
+    if (request.status !== 'PENDING') {
+      return res.status(400).json({ error: 'Request ini sudah diproses.' });
+    }
+
+    await prisma.passwordResetRequest.update({
+      where: { id },
+      data: {
+        status: 'REJECTED',
+        resolvedAt: new Date(),
+        resolvedBy: req.user.id,
+      }
+    });
+
+    await createAuditLog({
+      userId: req.user.id,
+      action: 'PASSWORD_RESET_REJECTED',
+      resource: 'password_reset_requests',
+      details: { requestId: id, targetUser: request.user.username },
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+    });
+
+    return res.json({ message: 'Request reset password ditolak.' });
+  } catch (error) {
+    console.error('Reject reset error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+module.exports = {
+  getUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+  getApplications,
+  createApplication,
+  updateApplication,
+  deleteApplication,
+  getAuditLogs,
+  getStats,
+  getPasswordResetRequests,
+  approvePasswordReset,
+  rejectPasswordReset,
+};

@@ -1,0 +1,170 @@
+// This is your Prisma schema file
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===========================
+// USER MODEL
+// ===========================
+model User {
+  id            String    @id @default(uuid())
+  email         String?   @unique
+  username      String    @unique
+  password      String
+  fullName      String    @map("full_name")
+  avatar        String?
+  role          UserRole  @default(USER)
+  pt            String?
+  area          String?
+  jabatan       String?
+  divisi        String?
+  isActive      Boolean   @default(true) @map("is_active")
+  isVerified    Boolean   @default(false) @map("is_verified")
+  lastLoginAt   DateTime? @map("last_login_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  sessions      UserSession[]
+  ssoTokens     SSOToken[]
+  auditLogs     AuditLog[]
+  passwordResets PasswordReset[]
+  resetRequests  PasswordResetRequest[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  SUPERADMIN
+  ADMIN
+  USER
+}
+
+// ===========================
+// USER SESSION MODEL
+// ===========================
+model UserSession {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  token       String    @unique
+  ipAddress   String?   @map("ip_address")
+  userAgent   String?   @map("user_agent")
+  isValid     Boolean   @default(true) @map("is_valid")
+  expiresAt   DateTime  @map("expires_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_sessions")
+}
+
+// ===========================
+// APPLICATION MODEL
+// ===========================
+model Application {
+  id            String    @id @default(uuid())
+  name          String
+  slug          String    @unique
+  description   String?
+  url           String
+  callbackUrl   String    @map("callback_url")
+  logoUrl       String?   @map("logo_url")
+  clientId      String    @unique @map("client_id")
+  clientSecret  String    @map("client_secret")
+  isActive      Boolean   @default(true) @map("is_active")
+  allowedRoles  String[]  @default(["USER"]) @map("allowed_roles")
+  allowedDepartemen String[] @default([]) @map("allowed_departemen")
+  areaLinks     Json?     @map("area_links")   // {"DC Medan": "https://...", "DC Stabat": "https://..."}
+  sortOrder     Int       @default(0) @map("sort_order")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  ssoTokens     SSOToken[]
+
+  @@map("applications")
+}
+
+// ===========================
+// SSO TOKEN MODEL
+// One-time token untuk redirect ke aplikasi
+// ===========================
+model SSOToken {
+  id            String      @id @default(uuid())
+  token         String      @unique
+  userId        String      @map("user_id")
+  applicationId String      @map("application_id")
+  isUsed        Boolean     @default(false) @map("is_used")
+  expiresAt     DateTime    @map("expires_at")
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("sso_tokens")
+}
+
+// ===========================
+// PASSWORD RESET MODEL
+// ===========================
+model PasswordReset {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  token       String    @unique
+  isUsed      Boolean   @default(false) @map("is_used")
+  expiresAt   DateTime  @map("expires_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_resets")
+}
+
+// ===========================
+// PASSWORD RESET REQUEST MODEL
+// Request dari user → diproses SUPERADMIN
+// ===========================
+model PasswordResetRequest {
+  id          String                    @id @default(uuid())
+  userId      String                    @map("user_id")
+  status      PasswordResetStatus       @default(PENDING)
+  requestedAt DateTime                  @default(now()) @map("requested_at")
+  resolvedAt  DateTime?                 @map("resolved_at")
+  resolvedBy  String?                   @map("resolved_by")
+  notes       String?
+
+  user        User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_requests")
+}
+
+enum PasswordResetStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ===========================
+// AUDIT LOG MODEL
+// ===========================
+model AuditLog {
+  id          String    @id @default(uuid())
+  userId      String?   @map("user_id")
+  action      String
+  resource    String?
+  details     Json?
+  ipAddress   String?   @map("ip_address")
+  userAgent   String?   @map("user_agent")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}

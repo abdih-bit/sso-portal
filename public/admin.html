@@ -1,0 +1,2025 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — SSO Portal HQ Medan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    body { background: #f4f5f7; }
+    .sidebar { width: 220px; min-height: 100vh; background: #fff; border-right: 1px solid #e5e7eb; }
+    .sidebar-brand { color: #00297a; font-weight: 700; font-size: 1.4rem; letter-spacing: -0.5px; }
+    .sidebar-brand span { color: #007dc1; }
+    .nav-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; padding: 16px 16px 4px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
+    .nav-item:hover { background: #f3f4f6; color: #111827; }
+    .nav-item.active { background: #eff6ff; color: #1d4ed8; border-left-color: #1d4ed8; font-weight: 600; }
+    .nav-item i { width: 16px; text-align: center; font-size: 13px; }
+    .admin-badge { font-size: 11px; background: #fee2e2; color: #b91c1c; border-radius: 99px; padding: 2px 8px; font-weight: 700; }
+    .sidebar-footer { border-top: 1px solid #e5e7eb; padding: 12px 16px; }
+    .sidebar-user { font-size: 13px; font-weight: 600; color: #111827; }
+    .sidebar-role { font-size: 11px; color: #6b7280; }
+
+    .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 12px 24px; }
+    .stat-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; transition: all 0.2s; }
+    .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }
+    .tab-btn { font-size: 13px; font-weight: 600; padding: 7px 16px; border-radius: 8px; transition: all 0.15s; cursor: pointer; }
+    .tab-btn.active { background: #1d4ed8; color: #fff; }
+    .tab-btn:not(.active) { background: #fff; color: #6b7280; border: 1px solid #e5e7eb; }
+    .tab-btn:not(.active):hover { background: #f3f4f6; color: #374151; }
+    .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+    .table-row:hover { background: #f9fafb; }
+    .input-field { background: #f9fafb; border: 1.5px solid #e5e7eb; border-radius: 8px; width: 100%; padding: 9px 14px; font-size: 13px; color: #111827; outline: none; transition: all 0.2s; }
+    .input-field:focus { background: #fff; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .input-field:disabled { background: #f3f4f6; color: #9ca3af; cursor: not-allowed; border-color: #e5e7eb; opacity: 0.7; }
+    .btn-primary { background: #1d4ed8; color: #fff; border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.15s; }
+    .btn-primary:hover { background: #1e40af; }
+    .modal { display: none; position: fixed; inset: 0; z-index: 50; }
+    .modal.show { display: flex; }
+    .tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+  </style>
+</head>
+<body class="flex min-h-screen">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar flex-shrink-0 flex flex-col fixed top-0 left-0 h-full z-30 overflow-y-auto">
+    <div class="px-4 py-5 border-b border-gray-100">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-building-columns text-2xl" style="color:#007dc1;"></i>
+        <div>
+          <div class="sidebar-brand">HQ<span>Medan</span></div>
+          <div class="text-xs text-gray-400" style="margin-top:1px;">SSO Portal</div>
+        </div>
+      </div>
+    </div>
+    <nav class="flex-1 py-2">
+      <div class="nav-item" onclick="window.location.href='/dashboard'">
+        <i class="fa-solid fa-house-chimney"></i> My Apps
+      </div>
+      <div class="nav-section-label mt-2">Manage</div>
+      <div class="nav-item" onclick="window.location.href='/users'">
+        <i class="fa-solid fa-users-gear"></i> Manajemen User
+      </div>
+      <div class="nav-item active" id="navAdmin" onclick="goToTab('apps')">
+        <i class="fa-solid fa-sliders"></i> Admin Panel
+        <span class="admin-badge ml-auto">SA</span>
+      </div>
+      <div class="nav-item" onclick="window.location.href='/profile'">
+        <i class="fa-regular fa-circle-user"></i> Settings
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="flex items-center gap-3 mb-2">
+        <div id="sidebarAvatarCircle" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">?</div>
+        <div class="min-w-0">
+          <div class="sidebar-user truncate" id="sidebarName">Memuat...</div>
+          <div class="sidebar-role" id="sidebarRole">-</div>
+        </div>
+      </div>
+      <div class="flex justify-end mt-1">
+        <button onclick="handleLogout()" class="text-xs text-red-400 hover:text-red-600 transition-colors flex items-center gap-1">
+          <i class="fa-solid fa-right-from-bracket text-xs"></i> Sign out
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1" style="margin-left:220px;">
+    <div class="topbar flex items-center justify-between">
+      <h1 class="text-sm font-semibold text-gray-800 flex items-center gap-2" id="topbarTitle">
+        <i class="fa-solid fa-sliders text-blue-600"></i> Admin Panel
+      </h1>
+      <div id="adminRoleBadge" class="tag bg-red-100 text-red-700 border border-red-200">
+        <i class="fa-solid fa-shield-halved text-xs"></i>
+        <span id="adminRoleText">ADMIN</span>
+      </div>
+    </div>
+
+    <div class="p-6">
+
+      <!-- STATS -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="stat-card p-4 flex items-center gap-4">
+          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-users text-blue-600 text-sm"></i>
+          </div>
+          <div>
+            <div class="text-xl font-bold text-gray-900" id="st-totalUsers">-</div>
+            <div class="text-xs text-gray-500 font-medium">Total User</div>
+          </div>
+        </div>
+        <div class="stat-card p-4 flex items-center gap-4">
+          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-user-check text-green-600 text-sm"></i>
+          </div>
+          <div>
+            <div class="text-xl font-bold text-green-600" id="st-activeUsers">-</div>
+            <div class="text-xs text-gray-500 font-medium">User Aktif</div>
+          </div>
+        </div>
+        <div class="stat-card p-4 flex items-center gap-4">
+          <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-grid-2 text-purple-600 text-sm"></i>
+          </div>
+          <div>
+            <div class="text-xl font-bold text-purple-600" id="st-totalApps">-</div>
+            <div class="text-xs text-gray-500 font-medium">Aplikasi</div>
+          </div>
+        </div>
+        <div class="stat-card p-4 flex items-center gap-4">
+          <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-right-to-bracket text-orange-600 text-sm"></i>
+          </div>
+          <div>
+            <div class="text-xl font-bold text-orange-600" id="st-totalLogins">-</div>
+            <div class="text-xs text-gray-500 font-medium">Total Login</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div id="tabBar" class="flex gap-2 mb-4 flex-wrap">
+        <button class="tab-btn active" onclick="switchTab('apps', this)">
+          <i class="fa-solid fa-grid-2 mr-1.5"></i> Aplikasi
+        </button>
+        <button class="tab-btn" onclick="switchTab('links', this)">
+          <i class="fa-solid fa-link mr-1.5"></i> Link AppScript
+        </button>
+        <button class="tab-btn" onclick="switchTab('appnames', this)">
+          <i class="fa-solid fa-tags mr-1.5"></i> Nama Aplikasi
+        </button>
+        <button class="tab-btn" onclick="switchTab('master', this)">
+          <i class="fa-solid fa-database mr-1.5"></i> Master Data
+        </button>
+        <button class="tab-btn" onclick="switchTab('logs', this)">
+          <i class="fa-solid fa-list-check mr-1.5"></i> Audit Log
+        </button>
+        <button class="tab-btn" id="resetTabBtn" onclick="switchTab('reset', this)">
+          <i class="fa-solid fa-key mr-1.5"></i> Reset Password
+          <span id="resetBadge" class="hidden ml-1.5 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 animate-pulse">0</span>
+        </button>
+      </div>
+
+      <!-- APPS TAB (default aktif) -->
+      <div id="tab-apps" class="tab-content">
+        <div class="panel">
+          <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-medium text-gray-400" id="appCount"></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="showAppModal()" class="btn-primary">
+                <i class="fa-solid fa-plus text-xs"></i> Add Application
+              </button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50 text-gray-500 text-xs font-semibold uppercase tracking-wider">
+                <tr>
+                  <th class="px-5 py-3 text-left">Application</th>
+                  <th class="px-5 py-3 text-left">URL</th>
+                  <th class="px-5 py-3 text-left">Departemen</th>
+                  <th class="px-5 py-3 text-left">Status</th>
+                  <th class="px-5 py-3 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="appsTable" class="divide-y divide-gray-50">
+                <tr><td colspan="5" class="text-center py-10 text-gray-400 text-sm">
+                  <i class="fa-solid fa-spinner fa-spin text-blue-400 mr-2"></i>Loading...
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- LINKS TAB -->
+      <div id="tab-links" class="tab-content hidden">
+        <div class="panel">
+          <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-medium text-gray-400" id="linkCount"></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="showLinkAppModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-all">
+                <i class="fa-solid fa-plus text-xs"></i> Tambah Link
+              </button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50 text-gray-500 text-xs font-semibold uppercase tracking-wider">
+                <tr>
+                  <th class="px-5 py-3 text-left">Nama Aplikasi</th>
+                  <th class="px-5 py-3 text-left">Area / DC</th>
+                  <th class="px-5 py-3 text-left">Link URL</th>
+                  <th class="px-5 py-3 text-left">Departemen</th>
+                  <th class="px-5 py-3 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="linksTable" class="divide-y divide-gray-50">
+                <tr><td colspan="5" class="text-center py-10 text-gray-400 text-sm">
+                  <i class="fa-solid fa-spinner fa-spin text-blue-400 mr-2"></i>Loading...
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- NAMA APLIKASI TAB -->
+      <div id="tab-appnames" class="tab-content hidden">
+        <div class="panel">
+          <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-tags text-violet-600 text-sm"></i>
+              </div>
+              <div>
+                <span class="text-sm font-bold text-gray-800">Daftar Nama Aplikasi</span>
+                <p class="text-[11px] text-gray-400 mt-0.5">Nama aplikasi yang tersedia untuk didaftarkan sebagai Link AppScript</p>
+              </div>
+            </div>
+            <button onclick="openAppNameModal()" class="btn-primary text-xs py-1.5 px-3">
+              <i class="fa-solid fa-plus text-xs"></i> Tambah Nama
+            </button>
+          </div>
+          <div id="appNamesList" class="divide-y divide-gray-50">
+            <div class="text-center py-10 text-gray-400 text-xs">Memuat...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MASTER DATA TAB -->
+      <div id="tab-master" class="tab-content hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+          <!-- PT Card -->
+          <div class="panel">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fa-solid fa-building text-blue-600 text-xs"></i></div>
+                <span class="text-sm font-bold text-gray-800">PT / Perusahaan</span>
+              </div>
+              <button onclick="openMasterModal('pt')" class="btn-primary text-xs py-1.5 px-3">
+                <i class="fa-solid fa-plus text-xs"></i> Tambah
+              </button>
+            </div>
+            <div id="masterPtList" class="divide-y divide-gray-50 max-h-60 overflow-y-auto">
+              <div class="text-center py-8 text-gray-400 text-xs">Memuat...</div>
+            </div>
+          </div>
+
+          <!-- Area/DC Card -->
+          <div class="panel">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center"><i class="fa-solid fa-location-dot text-green-600 text-xs"></i></div>
+                <span class="text-sm font-bold text-gray-800">Area / DC</span>
+              </div>
+              <button onclick="openMasterModal('area')" class="btn-primary text-xs py-1.5 px-3">
+                <i class="fa-solid fa-plus text-xs"></i> Tambah
+              </button>
+            </div>
+            <div id="masterAreaList" class="divide-y divide-gray-50 max-h-80 overflow-y-auto">
+              <div class="text-center py-8 text-gray-400 text-xs">Memuat...</div>
+            </div>
+          </div>
+
+          <!-- Jabatan Card -->
+          <div class="panel">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center"><i class="fa-solid fa-id-badge text-purple-600 text-xs"></i></div>
+                <span class="text-sm font-bold text-gray-800">Jabatan</span>
+              </div>
+              <button onclick="openMasterModal('jabatan')" class="btn-primary text-xs py-1.5 px-3">
+                <i class="fa-solid fa-plus text-xs"></i> Tambah
+              </button>
+            </div>
+            <div id="masterJabatanList" class="divide-y divide-gray-50 max-h-60 overflow-y-auto">
+              <div class="text-center py-8 text-gray-400 text-xs">Memuat...</div>
+            </div>
+          </div>
+
+          <!-- Departemen Card -->
+          <div class="panel">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-orange-100 rounded-lg flex items-center justify-center"><i class="fa-solid fa-sitemap text-orange-600 text-xs"></i></div>
+                <span class="text-sm font-bold text-gray-800">Departemen</span>
+              </div>
+              <button onclick="openMasterModal('departemen')" class="btn-primary text-xs py-1.5 px-3">
+                <i class="fa-solid fa-plus text-xs"></i> Tambah
+              </button>
+            </div>
+            <div id="masterDepartemenList" class="divide-y divide-gray-50 max-h-60 overflow-y-auto">
+              <div class="text-center py-8 text-gray-400 text-xs">Memuat...</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- LOGS TAB -->
+      <div id="tab-logs" class="tab-content hidden">
+        <div class="panel">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50 text-gray-500 text-xs font-semibold uppercase tracking-wider">
+                <tr>
+                  <th class="px-5 py-3 text-left">Time</th>
+                  <th class="px-5 py-3 text-left">User</th>
+                  <th class="px-5 py-3 text-left">Action</th>
+                  <th class="px-5 py-3 text-left">Resource</th>
+                  <th class="px-5 py-3 text-left">IP</th>
+                </tr>
+              </thead>
+              <tbody id="logsTable" class="divide-y divide-gray-50">
+                <tr><td colspan="5" class="text-center py-10 text-gray-400 text-sm">
+                  <i class="fa-solid fa-spinner fa-spin text-blue-400 mr-2"></i>Loading...
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESET PASSWORD TAB -->
+      <div id="tab-reset" class="tab-content hidden">
+        <div class="panel">
+          <!-- Filter -->
+          <div class="p-4 border-b border-gray-100 flex items-center gap-3 flex-wrap">
+            <span class="text-sm font-semibold text-gray-700">Filter:</span>
+            <button onclick="loadResetRequests('PENDING')" id="filterPending"
+              class="text-xs px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 font-semibold hover:bg-amber-100 transition">
+              <i class="fa-solid fa-clock mr-1"></i> Menunggu
+            </button>
+            <button onclick="loadResetRequests('APPROVED')" id="filterApproved"
+              class="text-xs px-3 py-1.5 rounded-lg bg-green-50 text-green-700 border border-green-200 font-semibold hover:bg-green-100 transition">
+              <i class="fa-solid fa-circle-check mr-1"></i> Disetujui
+            </button>
+            <button onclick="loadResetRequests('REJECTED')" id="filterRejected"
+              class="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-700 border border-red-200 font-semibold hover:bg-red-100 transition">
+              <i class="fa-solid fa-circle-xmark mr-1"></i> Ditolak
+            </button>
+            <button onclick="loadResetRequests()"
+              class="text-xs px-3 py-1.5 rounded-lg bg-gray-100 text-gray-600 border border-gray-200 font-semibold hover:bg-gray-200 transition">
+              <i class="fa-solid fa-list mr-1"></i> Semua
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50 text-gray-500 text-xs font-semibold uppercase tracking-wider">
+                <tr>
+                  <th class="px-5 py-3 text-left">User</th>
+                  <th class="px-5 py-3 text-left">Role</th>
+                  <th class="px-5 py-3 text-left">Departemen</th>
+                  <th class="px-5 py-3 text-left">Waktu Request</th>
+                  <th class="px-5 py-3 text-left">Status</th>
+                  <th class="px-5 py-3 text-left">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="resetTable" class="divide-y divide-gray-50">
+                <tr><td colspan="6" class="text-center py-10 text-gray-400 text-sm">
+                  <i class="fa-solid fa-spinner fa-spin text-blue-400 mr-2"></i>Loading...
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- APPROVE RESET PASSWORD MODAL -->
+  <div id="approveModal" class="modal items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+            <i class="fa-solid fa-key text-blue-600 text-sm"></i>
+          </div>
+          <div>
+            <div class="text-sm font-bold text-gray-900">Reset Password User</div>
+            <div id="approveUserName" class="text-xs text-gray-500 mt-0.5"></div>
+          </div>
+        </div>
+        <button onclick="closeModal('approveModal')" class="text-gray-400 hover:text-gray-600 transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="p-6 space-y-4">
+        <input type="hidden" id="approveReqId">
+        <div id="approveAlert" class="hidden"></div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Password Baru</label>
+          <input type="password" id="approveNewPwd" placeholder="Min. 6 karakter"
+            class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Konfirmasi Password</label>
+          <input type="password" id="approveConfirmPwd" placeholder="Ulangi password baru"
+            class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100">
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button onclick="closeModal('approveModal')"
+            class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition">
+            Batal
+          </button>
+          <button onclick="submitApprove()"
+            class="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-check"></i> Reset Password
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MASTER DATA MODAL -->
+  <div id="masterModal" class="modal items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+            <i id="masterModalIcon" class="fa-solid fa-database text-indigo-600 text-sm"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-gray-900" id="masterModalTitle">Tambah Data</h3>
+            <p class="text-xs text-gray-400" id="masterModalSub">Isi data baru</p>
+          </div>
+        </div>
+        <button onclick="closeModal('masterModal')" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition-all">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+      <form id="masterForm" onsubmit="submitMasterForm(event)" class="p-6 space-y-4">
+        <input type="hidden" id="masterType">
+        <input type="hidden" id="masterEditIndex" value="-1">
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1" id="masterNameLabel">Nama</label>
+          <input type="text" id="masterName" required class="input-field" placeholder="Masukkan nama...">
+        </div>
+        <!-- Untuk Area: pilih PT induk -->
+        <div id="masterPtParentField" class="hidden">
+          <label class="block text-xs font-medium text-gray-500 mb-1">PT Induk</label>
+          <select id="masterPtParent" class="input-field">
+            <option value="">— Pilih PT —</option>
+          </select>
+        </div>
+        <!-- Untuk Jabatan: pilih Departemen -->
+        <div id="masterJabatanDeptField" class="hidden">
+          <label class="block text-xs font-medium text-gray-500 mb-1">Departemen</label>
+          <select id="masterJabatanDept" class="input-field">
+            <option value="">— Pilih Departemen —</option>
+          </select>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="closeModal('masterModal')" class="flex-1 border border-gray-200 bg-white text-gray-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-all">Batal</button>
+          <button type="submit" class="flex-1 btn-primary justify-center rounded-xl py-2.5"><i class="fa-solid fa-floppy-disk text-xs"></i> Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DELETE CONFIRM MODAL -->
+  <div id="deleteConfirmModal" class="modal items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-xs shadow-2xl overflow-hidden">
+      <!-- Header merah -->
+      <div class="bg-red-50 px-5 py-4 flex items-center gap-3 border-b border-red-100">
+        <div class="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-triangle-exclamation text-red-500 text-sm"></i>
+        </div>
+        <div>
+          <div class="text-sm font-bold text-gray-900">Konfirmasi Hapus</div>
+          <div class="text-xs text-gray-500 mt-0.5" id="deleteConfirmSub">Data ini akan dihapus permanen</div>
+        </div>
+      </div>
+      <!-- Body -->
+      <div class="px-5 py-4">
+        <p class="text-xs text-gray-500 mb-2">Anda akan menghapus:</p>
+        <div class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2.5 border border-gray-100 mb-3">
+          <i id="deleteConfirmIcon" class="fa-solid fa-location-dot text-gray-400 text-sm w-4"></i>
+          <span id="deleteConfirmName" class="text-sm font-semibold text-gray-800"></span>
+          <span id="deleteConfirmBadge" class="ml-auto text-[10px] font-medium bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full hidden"></span>
+        </div>
+        <div id="deleteConfirmWarning" class="hidden flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 mb-3">
+          <i class="fa-solid fa-circle-info text-amber-500 text-xs mt-0.5 flex-shrink-0"></i>
+          <p id="deleteConfirmWarningText" class="text-xs text-amber-700 leading-relaxed"></p>
+        </div>
+        <p class="text-xs text-gray-400">Tindakan ini <span class="font-semibold text-gray-600">tidak dapat dibatalkan</span>.</p>
+      </div>
+      <!-- Footer -->
+      <div class="px-5 py-3 border-t border-gray-100 flex gap-2 justify-end">
+        <button onclick="closeModal('deleteConfirmModal')"
+          class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all">
+          Batal
+        </button>
+        <button id="deleteConfirmBtn"
+          class="px-4 py-2 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg transition-all flex items-center gap-1.5">
+          <i class="fa-solid fa-trash text-xs"></i> Hapus
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE LINK CONFIRM MODAL -->
+  <div id="deleteLinkModal" class="modal items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+      <div class="bg-red-50 px-5 py-4 flex items-center gap-3 border-b border-red-100">
+        <div class="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-triangle-exclamation text-red-500 text-sm"></i>
+        </div>
+        <div>
+          <div class="text-sm font-bold text-gray-900">Konfirmasi Hapus Link</div>
+          <div class="text-xs text-gray-500 mt-0.5">Link ini akan dihapus permanen</div>
+        </div>
+      </div>
+      <div class="px-5 py-4">
+        <p class="text-xs text-gray-500 mb-2">Anda akan menghapus link:</p>
+        <div class="bg-gray-50 rounded-lg px-3 py-2.5 border border-gray-100 mb-3 space-y-1.5">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-link text-indigo-400 text-xs w-4"></i>
+            <span id="deleteLinkAppName" class="text-sm font-semibold text-gray-800"></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-location-dot text-green-400 text-xs w-4"></i>
+            <span id="deleteLinkArea" class="text-sm text-gray-600"></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-arrow-up-right-from-square text-blue-400 text-xs w-4"></i>
+            <span id="deleteLinkUrl" class="text-xs text-gray-400 truncate max-w-[250px]"></span>
+          </div>
+        </div>
+        <div id="deleteLinkLastWarning" class="hidden flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 mb-3">
+          <i class="fa-solid fa-circle-info text-amber-500 text-xs mt-0.5 flex-shrink-0"></i>
+          <p class="text-xs text-amber-700 leading-relaxed">Ini adalah link terakhir untuk aplikasi ini. Menghapus link ini juga akan <strong>menghapus seluruh record aplikasi</strong>.</p>
+        </div>
+        <p class="text-xs text-gray-400">Tindakan ini <span class="font-semibold text-gray-600">tidak dapat dibatalkan</span>.</p>
+      </div>
+      <div class="px-5 py-3 border-t border-gray-100 flex gap-2 justify-end">
+        <button onclick="closeModal('deleteLinkModal')"
+          class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all">
+          Batal
+        </button>
+        <button id="deleteLinkConfirmBtn"
+          class="px-4 py-2 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg transition-all flex items-center gap-1.5">
+          <i class="fa-solid fa-trash text-xs"></i> Hapus Link
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP MODAL (SSO Application) -->
+  <div id="appModal" class="modal items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-xl p-6 w-full max-w-lg shadow-2xl max-h-screen overflow-y-auto">
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fa-solid fa-globe text-blue-600 text-sm"></i></div>
+          <h3 class="text-base font-semibold text-gray-900" id="appModalTitle">Add Application</h3>
+        </div>
+        <button onclick="closeModal('appModal')" class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 transition-all">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+      <p class="text-xs text-gray-400 mb-4 -mt-3"><i class="fa-solid fa-circle-info mr-1"></i>Aplikasi SSO — menggunakan URL, Callback URL, dan Client Credentials untuk single sign-on.</p>
+      <div id="clientCredentials" class="hidden bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
+        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+          <i class="fa-solid fa-key"></i> Client Credentials
+        </p>
+        <div class="space-y-2 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-gray-500 w-20 flex-shrink-0 font-medium">Client ID:</span>
+            <span id="displayClientId" class="font-mono text-gray-800 select-all bg-white px-2 py-1 rounded border border-gray-200 flex-1 truncate"></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-500 w-20 flex-shrink-0 font-medium">Secret:</span>
+            <span id="displayClientSecret" class="font-mono text-gray-800 select-all bg-white px-2 py-1 rounded border border-gray-200 flex-1 truncate"></span>
+          </div>
+        </div>
+      </div>
+      <form id="appForm" onsubmit="submitAppForm(event)" class="space-y-4">
+        <input type="hidden" id="appId">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">App Name *</label>
+            <input type="text" id="appName" required class="input-field" placeholder="HR Management">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Slug *</label>
+            <input type="text" id="appSlug" required class="input-field" placeholder="hrms">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Description</label>
+          <input type="text" id="appDesc" class="input-field" placeholder="Short description">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">App URL *</label>
+          <input type="url" id="appUrl" required class="input-field" placeholder="https://hrms.hqmedan.com">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Callback URL *</label>
+          <input type="url" id="appCallbackUrl" required class="input-field" placeholder="https://hrms.hqmedan.com/sso/callback">
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider">Departemen yang Dapat Akses</label>
+            <div class="flex gap-2">
+              <button type="button" onclick="selectAllDept('appForm')" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-2 py-0.5 rounded hover:bg-indigo-50 transition-all">Pilih Semua</button>
+              <span class="text-gray-300 text-xs">|</span>
+              <button type="button" onclick="clearAllDept('appForm')" class="text-xs text-gray-500 hover:text-gray-700 font-medium px-2 py-0.5 rounded hover:bg-gray-100 transition-all">Hapus Pilihan</button>
+            </div>
+          </div>
+          <div id="deptCheckboxes" class="flex flex-wrap gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 min-h-[40px]">
+          </div>
+          <p id="deptHint" class="text-xs text-red-500 mt-1.5 hidden"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Tidak ada departemen dipilih — aplikasi <strong>tidak akan tampil</strong> di dashboard manapun.</p>
+        </div>
+        <div class="flex gap-3 pt-1">
+          <button type="button" onclick="closeModal('appModal')" class="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-all">Cancel</button>
+          <button type="submit" class="flex-1 btn-primary justify-center">
+            <i class="fa-solid fa-floppy-disk text-xs"></i> Save
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- APP NAME MODAL (Tambah/Edit nama aplikasi untuk dropdown Link App) -->
+  <div id="appNameModal" class="modal items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-xl p-6 w-full max-w-sm shadow-2xl">
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center"><i class="fa-solid fa-tag text-violet-600 text-sm"></i></div>
+          <h3 class="text-base font-semibold text-gray-900" id="appNameModalTitle">Tambah Nama Aplikasi</h3>
+        </div>
+        <button onclick="closeModal('appNameModal')" class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 transition-all">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+      <form id="appNameForm" onsubmit="submitAppNameForm(event)" class="space-y-4">
+        <input type="hidden" id="appNameEditIndex" value="-1">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Nama Aplikasi *</label>
+          <input type="text" id="appNameInput" required class="input-field" placeholder="Contoh: E-TU Food">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Deskripsi</label>
+          <input type="text" id="appNameDescInput" class="input-field" placeholder="Deskripsi singkat (opsional)">
+        </div>
+        <div class="flex gap-3 pt-1">
+          <button type="button" onclick="closeModal('appNameModal')" class="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-all">Batal</button>
+          <button type="submit" class="flex-1 bg-violet-600 hover:bg-violet-700 text-white py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk text-xs"></i> Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DELETE APP NAME CONFIRM MODAL -->
+  <div id="deleteAppNameModal" class="modal items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-xl p-6 w-full max-w-sm shadow-2xl">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-trash text-red-500"></i>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-gray-900">Hapus Nama Aplikasi</h4>
+          <p class="text-xs text-gray-400">Tindakan ini tidak bisa dibatalkan</p>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded-lg px-3 py-2.5 mb-3 flex items-center gap-2">
+        <i class="fa-solid fa-tag text-violet-400 text-xs"></i>
+        <span class="text-sm font-semibold text-gray-700" id="deleteAppNameText">-</span>
+      </div>
+      <div id="deleteAppNameWarning" class="hidden bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+        <p class="text-xs text-amber-700" id="deleteAppNameWarningText"></p>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="closeModal('deleteAppNameModal')" class="flex-1 border border-gray-200 text-gray-600 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-all">Batal</button>
+        <button id="deleteAppNameConfirmBtn" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-trash text-xs"></i> Hapus
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LINK APP MODAL (AppScript / External Link per Area) -->
+  <div id="linkAppModal" class="modal items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl max-h-screen overflow-y-auto">
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center"><i class="fa-solid fa-link text-indigo-600 text-sm"></i></div>
+          <h3 class="text-base font-semibold text-gray-900" id="linkAppModalTitle">Add Link App</h3>
+        </div>
+        <button onclick="closeModal('linkAppModal')" class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 transition-all">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+      <p class="text-xs text-gray-400 mb-4 -mt-3"><i class="fa-solid fa-circle-info mr-1"></i>Daftarkan link per Area/DC (contoh: AppScript). Satu aplikasi per satu DC.</p>
+      <form id="linkAppForm" onsubmit="submitLinkAppForm(event)" class="space-y-4">
+        <input type="hidden" id="linkAppId">
+        <input type="hidden" id="linkAppOrigArea">
+
+        <!-- App Name Dropdown -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Nama Aplikasi *</label>
+          <select id="linkAppName" required class="input-field" onchange="onLinkAppNameChange()">
+            <option value="">— Pilih Aplikasi —</option>
+          </select>
+        </div>
+
+        <!-- Area/DC Dropdown -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Area / DC *</label>
+          <select id="linkAppArea" required class="input-field">
+            <option value="">— Pilih Area/DC —</option>
+          </select>
+        </div>
+
+        <!-- Link URL -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Link URL *</label>
+          <input type="url" id="linkAppUrl" required class="input-field" placeholder="https://script.google.com/macros/s/...">
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Description</label>
+          <input type="text" id="linkAppDesc" class="input-field" placeholder="Deskripsi singkat (opsional)">
+        </div>
+
+        <!-- Departemen -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider">Departemen yang Dapat Akses</label>
+            <div class="flex gap-2">
+              <button type="button" onclick="selectAllDept('linkAppForm')" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-2 py-0.5 rounded hover:bg-indigo-50 transition-all">Pilih Semua</button>
+              <span class="text-gray-300 text-xs">|</span>
+              <button type="button" onclick="clearAllDept('linkAppForm')" class="text-xs text-gray-500 hover:text-gray-700 font-medium px-2 py-0.5 rounded hover:bg-gray-100 transition-all">Hapus Pilihan</button>
+            </div>
+          </div>
+          <div id="linkDeptCheckboxes" class="flex flex-wrap gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 min-h-[40px]">
+          </div>
+          <p id="linkDeptHint" class="text-xs text-red-500 mt-1.5 hidden"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Tidak ada departemen dipilih — aplikasi <strong>tidak akan tampil</strong> di dashboard manapun.</p>
+        </div>
+
+        <!-- Duplicate warning banner -->
+        <div id="linkDuplicateWarning" class="hidden bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
+          <div class="flex items-start gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-0.5"></i>
+            <div>
+              <p class="text-xs font-semibold text-amber-700" id="linkDuplicateText"></p>
+              <p class="text-[10px] text-amber-500 mt-0.5">Klik Save untuk mengupdate link yang sudah ada.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-3 pt-1">
+          <button type="button" onclick="closeModal('linkAppModal')" class="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-all">Cancel</button>
+          <button type="submit" id="linkAppSaveBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk text-xs"></i> <span id="linkAppSaveBtnText">Save</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+
+    async function init() {
+      try {
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        if (!res.ok) { window.location.href = '/login'; return; }
+        const { user } = await res.json();
+        // Admin Panel hanya untuk SUPERADMIN
+        if (user.role !== 'SUPERADMIN') { window.location.href = '/users'; return; }
+        const initials = user.fullName.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+        document.getElementById('sidebarName').textContent = user.fullName;
+        document.getElementById('sidebarRole').textContent = user.role;
+        document.getElementById('sidebarAvatarCircle').textContent = initials;
+        document.getElementById('adminRoleText').textContent = user.role;
+      } catch { window.location.href = '/login'; }
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/admin/stats', { credentials: 'include' });
+        if (!res.ok) return;
+        const { stats: s } = await res.json();
+        document.getElementById('st-totalUsers').textContent  = s.totalUsers;
+        document.getElementById('st-activeUsers').textContent = s.activeUsers;
+        document.getElementById('st-totalApps').textContent   = s.totalApps;
+        document.getElementById('st-totalLogins').textContent = s.totalLogins;
+      } catch(e) {}
+    }
+
+    async function loadApps() {
+      try {
+        const res = await fetch('/api/admin/applications', { credentials: 'include' });
+        if (!res.ok) return;
+        const { applications: apps = [] } = await res.json();
+        _allAppsCache = apps; // cache for duplicate detection
+        // Filter only SSO apps
+        const ssoApps = apps.filter(a => !isLinkApp(a));
+        const tbody = document.getElementById('appsTable');
+        document.getElementById('appCount').textContent = ssoApps.length + ' aplikasi SSO';
+        if (!ssoApps.length) { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-gray-400 text-sm">No SSO applications found</td></tr>'; return; }
+        tbody.innerHTML = ssoApps.map(a => {
+          const ad = JSON.stringify(a).replace(/"/g, '&quot;');
+          return `<tr class="table-row">
+            <td class="px-5 py-3">
+              <div class="font-medium text-gray-900 text-sm">${a.name}</div>
+              <div class="text-gray-400 text-xs font-mono">${a.slug}</div>
+            </td>
+            <td class="px-5 py-3"><a href="${a.url}" target="_blank" class="text-blue-500 hover:text-blue-700 text-xs flex items-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i> ${a.url}</a></td>
+            <td class="px-5 py-3"><div class="flex flex-wrap gap-1">${(a.allowedDepartemen||[]).length ? (a.allowedDepartemen).map(d=>'<span class="tag bg-indigo-50 text-indigo-700">'+d+'</span>').join('') : '<span class="text-red-400 text-xs font-medium">⚠ Tidak tampil</span>'}</div></td>
+            <td class="px-5 py-3"><span class="tag ${a.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${a.isActive ? 'Active' : 'Inactive'}</span></td>
+            <td class="px-5 py-3">
+              <div class="flex gap-1">
+                <button onclick='editApp(${ad})' class="text-blue-600 hover:text-blue-800 text-xs font-semibold px-2 py-1 rounded hover:bg-blue-50 transition-all"><i class="fa-solid fa-pen text-xs"></i> Edit</button>
+                <button onclick='confirmDeleteApp("${a.id}", "${a.name.replace(/'/g, "\\'")}")' class="text-red-500 hover:text-red-700 text-xs font-semibold px-2 py-1 rounded hover:bg-red-50 transition-all"><i class="fa-solid fa-trash text-xs"></i></button>
+              </div>
+            </td>
+          </tr>`;
+        }).join('');
+      } catch(e) {}
+    }
+
+    /** Load Link AppScript table — each area link is a separate row */
+    async function loadLinks() {
+      try {
+        // Use cached data if available, otherwise fetch
+        if (!_allAppsCache.length) {
+          const res = await fetch('/api/admin/applications', { credentials: 'include' });
+          if (!res.ok) return;
+          const { applications: apps = [] } = await res.json();
+          _allAppsCache = apps;
+        }
+        const linkApps = _allAppsCache.filter(a => isLinkApp(a));
+        const tbody = document.getElementById('linksTable');
+
+        // Flatten: each area link becomes a row
+        var rows = [];
+        linkApps.forEach(function(a) {
+          var areaLinks = a.areaLinks && typeof a.areaLinks === 'object' ? a.areaLinks : {};
+          var areaKeys = Object.keys(areaLinks);
+          var totalAreas = areaKeys.length;
+          areaKeys.forEach(function(area) {
+            rows.push({ app: a, area: area, url: areaLinks[area], totalAreas: totalAreas });
+          });
+        });
+
+        document.getElementById('linkCount').textContent = rows.length + ' link terdaftar';
+
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-gray-400 text-sm"><i class="fa-solid fa-link-slash text-3xl text-gray-200 block mb-2"></i>Belum ada link AppScript terdaftar</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = rows.map(function(r) {
+          var shortUrl = r.url.length > 50 ? r.url.substring(0, 50) + '...' : r.url;
+          var deptHtml = (r.app.allowedDepartemen || []).length
+            ? r.app.allowedDepartemen.map(function(d) { return '<span class="tag bg-indigo-50 text-indigo-700">' + d + '</span>'; }).join('')
+            : '<span class="text-red-400 text-xs font-medium">⚠ Tidak tampil</span>';
+          return '<tr class="table-row">'
+            + '<td class="px-5 py-3"><div class="flex items-center gap-2"><div class="w-7 h-7 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-link text-indigo-600 text-xs"></i></div><div><div class="font-medium text-gray-900 text-sm">' + r.app.name + '</div><div class="text-gray-400 text-xs font-mono">' + r.app.slug + '</div></div></div></td>'
+            + '<td class="px-5 py-3"><span class="tag bg-green-50 text-green-700"><i class="fa-solid fa-location-dot mr-1 text-xs"></i>' + r.area + '</span></td>'
+            + '<td class="px-5 py-3"><a href="' + r.url + '" target="_blank" class="text-indigo-500 hover:text-indigo-700 text-xs flex items-center gap-1" title="' + r.url + '"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i> ' + shortUrl + '</a></td>'
+            + '<td class="px-5 py-3"><div class="flex flex-wrap gap-1">' + deptHtml + '</div></td>'
+            + '<td class="px-5 py-3">'
+            + '<div class="flex gap-1">'
+            + '<button onclick=\'editLinkAreaRow("' + r.app.id + '", "' + r.area.replace(/'/g, "\\'") + '")\' class="text-blue-600 hover:text-blue-800 text-xs font-semibold px-2 py-1 rounded hover:bg-blue-50 transition-all"><i class="fa-solid fa-pen text-xs"></i> Edit</button>'
+            + '<button onclick=\'confirmDeleteLink("' + r.app.id + '", "' + r.app.name.replace(/'/g, "\\'") + '", "' + r.area.replace(/'/g, "\\'") + '")\' class="text-red-500 hover:text-red-700 text-xs font-semibold px-2 py-1 rounded hover:bg-red-50 transition-all"><i class="fa-solid fa-trash text-xs"></i></button>'
+            + '</div>'
+            + '</td>'
+            + '</tr>';
+        }).join('');
+      } catch(e) { console.error(e); }
+    }
+
+    /** Delete SSO app confirmation */
+    function confirmDeleteApp(appId, appName) {
+      document.getElementById('deleteConfirmSub').textContent = 'Hapus aplikasi SSO';
+      document.getElementById('deleteConfirmIcon').className = 'fa-solid fa-globe text-gray-400 text-sm w-4';
+      document.getElementById('deleteConfirmName').textContent = appName;
+      document.getElementById('deleteConfirmBadge').classList.add('hidden');
+      document.getElementById('deleteConfirmWarning').classList.add('hidden');
+      var confirmBtn = document.getElementById('deleteConfirmBtn');
+      confirmBtn.onclick = async function() {
+        try {
+          var res = await fetch('/api/admin/applications/' + appId, { method: 'DELETE', credentials: 'include' });
+          var data = await res.json();
+          if (res.ok) { closeModal('deleteConfirmModal'); _allAppsCache = []; loadApps(); loadStats(); }
+          else alert(data.error || 'Error');
+        } catch(e) { alert('Koneksi gagal.'); }
+      };
+      document.getElementById('deleteConfirmModal').classList.add('show');
+    }
+
+    /** Delete a single area link from a link app — with confirmation */
+    function confirmDeleteLink(appId, appName, area) {
+      var app = _allAppsCache.find(function(a) { return a.id === appId; });
+      if (!app) return;
+      var areaLinks = app.areaLinks && typeof app.areaLinks === 'object' ? app.areaLinks : {};
+      var linkUrl = areaLinks[area] || '';
+      var totalAreas = Object.keys(areaLinks).length;
+
+      document.getElementById('deleteLinkAppName').textContent = appName;
+      document.getElementById('deleteLinkArea').textContent = area;
+      document.getElementById('deleteLinkUrl').textContent = linkUrl;
+
+      // If this is the last area link, show warning that the entire app record will be deleted
+      var lastWarn = document.getElementById('deleteLinkLastWarning');
+      if (totalAreas <= 1) {
+        lastWarn.classList.remove('hidden');
+      } else {
+        lastWarn.classList.add('hidden');
+      }
+
+      var confirmBtn = document.getElementById('deleteLinkConfirmBtn');
+      confirmBtn.onclick = async function() {
+        try {
+          if (totalAreas <= 1) {
+            // Last area — delete the whole app record
+            var res = await fetch('/api/admin/applications/' + appId, { method: 'DELETE', credentials: 'include' });
+            var data = await res.json();
+            if (res.ok) {
+              closeModal('deleteLinkModal');
+              _allAppsCache = [];
+              await loadAllAppsCache();
+              loadLinks();
+              loadStats();
+            } else {
+              alert(data.error || 'Error');
+            }
+          } else {
+            // Remove this one area from areaLinks
+            var updatedLinks = Object.assign({}, areaLinks);
+            delete updatedLinks[area];
+            var res = await fetch('/api/admin/applications/' + appId, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ areaLinks: updatedLinks })
+            });
+            var data = await res.json();
+            if (res.ok) {
+              closeModal('deleteLinkModal');
+              _allAppsCache = [];
+              await loadAllAppsCache();
+              loadLinks();
+            } else {
+              alert(data.error || 'Error');
+            }
+          }
+        } catch(e) { alert('Koneksi gagal.'); }
+      };
+
+      document.getElementById('deleteLinkModal').classList.add('show');
+    }
+
+    /** Edit a specific area row of a link app */
+    function editLinkAreaRow(appId, area) {
+      var app = _allAppsCache.find(function(a) { return a.id === appId; });
+      if (!app) return;
+      var areaLinks = app.areaLinks && typeof app.areaLinks === 'object' ? app.areaLinks : {};
+      var linkUrl = areaLinks[area] || '';
+
+      document.getElementById('linkAppModalTitle').textContent = 'Edit Link App';
+      document.getElementById('linkAppId').value = app.id;
+      document.getElementById('linkAppOrigArea').value = area; // simpan area asli
+      populateLinkAppNameDropdown(app.name);
+      document.getElementById('linkAppDesc').value = app.description || '';
+      renderDeptCheckboxes(app.allowedDepartemen || [], 'linkDeptCheckboxes', 'linkDeptHint');
+      populateLinkAreaDropdown(area);
+      document.getElementById('linkAppUrl').value = linkUrl;
+      document.getElementById('linkDuplicateWarning').classList.add('hidden');
+      document.getElementById('linkAppSaveBtnText').textContent = 'Update';
+      // Saat edit: kunci Nama Aplikasi & Area/DC agar tidak bisa diubah
+      document.getElementById('linkAppName').disabled = true;
+      document.getElementById('linkAppArea').disabled = true;
+      document.getElementById('linkAppModal').classList.add('show');
+      document.getElementById('linkAppArea').onchange = null; // tidak perlu cek duplikat saat edit
+    }
+
+    /** Reload all apps cache */
+    async function loadAllAppsCache() {
+      try {
+        var res = await fetch('/api/admin/applications', { credentials: 'include' });
+        if (!res.ok) return;
+        var data = await res.json();
+        _allAppsCache = data.applications || [];
+      } catch(e) {}
+    }
+
+    /** Deteksi apakah app bertipe Link (bukan SSO) */
+    function isLinkApp(a) {
+      return a.areaLinks && Object.keys(a.areaLinks).length > 0 && (!a.callbackUrl || a.callbackUrl === '');
+    }
+
+    async function loadLogs() {
+      try {
+        const res = await fetch('/api/admin/audit-logs?limit=100', { credentials: 'include' });
+        if (!res.ok) return;
+        const { logs = [] } = await res.json();
+        const tbody = document.getElementById('logsTable');
+        if (!logs.length) { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-gray-400 text-sm">No logs found</td></tr>'; return; }
+        const colors = { LOGIN_SUCCESS:'bg-green-100 text-green-700', LOGIN_FAILED:'bg-red-100 text-red-700', LOGOUT:'bg-gray-100 text-gray-600', SSO_LOGIN_SUCCESS:'bg-blue-100 text-blue-700', PASSWORD_CHANGED:'bg-yellow-100 text-yellow-700' };
+        tbody.innerHTML = logs.map(l => `<tr class="table-row text-xs">
+          <td class="px-5 py-3 text-gray-400">${new Date(l.createdAt).toLocaleString('id-ID')}</td>
+          <td class="px-5 py-3 text-gray-700 font-medium">${l.user ? (l.user.fullName || l.user.username || '-') : '-'}</td>
+          <td class="px-5 py-3"><span class="tag ${colors[l.action] || 'bg-gray-100 text-gray-600'}">${l.action}</span></td>
+          <td class="px-5 py-3 text-gray-500">${l.resource || '-'}</td>
+          <td class="px-5 py-3 text-gray-400 font-mono">${l.ipAddress || '-'}</td>
+        </tr>`).join('');
+      } catch(e) {}
+    }
+
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+      document.querySelectorAll('#tabBar .tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.remove('hidden');
+      if (btn) btn.classList.add('active');
+      if (tab === 'apps') loadApps();
+      if (tab === 'links') loadLinks();
+      if (tab === 'appnames') renderAppNamesList();
+      if (tab === 'logs') loadLogs();
+      if (tab === 'master') renderMasterLists();
+      if (tab === 'reset') loadResetRequests('PENDING');
+    }
+
+    /** Navigate from sidebar */
+    function goToTab(section) {
+      // Find the matching tab button and click it
+      var tabBtns = document.querySelectorAll('#tabBar .tab-btn');
+      var targetTab = section === 'links' ? 'links' : 'apps';
+      tabBtns.forEach(function(btn) {
+        var onclickStr = btn.getAttribute('onclick') || '';
+        if (onclickStr.indexOf("'" + targetTab + "'") !== -1) {
+          switchTab(targetTab, btn);
+        }
+      });
+    }
+
+    // ── PT / Area cascade data (untuk Master Data sinkronisasi) ──
+    var PT_AREAS = {};
+    var JABATAN_DEPARTEMEN = {};
+
+    function renderDeptCheckboxes(selected, containerId, hintId) {
+      containerId = containerId || 'deptCheckboxes';
+      hintId = hintId || 'deptHint';
+      var data = getMasterData();
+      var container = document.getElementById(containerId);
+      if (!data.departemen || !data.departemen.length) {
+        container.innerHTML = '<span class="text-xs text-gray-400">Belum ada data departemen di Master Data.</span>';
+        return;
+      }
+      container.innerHTML = data.departemen.map(function(d) {
+        var isChecked = selected && selected.includes(d.name) ? 'checked' : '';
+        return '<label class="flex items-center gap-1.5 text-sm font-medium cursor-pointer">'
+          + '<input type="checkbox" value="' + d.name + '" class="deptCheck w-4 h-4 accent-indigo-600" onchange="updateDeptHint(\'' + hintId + '\', \'' + containerId + '\')" ' + isChecked + '> '
+          + d.name
+          + '</label>';
+      }).join('');
+      updateDeptHint(hintId, containerId);
+    }
+
+    function updateDeptHint(hintId, containerId) {
+      hintId = hintId || 'deptHint';
+      containerId = containerId || 'deptCheckboxes';
+      var container = document.getElementById(containerId);
+      var checked = container ? container.querySelectorAll('.deptCheck:checked').length : 0;
+      var hint = document.getElementById(hintId);
+      if (hint) hint.classList.toggle('hidden', checked > 0);
+    }
+
+    function selectAllDept(formId) {
+      var container = formId === 'linkAppForm' ? document.getElementById('linkDeptCheckboxes') : document.getElementById('deptCheckboxes');
+      var hintId = formId === 'linkAppForm' ? 'linkDeptHint' : 'deptHint';
+      container.querySelectorAll('.deptCheck').forEach(function(c) { c.checked = true; });
+      updateDeptHint(hintId, container.id);
+    }
+
+    function clearAllDept(formId) {
+      var container = formId === 'linkAppForm' ? document.getElementById('linkDeptCheckboxes') : document.getElementById('deptCheckboxes');
+      var hintId = formId === 'linkAppForm' ? 'linkDeptHint' : 'deptHint';
+      container.querySelectorAll('.deptCheck').forEach(function(c) { c.checked = false; });
+      updateDeptHint(hintId, container.id);
+    }
+
+    // ── Area Links (for Link App modal) ──
+
+    // Ambil nama aplikasi dari master data (bukan hardcoded lagi)
+    function getLinkAppNames() {
+      var data = getMasterData();
+      return (data.linkAppNames || []).map(function(item) {
+        return {
+          name: item.name,
+          slug: item.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, ''),
+          desc: item.desc || item.name
+        };
+      });
+    }
+
+    // Cache of all loaded apps (for duplicate detection)
+    var _allAppsCache = [];
+
+    function populateLinkAppNameDropdown(selectedName) {
+      var appNames = getLinkAppNames();
+      var sel = document.getElementById('linkAppName');
+      sel.innerHTML = '<option value="">— Pilih Aplikasi —</option>';
+      appNames.forEach(function(app) {
+        var opt = document.createElement('option');
+        opt.value = app.name;
+        opt.textContent = app.name;
+        if (selectedName && selectedName === app.name) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      if (selectedName && !appNames.find(function(a) { return a.name === selectedName; })) {
+        var opt = document.createElement('option');
+        opt.value = selectedName;
+        opt.textContent = selectedName;
+        opt.selected = true;
+        sel.appendChild(opt);
+      }
+    }
+
+    function populateLinkAreaDropdown(selectedArea) {
+      var data = getMasterData();
+      var sel = document.getElementById('linkAppArea');
+      sel.innerHTML = '<option value="">— Pilih Area/DC —</option>';
+      if (!data.area || !data.area.length) return;
+      // Group areas by PT
+      var ptOrder = (data.pt || []).map(function(p) { return p.name; });
+      var grouped = {};
+      data.area.forEach(function(a) {
+        var pt = a.pt || 'Lainnya';
+        if (!grouped[pt]) grouped[pt] = [];
+        grouped[pt].push(a);
+      });
+      // Render optgroups in PT order
+      ptOrder.forEach(function(ptName) {
+        if (!grouped[ptName] || !grouped[ptName].length) return;
+        var og = document.createElement('optgroup');
+        og.label = ptName;
+        grouped[ptName].forEach(function(a) {
+          var opt = document.createElement('option');
+          opt.value = a.name;
+          opt.textContent = a.name;
+          if (selectedArea && selectedArea === a.name) opt.selected = true;
+          og.appendChild(opt);
+        });
+        sel.appendChild(og);
+      });
+      // Any areas without matching PT
+      var ungrouped = data.area.filter(function(a) { return !ptOrder.includes(a.pt || ''); });
+      if (ungrouped.length) {
+        var og = document.createElement('optgroup');
+        og.label = 'Lainnya';
+        ungrouped.forEach(function(a) {
+          var opt = document.createElement('option');
+          opt.value = a.name;
+          opt.textContent = a.name;
+          if (selectedArea && selectedArea === a.name) opt.selected = true;
+          og.appendChild(opt);
+        });
+        sel.appendChild(og);
+      }
+    }
+
+    function onLinkAppNameChange() {
+      var sel = document.getElementById('linkAppName');
+      var appNames = getLinkAppNames();
+      var match = appNames.find(function(a) { return a.name === sel.value; });
+      if (match) {
+        document.getElementById('linkAppDesc').value = match.desc;
+      }
+      checkLinkDuplicate();
+    }
+
+    /** Check if selected app name + area already exists */
+    function checkLinkDuplicate() {
+      var appName = document.getElementById('linkAppName').value;
+      var area = document.getElementById('linkAppArea').value;
+      var editingId = document.getElementById('linkAppId').value;
+      var warn = document.getElementById('linkDuplicateWarning');
+      var warnText = document.getElementById('linkDuplicateText');
+      var saveBtn = document.getElementById('linkAppSaveBtnText');
+
+      if (!appName || !area) {
+        warn.classList.add('hidden');
+        saveBtn.textContent = 'Save';
+        return null;
+      }
+
+      // Find existing app with same name that already has this area in its areaLinks
+      var existing = _allAppsCache.find(function(a) {
+        if (editingId && a.id === editingId) return false; // skip self when editing
+        if (!isLinkApp(a)) return false;
+        if (a.name !== appName) return false;
+        return a.areaLinks && a.areaLinks[area];
+      });
+
+      if (existing) {
+        warnText.textContent = '"' + appName + '" sudah terdaftar untuk ' + area + '.';
+        warn.classList.remove('hidden');
+        saveBtn.textContent = 'Update';
+        return existing;
+      } else {
+        warn.classList.add('hidden');
+        saveBtn.textContent = 'Save';
+        return null;
+      }
+    }
+
+    // ── SSO App Modal Functions ──
+    function showAppModal() {
+      document.getElementById('appModalTitle').textContent = 'Add Application';
+      document.getElementById('appForm').reset();
+      document.getElementById('appId').value = '';
+      document.getElementById('clientCredentials').classList.add('hidden');
+      renderDeptCheckboxes([], 'deptCheckboxes', 'deptHint');
+      document.getElementById('appModal').classList.add('show');
+    }
+
+    function editApp(a) {
+      document.getElementById('appModalTitle').textContent = 'Edit Application';
+      document.getElementById('appId').value          = a.id;
+      document.getElementById('appName').value        = a.name;
+      document.getElementById('appSlug').value        = a.slug;
+      document.getElementById('appDesc').value        = a.description || '';
+      document.getElementById('appUrl').value         = a.url;
+      document.getElementById('appCallbackUrl').value = a.callbackUrl;
+      renderDeptCheckboxes(a.allowedDepartemen || [], 'deptCheckboxes', 'deptHint');
+      document.getElementById('displayClientId').textContent     = a.clientId;
+      document.getElementById('displayClientSecret').textContent = a.clientSecret;
+      document.getElementById('clientCredentials').classList.remove('hidden');
+      document.getElementById('appModal').classList.add('show');
+    }
+
+    async function submitAppForm(e) {
+      e.preventDefault();
+      const id = document.getElementById('appId').value;
+      const allowedDepartemen = [...document.getElementById('deptCheckboxes').querySelectorAll('.deptCheck:checked')].map(c => c.value);
+      const body = {
+        name: document.getElementById('appName').value,
+        slug: document.getElementById('appSlug').value,
+        description: document.getElementById('appDesc').value,
+        url: document.getElementById('appUrl').value,
+        callbackUrl: document.getElementById('appCallbackUrl').value,
+        allowedDepartemen,
+        areaLinks: null,
+        appType: 'SSO',
+      };
+      const res = await fetch('/api/admin/applications' + (id ? '/' + id : ''), {
+        method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (res.ok) { closeModal('appModal'); _allAppsCache = []; loadApps(); loadStats(); }
+      else alert(data.error || 'Error');
+    }
+
+    // ── Link App Modal Functions ──
+    function showLinkAppModal() {
+      document.getElementById('linkAppModalTitle').textContent = 'Add Link App';
+      document.getElementById('linkAppForm').reset();
+      document.getElementById('linkAppId').value = '';
+      document.getElementById('linkAppOrigArea').value = '';
+      // Pastikan field tidak terkunci saat tambah baru
+      document.getElementById('linkAppName').disabled = false;
+      document.getElementById('linkAppArea').disabled = false;
+      populateLinkAppNameDropdown('');
+      populateLinkAreaDropdown('');
+      renderDeptCheckboxes([], 'linkDeptCheckboxes', 'linkDeptHint');
+      document.getElementById('linkDuplicateWarning').classList.add('hidden');
+      document.getElementById('linkAppSaveBtnText').textContent = 'Save';
+      document.getElementById('linkAppModal').classList.add('show');
+      // attach change listener on area dropdown for duplicate check
+      document.getElementById('linkAppArea').onchange = checkLinkDuplicate;
+    }
+
+    function editLinkApp(a) {
+      // Redirect to links tab and edit from there
+      goToTab('links');
+    }
+
+    async function submitLinkAppForm(e) {
+      e.preventDefault();
+      var editingId   = document.getElementById('linkAppId').value;
+      var origArea    = document.getElementById('linkAppOrigArea').value;
+
+      // Saat mode edit, nama & area dikunci → ambil dari origArea dan origApp
+      var appNameEl = document.getElementById('linkAppName');
+      var areaEl    = document.getElementById('linkAppArea');
+      var appName   = appNameEl.value;
+      var area      = editingId ? origArea : areaEl.value; // pakai origArea jika edit
+
+      var url = document.getElementById('linkAppUrl').value.trim();
+      if (!appName || !area || !url) return;
+      var appNames = getLinkAppNames();
+      var matched = appNames.find(function(a) { return a.name === appName; });
+      var slug = matched ? matched.slug : appName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+      var allowedDepartemen = [...document.getElementById('linkDeptCheckboxes').querySelectorAll('.deptCheck:checked')].map(c => c.value);
+      var description = document.getElementById('linkAppDesc').value;
+
+      if (editingId) {
+        // ── MODE EDIT: update app yang sudah ada berdasarkan ID ──
+        var origApp = _allAppsCache.find(function(a) { return a.id === editingId; });
+        // Salin semua areaLinks yang ada
+        var areaLinks = origApp && origApp.areaLinks && typeof origApp.areaLinks === 'object'
+          ? Object.assign({}, origApp.areaLinks)
+          : {};
+        // Jika nama app berubah → reset, mulai dari area baru saja
+        if (origApp && origApp.name !== appName) {
+          areaLinks = {};
+        } else if (origArea && origArea !== area) {
+          // Area diganti → hapus entry area lama agar tidak bertambah
+          delete areaLinks[origArea];
+        }
+        areaLinks[area] = url;
+        var body = {
+          name: appName,
+          slug: slug,
+          description: description,
+          url: '',
+          callbackUrl: '',
+          allowedDepartemen: allowedDepartemen,
+          areaLinks: areaLinks,
+          appType: 'LINK',
+        };
+        var res = await fetch('/api/admin/applications/' + editingId, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', body: JSON.stringify(body)
+        });
+        var data = await res.json();
+        if (res.ok) { closeModal('linkAppModal'); _allAppsCache = []; loadAllAppsCache().then(function() { loadLinks(); }); loadStats(); }
+        else alert(data.error || 'Error');
+      } else {
+        // ── MODE TAMBAH BARU ──
+        // Cek apakah sudah ada app dengan nama yang sama (link type) → merge area
+        var existingApp = _allAppsCache.find(function(a) {
+          if (!isLinkApp(a)) return false;
+          return a.name === appName;
+        });
+
+        if (existingApp) {
+          // App sudah ada — merge area baru ke areaLinks yang sudah ada
+          var existingAreaLinks = existingApp.areaLinks && typeof existingApp.areaLinks === 'object'
+            ? Object.assign({}, existingApp.areaLinks)
+            : {};
+          if (existingAreaLinks[area]) {
+            if (!confirm('Link "' + appName + '" untuk ' + area + ' sudah ada.\nLink lama: ' + existingAreaLinks[area] + '\n\nApakah ingin mengupdate ke link baru?')) return;
+          }
+          existingAreaLinks[area] = url;
+          var body = {
+            name: appName,
+            description: description || existingApp.description,
+            allowedDepartemen: allowedDepartemen.length ? allowedDepartemen : existingApp.allowedDepartemen,
+            areaLinks: existingAreaLinks,
+          };
+          var res = await fetch('/api/admin/applications/' + existingApp.id, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            credentials: 'include', body: JSON.stringify(body)
+          });
+          var data = await res.json();
+          if (res.ok) { closeModal('linkAppModal'); _allAppsCache = []; loadAllAppsCache().then(function() { loadLinks(); }); loadStats(); }
+          else alert(data.error || 'Error');
+        } else {
+          // Brand new link app
+          var areaLinks = {};
+          areaLinks[area] = url;
+          var body = {
+            name: appName,
+            slug: slug,
+            description: description,
+            url: '',
+            callbackUrl: '',
+            allowedDepartemen: allowedDepartemen,
+            areaLinks: areaLinks,
+            appType: 'LINK',
+          };
+          var res = await fetch('/api/admin/applications', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            credentials: 'include', body: JSON.stringify(body)
+          });
+          var data = await res.json();
+          if (res.ok) { closeModal('linkAppModal'); _allAppsCache = []; loadAllAppsCache().then(function() { loadLinks(); }); loadStats(); }
+          else alert(data.error || 'Error');
+        }
+      }
+    }
+
+    // ── MASTER DATA ────────────────────────────────────────
+    // Struktur master data: { pt, area, jabatan, departemen, linkAppNames }
+    function getMasterData() {
+      const defaults = {
+        pt: [
+          { name: 'MDR 1' }, { name: 'MDR 2' }, { name: 'MDR 3' }, { name: 'MDR 4' }
+        ],
+        area: [
+          { name: 'DC Medan', pt: 'MDR 1' }, { name: 'DC Stabat', pt: 'MDR 1' },
+          { name: 'DC Siantar', pt: 'MDR 2' }, { name: 'DC Tanjung Balai Asahan', pt: 'MDR 2' }, { name: 'DC Kabanjahe', pt: 'MDR 2' },
+          { name: 'DC Sibolga', pt: 'MDR 3' }, { name: 'DC Padang Sidimpuan', pt: 'MDR 3' }, { name: 'DC Rantau Prapat', pt: 'MDR 3' },
+          { name: 'DC Pancur Batu', pt: 'MDR 4' }, { name: 'DC Nias', pt: 'MDR 4' }, { name: 'DC Sei Rampah', pt: 'MDR 4' }
+        ],
+        jabatan: [
+          { name: 'Head ACC', departemen: 'FAT' }, { name: 'Head AR', departemen: 'FAT' },
+          { name: 'KA Admin', departemen: 'FAT' }, { name: 'Admin FAT', departemen: 'FAT' },
+          { name: 'KA Transport', departemen: 'TRP' }, { name: 'Admin TRP', departemen: 'TRP' },
+          { name: 'KA WRH FG', departemen: 'WRH' }, { name: 'KA WRH BS', departemen: 'WRH' },
+          { name: 'Admin FG', departemen: 'WRH' }, { name: 'Admin BS', departemen: 'WRH' }
+        ],
+        departemen: [
+          { name: 'FAT' }, { name: 'TRP' }, { name: 'WRH' }
+        ],
+        linkAppNames: [
+          { name: 'E-TU Food', desc: 'E-TU Food' },
+          { name: 'E-TU Non Food', desc: 'E-TU Non Food' },
+          { name: 'E-TU Frozen', desc: 'E-TU Frozen' },
+          { name: 'E-TU Kosmetik', desc: 'E-TU Kosmetik' },
+        ]
+      };
+      try {
+        const saved = localStorage.getItem('sso_master_data');
+        if (!saved) return defaults;
+        const parsed = JSON.parse(saved);
+        // Backward compat: jika belum ada linkAppNames, tambahkan default
+        if (!parsed.linkAppNames) parsed.linkAppNames = defaults.linkAppNames;
+        return parsed;
+      } catch { return defaults; }
+    }
+
+    function saveMasterData(data) {
+      localStorage.setItem('sso_master_data', JSON.stringify(data));
+      // Sinkronisasi ke dropdown Add User
+      rebuildDropdownsFromMaster(data);
+    }
+
+    function rebuildDropdownsFromMaster(data) {
+      // Rebuild PT_AREAS dari master data
+      PT_AREAS = {};
+      data.pt.forEach(function(p) {
+        PT_AREAS[p.name] = data.area.filter(function(a) { return a.pt === p.name; }).map(function(a) { return a.name; });
+      });
+      // Rebuild JABATAN_DEPARTEMEN dari master data
+      JABATAN_DEPARTEMEN = {};
+      data.jabatan.forEach(function(j) {
+        if (j.departemen) JABATAN_DEPARTEMEN[j.name] = [j.departemen];
+      });
+      // Rebuild PT select di Add User modal
+      var ptEl = document.getElementById('userPt');
+      if (ptEl) {
+        ptEl.innerHTML = '<option value="">— Pilih PT —</option>';
+        data.pt.forEach(function(p) {
+          var o = document.createElement('option'); o.value = p.name; o.textContent = 'PT. ' + p.name;
+          ptEl.appendChild(o);
+        });
+      }
+      // Rebuild Jabatan select di Add User modal
+      var jabEl = document.getElementById('userJabatan');
+      if (jabEl) {
+        jabEl.innerHTML = '<option value="">— Pilih Jabatan —</option>';
+        data.jabatan.forEach(function(j) {
+          var o = document.createElement('option'); o.value = j.name; o.textContent = j.name;
+          jabEl.appendChild(o);
+        });
+      }
+      // Rebuild Departemen select di Add User modal
+      var deptEl = document.getElementById('userDivisi');
+      if (deptEl) {
+        deptEl.innerHTML = '<option value="">— Pilih Departemen —</option>';
+        data.departemen.forEach(function(d) {
+          var o = document.createElement('option'); o.value = d.name; o.textContent = d.name;
+          deptEl.appendChild(o);
+        });
+      }
+    }
+
+    function renderMasterLists() {
+      var data = getMasterData();
+      // Sinkronisasi dropdown juga
+      rebuildDropdownsFromMaster(data);
+
+      var typeMap = {
+        pt: { listId: 'masterPtList', color: 'blue', icon: 'fa-building', badge: function(item) { return ''; } },
+        jabatan: { listId: 'masterJabatanList', color: 'purple', icon: 'fa-id-badge', badge: function(item) { return item.departemen ? `<span class="tag bg-orange-50 text-orange-600 text-[10px]">${item.departemen}</span>` : ''; } },
+        departemen: { listId: 'masterDepartemenList', color: 'orange', icon: 'fa-sitemap', badge: function(item) { return ''; } }
+      };
+
+      Object.keys(typeMap).forEach(function(type) {
+        var cfg = typeMap[type];
+        var listEl = document.getElementById(cfg.listId);
+        var items = data[type] || [];
+        if (!items.length) {
+          listEl.innerHTML = '<div class="text-center py-6 text-gray-400 text-xs">Belum ada data</div>';
+          return;
+        }
+        listEl.innerHTML = items.map(function(item, idx) {
+          return `<div class="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 group">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid ${cfg.icon} text-${cfg.color}-400 text-xs w-4"></i>
+              <span class="text-sm text-gray-700 font-medium">${item.name}</span>
+              ${cfg.badge(item)}
+            </div>
+            <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button onclick="editMasterItem('${type}', ${idx})" class="text-xs text-blue-500 hover:bg-blue-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-pen text-xs"></i></button>
+              <button onclick="deleteMasterItem('${type}', ${idx})" class="text-xs text-red-400 hover:bg-red-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-trash text-xs"></i></button>
+            </div>
+          </div>`;
+        }).join('');
+      });
+
+      // ── Area/DC: render dikelompokkan per PT ──
+      var areaListEl = document.getElementById('masterAreaList');
+      var areas = data.area || [];
+      if (!areas.length) {
+        areaListEl.innerHTML = '<div class="text-center py-6 text-gray-400 text-xs">Belum ada data</div>';
+      } else {
+        // Kelompokkan per PT, urut sesuai urutan PT
+        var ptOrder = (data.pt || []).map(function(p) { return p.name; });
+        var groups = {};
+        ptOrder.forEach(function(pt) { groups[pt] = []; });
+        areas.forEach(function(item, idx) {
+          var key = item.pt || '—';
+          if (!groups[key]) groups[key] = [];
+          groups[key].push({ item: item, idx: idx });
+        });
+        // PT tanpa grup (tidak dikenal) tetap tampil di bawah
+        Object.keys(groups).forEach(function(key) {
+          if (!ptOrder.includes(key)) ptOrder.push(key);
+        });
+
+        var html = '';
+        ptOrder.forEach(function(pt) {
+          var list = groups[pt];
+          if (!list || !list.length) return;
+          html += `<div class="px-4 pt-3 pb-1 flex items-center gap-1.5">
+            <i class="fa-solid fa-building text-blue-400 text-[10px]"></i>
+            <span class="text-[11px] font-bold text-blue-500 uppercase tracking-wide">${pt}</span>
+            <span class="ml-auto text-[10px] text-gray-400">${list.length} DC</span>
+          </div>`;
+          list.forEach(function(entry) {
+            html += `<div class="flex items-center justify-between pl-8 pr-4 py-2 hover:bg-gray-50 group">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-location-dot text-green-400 text-xs w-4"></i>
+                <span class="text-sm text-gray-700 font-medium">${entry.item.name}</span>
+              </div>
+              <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onclick="editMasterItem('area', ${entry.idx})" class="text-xs text-blue-500 hover:bg-blue-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-pen text-xs"></i></button>
+                <button onclick="deleteMasterItem('area', ${entry.idx})" class="text-xs text-red-400 hover:bg-red-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-trash text-xs"></i></button>
+              </div>
+            </div>`;
+          });
+        });
+        areaListEl.innerHTML = html;
+      }
+    }
+
+    var masterModalConfig = {
+      pt:         { title: 'PT / Perusahaan', sub: 'Tambah data PT baru', label: 'Nama PT', icon: 'fa-building', placeholder: 'Contoh: MDR 5' },
+      area:       { title: 'Area / DC', sub: 'Tambah data Area / DC baru', label: 'Nama Area / DC', icon: 'fa-location-dot', placeholder: 'Contoh: DC Binjai' },
+      jabatan:    { title: 'Jabatan', sub: 'Tambah jabatan baru', label: 'Nama Jabatan', icon: 'fa-id-badge', placeholder: 'Contoh: Admin Logistik' },
+      departemen: { title: 'Departemen', sub: 'Tambah departemen baru', label: 'Nama Departemen', icon: 'fa-sitemap', placeholder: 'Contoh: LOG' }
+    };
+
+    function openMasterModal(type, editIdx) {
+      var cfg = masterModalConfig[type];
+      document.getElementById('masterModalTitle').textContent = (editIdx >= 0 ? 'Edit ' : 'Tambah ') + cfg.title;
+      document.getElementById('masterModalSub').textContent = cfg.sub;
+      document.getElementById('masterModalIcon').className = 'fa-solid ' + cfg.icon + ' text-indigo-600 text-sm';
+      document.getElementById('masterNameLabel').textContent = cfg.label;
+      document.getElementById('masterName').placeholder = cfg.placeholder;
+      document.getElementById('masterType').value = type;
+      document.getElementById('masterEditIndex').value = editIdx >= 0 ? editIdx : -1;
+      document.getElementById('masterName').value = '';
+
+      // Reset sub-fields
+      document.getElementById('masterPtParentField').classList.add('hidden');
+      document.getElementById('masterJabatanDeptField').classList.add('hidden');
+
+      var data = getMasterData();
+      if (type === 'area') {
+        // Populate PT select
+        var ptSel = document.getElementById('masterPtParent');
+        ptSel.innerHTML = '<option value="">— Pilih PT —</option>';
+        data.pt.forEach(function(p) {
+          var o = document.createElement('option'); o.value = p.name; o.textContent = 'PT. ' + p.name;
+          ptSel.appendChild(o);
+        });
+        document.getElementById('masterPtParentField').classList.remove('hidden');
+        if (editIdx >= 0) ptSel.value = data.area[editIdx].pt || '';
+      }
+      if (type === 'jabatan') {
+        // Populate Departemen select
+        var dSel = document.getElementById('masterJabatanDept');
+        dSel.innerHTML = '<option value="">— Pilih Departemen —</option>';
+        data.departemen.forEach(function(d) {
+          var o = document.createElement('option'); o.value = d.name; o.textContent = d.name;
+          dSel.appendChild(o);
+        });
+        document.getElementById('masterJabatanDeptField').classList.remove('hidden');
+        if (editIdx >= 0) dSel.value = data.jabatan[editIdx].departemen || '';
+      }
+      if (editIdx >= 0) {
+        document.getElementById('masterName').value = data[type][editIdx].name;
+      }
+
+      document.getElementById('masterModal').classList.add('show');
+    }
+
+    function editMasterItem(type, idx) { openMasterModal(type, idx); }
+
+    function deleteMasterItem(type, idx) {
+      var data = getMasterData();
+      var item = data[type][idx];
+      if (!item) return;
+
+      var typeLabel = { pt: 'PT / Perusahaan', area: 'Area / DC', jabatan: 'Jabatan', departemen: 'Departemen' };
+      var typeIcon  = { pt: 'fa-building', area: 'fa-location-dot', jabatan: 'fa-id-badge', departemen: 'fa-sitemap' };
+
+      // Cek dampak / dependensi
+      var warnings = [];
+      if (type === 'pt') {
+        var affectedArea = (data.area || []).filter(function(a) { return a.pt === item.name; });
+        if (affectedArea.length) {
+          warnings.push(affectedArea.length + ' Area/DC yang terhubung ke PT ini (' + affectedArea.map(function(a){ return a.name; }).join(', ') + ') akan kehilangan referensi PT-nya.');
+        }
+      }
+      if (type === 'departemen') {
+        var affectedJabatan = (data.jabatan || []).filter(function(j) { return j.departemen === item.name; });
+        if (affectedJabatan.length) {
+          warnings.push(affectedJabatan.length + ' Jabatan yang terhubung (' + affectedJabatan.map(function(j){ return j.name; }).join(', ') + ') akan kehilangan referensi Departemen-nya.');
+        }
+      }
+
+      // Isi modal
+      document.getElementById('deleteConfirmSub').textContent = 'Hapus data ' + typeLabel[type];
+      document.getElementById('deleteConfirmIcon').className = 'fa-solid ' + typeIcon[type] + ' text-gray-400 text-sm w-4';
+      document.getElementById('deleteConfirmName').textContent = item.name;
+
+      // Badge (PT induk untuk area, departemen induk untuk jabatan)
+      var badge = document.getElementById('deleteConfirmBadge');
+      if (type === 'area' && item.pt) {
+        badge.textContent = item.pt;
+        badge.classList.remove('hidden');
+      } else if (type === 'jabatan' && item.departemen) {
+        badge.textContent = item.departemen;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+
+      // Warning dependensi
+      var warnBox = document.getElementById('deleteConfirmWarning');
+      var warnText = document.getElementById('deleteConfirmWarningText');
+      if (warnings.length) {
+        warnText.textContent = '⚠ ' + warnings.join(' ');
+        warnBox.classList.remove('hidden');
+        warnBox.style.display = 'flex';
+      } else {
+        warnBox.classList.add('hidden');
+      }
+
+      // Tombol konfirmasi — pasang handler baru setiap kali
+      var confirmBtn = document.getElementById('deleteConfirmBtn');
+      confirmBtn.onclick = function() {
+        data[type].splice(idx, 1);
+        saveMasterData(data);
+        renderMasterLists();
+        closeModal('deleteConfirmModal');
+      };
+
+      document.getElementById('deleteConfirmModal').classList.add('show');
+    }
+
+    function submitMasterForm(e) {
+      e.preventDefault();
+      var type = document.getElementById('masterType').value;
+      var editIdx = parseInt(document.getElementById('masterEditIndex').value);
+      var name = document.getElementById('masterName').value.trim();
+      if (!name) return;
+
+      var data = getMasterData();
+      var item = { name: name };
+      if (type === 'area') item.pt = document.getElementById('masterPtParent').value;
+      if (type === 'jabatan') item.departemen = document.getElementById('masterJabatanDept').value;
+
+      if (editIdx >= 0) {
+        data[type][editIdx] = item;
+      } else {
+        data[type].push(item);
+      }
+
+      saveMasterData(data);
+      renderMasterLists();
+      closeModal('masterModal');
+    }
+    // ────────────────────────────────────────────────────────
+
+    // ── NAMA APLIKASI (untuk dropdown Link App) ─────────────
+    function renderAppNamesList() {
+      var data = getMasterData();
+      var items = data.linkAppNames || [];
+      var listEl = document.getElementById('appNamesList');
+
+      if (!items.length) {
+        listEl.innerHTML = '<div class="text-center py-10 text-gray-400 text-xs"><i class="fa-solid fa-tags text-3xl text-gray-200 block mb-2"></i>Belum ada nama aplikasi terdaftar</div>';
+        return;
+      }
+
+      listEl.innerHTML = items.map(function(item, idx) {
+        return `<div class="flex items-center justify-between px-5 py-3 hover:bg-gray-50 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid fa-tag text-violet-500 text-xs"></i>
+            </div>
+            <div>
+              <div class="text-sm font-semibold text-gray-800">${item.name}</div>
+              <div class="text-[11px] text-gray-400">${item.desc || '-'}</div>
+            </div>
+          </div>
+          <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button onclick="editAppName(${idx})" class="text-xs text-blue-500 hover:bg-blue-50 px-2.5 py-1.5 rounded-lg transition-all" title="Edit">
+              <i class="fa-solid fa-pen text-xs"></i>
+            </button>
+            <button onclick="confirmDeleteAppName(${idx})" class="text-xs text-red-400 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-all" title="Hapus">
+              <i class="fa-solid fa-trash text-xs"></i>
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function openAppNameModal(editIdx) {
+      document.getElementById('appNameEditIndex').value = (editIdx >= 0) ? editIdx : -1;
+      document.getElementById('appNameInput').value = '';
+      document.getElementById('appNameDescInput').value = '';
+      if (editIdx >= 0) {
+        var data = getMasterData();
+        var item = data.linkAppNames[editIdx];
+        document.getElementById('appNameModalTitle').textContent = 'Edit Nama Aplikasi';
+        document.getElementById('appNameInput').value = item.name;
+        document.getElementById('appNameDescInput').value = item.desc || '';
+      } else {
+        document.getElementById('appNameModalTitle').textContent = 'Tambah Nama Aplikasi';
+      }
+      document.getElementById('appNameModal').classList.add('show');
+    }
+
+    function editAppName(idx) { openAppNameModal(idx); }
+
+    function submitAppNameForm(e) {
+      e.preventDefault();
+      var editIdx = parseInt(document.getElementById('appNameEditIndex').value);
+      var name = document.getElementById('appNameInput').value.trim();
+      var desc = document.getElementById('appNameDescInput').value.trim();
+      if (!name) return;
+
+      var data = getMasterData();
+      if (!data.linkAppNames) data.linkAppNames = [];
+
+      // Cek duplikat nama
+      var duplicate = data.linkAppNames.find(function(item, idx2) {
+        return item.name.toLowerCase() === name.toLowerCase() && idx2 !== editIdx;
+      });
+      if (duplicate) {
+        alert('Nama aplikasi "' + name + '" sudah terdaftar.');
+        return;
+      }
+
+      var item = { name: name, desc: desc || name };
+      if (editIdx >= 0) {
+        data.linkAppNames[editIdx] = item;
+      } else {
+        data.linkAppNames.push(item);
+      }
+
+      saveMasterData(data);
+      renderAppNamesList();
+      closeModal('appNameModal');
+    }
+
+    function confirmDeleteAppName(idx) {
+      var data = getMasterData();
+      var item = data.linkAppNames[idx];
+      if (!item) return;
+
+      document.getElementById('deleteAppNameText').textContent = item.name;
+
+      // Cek apakah nama ini sedang digunakan di aplikasi yang sudah terdaftar
+      var warnBox = document.getElementById('deleteAppNameWarning');
+      var warnText = document.getElementById('deleteAppNameWarningText');
+      var usedApp = _allAppsCache.find(function(a) {
+        return isLinkApp(a) && a.name === item.name;
+      });
+      if (usedApp) {
+        warnText.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1"></i>Nama ini sedang digunakan oleh Link App yang sudah terdaftar. Menghapus nama tidak akan menghapus data aplikasi.';
+        warnBox.classList.remove('hidden');
+      } else {
+        warnBox.classList.add('hidden');
+      }
+
+      document.getElementById('deleteAppNameConfirmBtn').onclick = function() {
+        data.linkAppNames.splice(idx, 1);
+        saveMasterData(data);
+        renderAppNamesList();
+        closeModal('deleteAppNameModal');
+      };
+
+      document.getElementById('deleteAppNameModal').classList.add('show');
+    }
+    // ────────────────────────────────────────────────────────
+
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    async function handleLogout() {
+      try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } finally { window.location.href = '/login'; }
+    }
+
+    // ── RESET PASSWORD TAB ──────────────────────────────────
+    var currentResetFilter = 'PENDING';
+
+    async function loadResetRequests(status) {
+      currentResetFilter = status || '';
+      const tbody = document.getElementById('resetTable');
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-gray-400 text-sm"><i class="fa-solid fa-spinner fa-spin text-blue-400 mr-2"></i>Loading...</td></tr>';
+
+      try {
+        const qs = status ? '?status=' + status : '';
+        const res = await fetch('/api/admin/password-reset-requests' + qs, { credentials: 'include' });
+        const data = await res.json();
+        const requests = data.requests || [];
+
+        if (!requests.length) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-gray-400 text-sm"><i class="fa-solid fa-inbox text-3xl text-gray-200 block mb-2"></i>Tidak ada permintaan reset password</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = requests.map(r => {
+          const user = r.user || {};
+          const statusBadge = {
+            PENDING:  '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-clock text-xs"></i> Menunggu</span>',
+            APPROVED: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200"><i class="fa-solid fa-circle-check text-xs"></i> Disetujui</span>',
+            REJECTED: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200"><i class="fa-solid fa-circle-xmark text-xs"></i> Ditolak</span>',
+          }[r.status] || r.status;
+
+          const roleBadge = {
+            USER:  '<span class="tag bg-gray-100 text-gray-600">USER</span>',
+            ADMIN: '<span class="tag bg-blue-50 text-blue-700">ADMIN</span>',
+          }[user.role] || user.role;
+
+          const waktu = new Date(r.requestedAt).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
+
+          const aksi = r.status === 'PENDING' ? `
+            <div class="flex gap-2">
+              <button onclick="showApproveModal('${r.id}', '${user.fullName}', '${user.username}')"
+                class="text-xs px-3 py-1.5 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
+                <i class="fa-solid fa-key mr-1"></i>Reset
+              </button>
+              <button onclick="rejectReset('${r.id}')"
+                class="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 font-semibold hover:bg-red-100 transition">
+                <i class="fa-solid fa-xmark mr-1"></i>Tolak
+              </button>
+            </div>` : '<span class="text-xs text-gray-400 italic">Sudah diproses</span>';
+
+          return `<tr class="hover:bg-gray-50 transition">
+            <td class="px-5 py-3">
+              <div class="font-semibold text-gray-800">${user.fullName || '-'}</div>
+              <div class="text-xs text-gray-400">@${user.username || '-'}</div>
+            </td>
+            <td class="px-5 py-3">${roleBadge}</td>
+            <td class="px-5 py-3 text-gray-500 text-xs">${user.divisi || '<span class="italic text-gray-300">—</span>'}</td>
+            <td class="px-5 py-3 text-gray-500 text-xs">${waktu}</td>
+            <td class="px-5 py-3">${statusBadge}</td>
+            <td class="px-5 py-3">${aksi}</td>
+          </tr>`;
+        }).join('');
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-red-400 text-sm">Gagal memuat data</td></tr>';
+      }
+    }
+
+    var _prevResetCount = 0;
+
+    async function loadResetBadge() {
+      try {
+        const res = await fetch('/api/admin/password-reset-requests?status=PENDING', { credentials: 'include' });
+        const data = await res.json();
+        const count = (data.requests || []).length;
+        const badge = document.getElementById('resetBadge');
+        const tabBtn = document.getElementById('resetTabBtn');
+        if (count > 0) {
+          badge.textContent = count;
+          badge.classList.remove('hidden');
+          // Jika ada request baru masuk, beri animasi pulse pada tab button
+          if (count > _prevResetCount) {
+            tabBtn.classList.add('ring-2', 'ring-red-400', 'ring-offset-1');
+            setTimeout(() => tabBtn.classList.remove('ring-2', 'ring-red-400', 'ring-offset-1'), 3000);
+          }
+          // Update title halaman
+          document.title = '(' + count + ') Admin Panel — SSO Portal HQ Medan';
+        } else {
+          badge.classList.add('hidden');
+          document.title = 'Admin Panel — SSO Portal HQ Medan';
+        }
+        _prevResetCount = count;
+      } catch {}
+    }
+
+    function showApproveModal(id, fullName, username) {
+      document.getElementById('approveReqId').value = id;
+      document.getElementById('approveUserName').textContent = fullName + ' (@' + username + ')';
+      document.getElementById('approveNewPwd').value = '';
+      document.getElementById('approveConfirmPwd').value = '';
+      document.getElementById('approveAlert').classList.add('hidden');
+      document.getElementById('approveModal').classList.add('show');
+    }
+
+    async function submitApprove() {
+      const id = document.getElementById('approveReqId').value;
+      const newPassword = document.getElementById('approveNewPwd').value;
+      const confirmPassword = document.getElementById('approveConfirmPwd').value;
+      const alertEl = document.getElementById('approveAlert');
+
+      if (!newPassword || newPassword.length < 6) {
+        alertEl.className = 'mb-3 p-3 rounded-xl text-xs bg-red-50 text-red-700 border border-red-200';
+        alertEl.textContent = 'Password minimal 6 karakter.';
+        alertEl.classList.remove('hidden');
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        alertEl.className = 'mb-3 p-3 rounded-xl text-xs bg-red-50 text-red-700 border border-red-200';
+        alertEl.textContent = 'Password dan konfirmasi tidak cocok.';
+        alertEl.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/admin/password-reset-requests/' + id + '/approve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ newPassword })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          closeModal('approveModal');
+          loadResetRequests(currentResetFilter);
+          loadResetBadge();
+          alert('✅ ' + data.message);
+        } else {
+          alertEl.className = 'mb-3 p-3 rounded-xl text-xs bg-red-50 text-red-700 border border-red-200';
+          alertEl.textContent = data.error || 'Gagal.';
+          alertEl.classList.remove('hidden');
+        }
+      } catch {
+        alertEl.className = 'mb-3 p-3 rounded-xl text-xs bg-red-50 text-red-700 border border-red-200';
+        alertEl.textContent = 'Koneksi gagal.';
+        alertEl.classList.remove('hidden');
+      }
+    }
+
+    async function rejectReset(id) {
+      if (!confirm('Tolak permintaan reset password ini?')) return;
+      try {
+        const res = await fetch('/api/admin/password-reset-requests/' + id + '/reject', {
+          method: 'POST', credentials: 'include'
+        });
+        const data = await res.json();
+        if (res.ok) {
+          loadResetRequests(currentResetFilter);
+          loadResetBadge();
+        } else {
+          alert('Error: ' + (data.error || 'Gagal menolak.'));
+        }
+      } catch { alert('Koneksi gagal.'); }
+    }
+    // ────────────────────────────────────────────────────────
+
+    init().then(() => {
+      loadStats();
+      loadApps();
+      rebuildDropdownsFromMaster(getMasterData());
+      loadResetBadge();
+
+      // ── Auto-refresh badge setiap 15 detik ──
+      setInterval(async () => {
+        await loadResetBadge();
+        // Jika tab reset sedang aktif, refresh tabelnya juga
+        const resetTab = document.getElementById('tab-reset');
+        if (resetTab && !resetTab.classList.contains('hidden')) {
+          loadResetRequests(currentResetFilter);
+        }
+      }, 15000);
+    });
+  </script>
+</body>
+</html>

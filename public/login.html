@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — SSO Portal HQ Medan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { font-family: 'Inter', sans-serif; box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 40%, #e0f7fa 70%, #ccfbf1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%);
+      top: -150px; left: -150px;
+      pointer-events: none;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(14,165,233,0.10) 0%, transparent 70%);
+      bottom: -100px; right: -100px;
+      pointer-events: none;
+    }
+
+    /* Card wrapper */
+    .login-wrap {
+      display: flex;
+      width: 100%;
+      max-width: 980px;
+      min-height: 560px;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow:
+        0 0 0 1px rgba(6,182,212,0.10),
+        0 4px 6px rgba(0,0,0,0.04),
+        0 20px 60px rgba(6,182,212,0.14),
+        0 40px 80px rgba(0,0,0,0.08);
+      overflow: hidden;
+      animation: fadeUp 0.32s cubic-bezier(0.16,1,0.3,1) both;
+      position: relative;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px) scale(0.99); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ── LEFT PANEL ── */
+    .left-panel {
+      flex: 1;
+      background: linear-gradient(150deg, #0c4a6e 0%, #075985 30%, #0369a1 60%, #0284c7 85%, #0ea5e9 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px 44px;
+      position: relative;
+      overflow: hidden;
+    }
+    .left-panel::before {
+      content: '';
+      position: absolute;
+      width: 380px; height: 380px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      top: -100px; right: -120px;
+      pointer-events: none;
+    }
+    .left-panel::after {
+      content: '';
+      position: absolute;
+      width: 250px; height: 250px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      bottom: -80px; left: -60px;
+      pointer-events: none;
+    }
+
+    /* Small decorative dot grid */
+    .dot-grid {
+      position: absolute;
+      bottom: 120px; right: 32px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      opacity: 0.12;
+    }
+    .dot-grid span {
+      width: 4px; height: 4px;
+      background: #fff;
+      border-radius: 50%;
+      display: block;
+    }
+
+    .brand-logo { display: flex; align-items: center; gap: 14px; position: relative; z-index: 1; }
+    .brand-icon {
+      width: 44px; height: 44px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.20);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    .brand-name { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+    .brand-sub  { font-size: 11.5px; color: rgba(255,255,255,0.45); margin-top: 2px; letter-spacing: 0.2px; }
+
+    .left-body { position: relative; z-index: 1; }
+    .left-body h2 {
+      font-size: 26px; font-weight: 800; color: #fff;
+      line-height: 1.3; margin-bottom: 10px; letter-spacing: -0.5px;
+    }
+    .left-body p { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.6; }
+
+    /* Feature list */
+    .feature-list { margin-top: 28px; display: flex; flex-direction: column; gap: 10px; }
+    .feature-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12.5px; color: rgba(255,255,255,0.70);
+    }
+    .feature-item i {
+      width: 26px; height: 26px;
+      background: rgba(255,255,255,0.10);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: rgba(255,255,255,0.85);
+      flex-shrink: 0;
+    }
+
+    .left-footer { display: flex; align-items: center; gap: 8px; position: relative; z-index: 1; }
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: #34d399;
+      box-shadow: 0 0 0 3px rgba(52,211,153,0.25);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(52,211,153,0.25); }
+      50% { box-shadow: 0 0 0 5px rgba(52,211,153,0.10); }
+    }
+    .status-text { font-size: 12px; color: rgba(255,255,255,0.40); }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel {
+      width: 400px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 52px 46px;
+      background: #fff;
+    }
+
+    .form-header { margin-bottom: 28px; }
+    .form-title    { font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.4px; margin-bottom: 5px; }
+    .form-subtitle { font-size: 13px; color: #94a3b8; font-weight: 400; }
+
+    /* Inputs */
+    .field-group { margin-bottom: 16px; }
+    .field-label { display: block; font-size: 12.5px; font-weight: 600; color: #374151; margin-bottom: 6px; letter-spacing: 0.1px; }
+    .input-wrap  { position: relative; }
+    .input-icon  {
+      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+      color: #cbd5e1; font-size: 13px; pointer-events: none;
+      transition: color 0.18s;
+    }
+    .field-input {
+      width: 100%;
+      padding: 11px 14px 11px 38px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 11px;
+      font-size: 14px; color: #0f172a;
+      background: #f8fafc;
+      outline: none;
+      transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+    }
+    .field-input:focus {
+      border-color: #0ea5e9;
+      background: #fff;
+      box-shadow: 0 0 0 3.5px rgba(14,165,233,0.12);
+    }
+    .input-wrap:focus-within .input-icon { color: #0ea5e9; }
+    .field-input::placeholder { color: #cbd5e1; font-size: 13px; }
+    .eye-btn {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: #cbd5e1; font-size: 13px; padding: 4px; transition: color 0.15s;
+    }
+    .eye-btn:hover { color: #0ea5e9; }
+
+    /* Error */
+    .alert-error {
+      display: none; align-items: flex-start; gap: 9px;
+      background: #fff1f2; border: 1.5px solid #fecdd3;
+      border-radius: 10px; padding: 11px 14px;
+      margin-bottom: 18px; font-size: 13px; color: #be123c;
+    }
+    .alert-error.show { display: flex; }
+    .alert-error i { margin-top: 1px; flex-shrink: 0; font-size: 13px; }
+
+    /* SSO notice */
+    .sso-notice {
+      display: none; align-items: center; gap: 9px;
+      background: #f0f9ff; border: 1.5px solid #bae6fd;
+      border-radius: 10px; padding: 11px 14px;
+      margin-bottom: 18px; font-size: 13px; color: #0369a1;
+    }
+    .sso-notice.show { display: flex; }
+
+    /* Row: remember + forgot */
+    .row-mid {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .remember-label {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 13px; color: #64748b; cursor: pointer;
+      user-select: none;
+    }
+    /* Custom checkbox */
+    .remember-label input[type="checkbox"] {
+      appearance: none; -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 5px;
+      background: #f8fafc;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .remember-label input[type="checkbox"]:checked {
+      background: #0ea5e9;
+      border-color: #0ea5e9;
+    }
+    .remember-label input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      top: 1.5px; left: 4px;
+      width: 5px; height: 8px;
+      border: 2px solid #fff;
+      border-top: none; border-left: none;
+      transform: rotate(45deg);
+    }
+    .forgot-link {
+      font-size: 13px; color: #0ea5e9; font-weight: 600;
+      text-decoration: none; transition: color 0.15s;
+    }
+    .forgot-link:hover { color: #0284c7; }
+
+    /* Button */
+    .btn-primary {
+      width: 100%; padding: 12px;
+      background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+      color: #fff;
+      border: none; border-radius: 11px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.18s;
+      box-shadow: 0 2px 12px rgba(14,165,233,0.30);
+      letter-spacing: 0.1px;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+      box-shadow: 0 4px 20px rgba(14,165,233,0.40);
+      transform: translateY(-1px);
+    }
+    .btn-primary:active:not(:disabled) { transform: translateY(0) scale(0.99); }
+    .btn-primary:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+
+    /* Spinner */
+    .spinner {
+      width: 15px; height: 15px;
+      border: 2px solid rgba(255,255,255,0.30);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Divider & footer */
+    .form-divider { border: none; border-top: 1px solid #f1f5f9; margin: 24px 0 16px; }
+    .form-footer  { font-size: 12px; color: #cbd5e1; text-align: center; }
+
+    /* Back button */
+    .btn-back {
+      width: 33px; height: 33px; flex-shrink: 0;
+      border: 1.5px solid #e2e8f0; border-radius: 9px;
+      background: #f8fafc; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #94a3b8; transition: all 0.15s;
+    }
+    .btn-back:hover { background: #f0f9ff; color: #0284c7; border-color: #7dd3fc; }
+
+    /* Saved credential hint */
+    .saved-hint {
+      display: none;
+      font-size: 11.5px; color: #0284c7;
+      background: #e0f2fe; border: 1px solid #7dd3fc;
+      border-radius: 8px; padding: 8px 12px;
+      margin-bottom: 14px;
+      align-items: center; gap: 7px;
+    }
+    .saved-hint.show { display: flex; }
+    .saved-hint button {
+      margin-left: auto;
+      font-size: 11px; color: #dc2626; background: none; border: none;
+      cursor: pointer; font-weight: 600; padding: 0;
+      white-space: nowrap;
+    }
+    .saved-hint button:hover { color: #b91c1c; }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .left-panel { display: none; }
+      .login-wrap { max-width: 420px; min-height: unset; }
+      .right-panel { width: 100%; padding: 40px 30px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-wrap">
+
+    <!-- ════ LEFT PANEL ════ -->
+    <div class="left-panel">
+      <div class="brand-logo">
+        <div class="brand-icon">
+          <i class="fa-solid fa-shield-halved text-white" style="font-size:17px"></i>
+        </div>
+        <div>
+          <div class="brand-name">HQ Medan</div>
+          <div class="brand-sub">SSO Portal</div>
+        </div>
+      </div>
+
+      <div class="left-body">
+        <h2>Satu login<br>untuk semua akses.</h2>
+        <p>Masuk sekali, akses semua aplikasi<br>yang terhubung ke portal.</p>
+      </div>
+
+      <!-- Dot grid decoration -->
+      <div class="dot-grid">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+
+      <div class="left-footer">
+        <div class="status-dot"></div>
+        <span class="status-text">Sistem beroperasi normal</span>
+      </div>
+    </div>
+
+    <!-- ════ RIGHT PANEL ════ -->
+    <div class="right-panel">
+
+      <div class="form-header">
+        <div class="form-title">Selamat datang 👋</div>
+        <div class="form-subtitle">Masuk ke akun Anda untuk melanjutkan</div>
+      </div>
+
+      <!-- SSO Notice -->
+      <div id="ssoNotice" class="sso-notice">
+        <i class="fa-solid fa-link" style="font-size:12px;flex-shrink:0"></i>
+        <span>Mengakses: <strong id="ssoAppName"></strong></span>
+      </div>
+
+      <!-- Error Alert -->
+      <div id="alertError" class="alert-error">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span id="alertErrorMsg"></span>
+      </div>
+
+      <!-- Saved credential hint -->
+      <div id="savedHint" class="saved-hint">
+        <i class="fa-solid fa-circle-check" style="flex-shrink:0;color:#0ea5e9"></i>
+        <span>Kredensial tersimpan telah diisi otomatis.</span>
+        <button onclick="clearSaved()">Hapus</button>
+      </div>
+
+      <!-- ── LOGIN FORM ── -->
+      <form id="loginForm">
+
+        <div class="field-group">
+          <label class="field-label" for="identifier">Username</label>
+          <div class="input-wrap">
+            <i class="fa-regular fa-user input-icon"></i>
+            <input type="text" id="identifier" name="identifier" required
+                   autocomplete="username" class="field-input"
+                   placeholder="Masukkan username">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="password">Password</label>
+          <div class="input-wrap">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="password" name="password" required
+                   autocomplete="current-password" class="field-input"
+                   style="padding-right:38px" placeholder="Masukkan password">
+            <button type="button" id="togglePassword" class="eye-btn" tabindex="-1">
+              <i id="eyeIcon" class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="row-mid">
+          <label class="remember-label">
+            <input type="checkbox" id="rememberMe">
+            <span>Ingat saya</span>
+          </label>
+          <a href="#" id="forgotLink" class="forgot-link">Lupa password?</a>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn-primary">
+          <span id="btnContent">Masuk</span>
+        </button>
+
+      </form>
+
+      <!-- ── FORGOT PASSWORD FORM ── -->
+      <form id="forgotForm" style="display:none">
+
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+          <button type="button" id="backToLogin" class="btn-back">
+            <i class="fa-solid fa-arrow-left" style="font-size:11px"></i>
+          </button>
+          <div>
+            <div style="font-size:16px;font-weight:700;color:#0f172a">Lupa Password?</div>
+            <div style="font-size:12px;color:#94a3b8">Masukkan username Anda untuk meminta reset</div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="forgotUsername">Username</label>
+          <div class="input-wrap">
+            <i class="fa-regular fa-user input-icon"></i>
+            <input type="text" id="forgotUsername" required
+                   class="field-input" placeholder="Masukkan username Anda">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary">
+          <i class="fa-solid fa-paper-plane" style="font-size:12px"></i>
+          Kirim Permintaan Reset
+        </button>
+
+      </form>
+
+      <hr class="form-divider">
+      <div class="form-footer">&copy; 2025 HQ Medan &nbsp;·&nbsp; Secured by SSL/TLS</div>
+
+    </div>
+  </div>
+
+  <script>
+    const REMEMBER_KEY = 'sso_remember';
+
+    const urlParams     = new URLSearchParams(window.location.search);
+    const appParam      = urlParams.get('app');
+    const redirectParam = urlParams.get('redirect');
+
+    // SSO notice
+    if (appParam) {
+      document.getElementById('ssoAppName').textContent = appParam.toUpperCase();
+      document.getElementById('ssoNotice').classList.add('show');
+    }
+
+    // ── "INGAT SAYA" — isi otomatis dari localStorage ──
+    function loadSaved() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(REMEMBER_KEY) || 'null');
+        if (saved && saved.identifier && saved.password) {
+          document.getElementById('identifier').value = saved.identifier;
+          document.getElementById('password').value   = saved.password;
+          document.getElementById('rememberMe').checked = true;
+          document.getElementById('savedHint').classList.add('show');
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    function clearSaved() {
+      localStorage.removeItem(REMEMBER_KEY);
+      document.getElementById('identifier').value   = '';
+      document.getElementById('password').value     = '';
+      document.getElementById('rememberMe').checked = false;
+      document.getElementById('savedHint').classList.remove('show');
+      document.getElementById('identifier').focus();
+    }
+
+    loadSaved();
+
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', () => {
+      const pwd  = document.getElementById('password');
+      const icon = document.getElementById('eyeIcon');
+      if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash';
+      } else {
+        pwd.type = 'password';
+        icon.className = 'fa-regular fa-eye';
+      }
+    });
+
+    // Switch forms
+    document.getElementById('forgotLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      hideAlert();
+      document.getElementById('loginForm').style.display  = 'none';
+      document.getElementById('forgotForm').style.display = 'block';
+      document.getElementById('savedHint').classList.remove('show');
+    });
+    document.getElementById('backToLogin').addEventListener('click', () => {
+      hideAlert();
+      document.getElementById('forgotForm').style.display = 'none';
+      document.getElementById('loginForm').style.display  = 'block';
+      // Re-show saved hint jika kredensial masih tersimpan
+      const saved = JSON.parse(localStorage.getItem(REMEMBER_KEY) || 'null');
+      if (saved && saved.identifier) {
+        document.getElementById('savedHint').classList.add('show');
+      }
+    });
+
+    // Alert helpers
+    function showError(msg) {
+      const el = document.getElementById('alertError');
+      document.getElementById('alertErrorMsg').textContent = msg;
+      el.classList.add('show');
+    }
+    function hideAlert() {
+      document.getElementById('alertError').classList.remove('show');
+    }
+
+    // Loading state
+    function setLoading(on) {
+      const btn     = document.getElementById('submitBtn');
+      const content = document.getElementById('btnContent');
+      btn.disabled = on;
+      content.innerHTML = on
+        ? '<div class="spinner"></div> Memverifikasi...'
+        : 'Masuk';
+    }
+
+    // ── LOGIN ──
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAlert();
+      setLoading(true);
+
+      const identifier = document.getElementById('identifier').value.trim();
+      const password   = document.getElementById('password').value;
+      const remember   = document.getElementById('rememberMe').checked;
+
+      try {
+        const res  = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ identifier, password }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.error || 'Login gagal. Periksa kembali credential Anda.');
+          setLoading(false);
+          return;
+        }
+
+        // Simpan atau hapus credential sesuai checkbox "Ingat Saya"
+        if (remember) {
+          localStorage.setItem(REMEMBER_KEY, JSON.stringify({ identifier, password }));
+        } else {
+          localStorage.removeItem(REMEMBER_KEY);
+        }
+
+        if (appParam && redirectParam) {
+          window.location.href = `/api/sso/authorize?app=${appParam}&redirect=${encodeURIComponent(redirectParam)}`;
+        } else {
+          window.location.href = '/dashboard';
+        }
+      } catch {
+        showError('Koneksi gagal. Periksa jaringan Anda.');
+        setLoading(false);
+      }
+    });
+
+    // ── FORGOT PASSWORD ──
+    document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAlert();
+
+      const username = document.getElementById('forgotUsername').value.trim();
+      if (!username) { showError('Username wajib diisi.'); return; }
+
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const origHTML  = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<div class="spinner"></div> Mengirim...';
+
+      try {
+        const res  = await fetch('/api/auth/request-password-reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username }),
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          document.getElementById('forgotForm').innerHTML = `
+            <div style="text-align:center;padding:24px 0">
+              <div style="width:56px;height:56px;background:linear-gradient(135deg,#e0f2fe,#bae6fd);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 4px 14px rgba(14,165,233,0.18)">
+                <i class="fa-solid fa-clock-rotate-left" style="color:#0284c7;font-size:22px"></i>
+              </div>
+              <div style="font-size:17px;font-weight:700;color:#0f172a;margin-bottom:8px">Permintaan Terkirim!</div>
+              <div style="font-size:13px;color:#94a3b8;line-height:1.7;max-width:260px;margin:0 auto">
+                ${data.message}
+              </div>
+              <button onclick="location.reload()"
+                style="margin-top:20px;font-size:13px;color:#0284c7;font-weight:600;background:#e0f2fe;border:none;cursor:pointer;padding:9px 20px;border-radius:9px;display:inline-flex;align-items:center;gap:7px"
+                onmouseover="this.style.background='#bae6fd'"
+                onmouseout="this.style.background='#e0f2fe'">
+                <i class="fa-solid fa-arrow-left" style="font-size:11px"></i> Kembali ke login
+              </button>
+            </div>`;
+        } else {
+          showError(data.error || 'Gagal mengirim permintaan.');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = origHTML;
+        }
+      } catch {
+        showError('Koneksi gagal.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origHTML;
+      }
+    });
+
+    // Auto show forgot if hash
+    if (window.location.hash === '#forgot') {
+      document.getElementById('forgotLink').click();
+    }
+  </script>
+</body>
+</html>

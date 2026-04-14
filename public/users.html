@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manajemen User — SSO Portal HQ Medan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    body { background: #f4f5f7; }
+    .sidebar { width: 220px; min-height: 100vh; background: #fff; border-right: 1px solid #e5e7eb; }
+    .sidebar-brand { color: #00297a; font-weight: 700; font-size: 1.4rem; letter-spacing: -0.5px; }
+    .sidebar-brand span { color: #007dc1; }
+    .nav-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; padding: 16px 16px 4px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
+    .nav-item:hover { background: #f3f4f6; color: #111827; }
+    .nav-item.active { background: #eff6ff; color: #1d4ed8; border-left-color: #1d4ed8; font-weight: 600; }
+    .nav-item i { width: 16px; text-align: center; font-size: 13px; }
+    .admin-badge { font-size: 11px; background: #fee2e2; color: #b91c1c; border-radius: 99px; padding: 2px 8px; font-weight: 700; }
+    .sidebar-footer { border-top: 1px solid #e5e7eb; padding: 12px 16px; }
+    .sidebar-user { font-size: 13px; font-weight: 600; color: #111827; }
+    .sidebar-role { font-size: 11px; color: #6b7280; }
+    .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 12px 24px; }
+    .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+    .table-row:hover { background: #f9fafb; }
+    .input-field { background: #f9fafb; border: 1.5px solid #e5e7eb; border-radius: 8px; width: 100%; padding: 9px 14px; font-size: 13px; color: #111827; outline: none; transition: all 0.2s; }
+    .input-field:focus { background: #fff; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .input-field:disabled { background: #f3f4f6; color: #9ca3af; cursor: not-allowed; border-color: #e5e7eb; opacity: 0.7; }
+    .btn-primary { background: #1d4ed8; color: #fff; border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.15s; }
+    .btn-primary:hover { background: #1e40af; }
+    .modal { display: none !important; position: fixed; inset: 0; z-index: 50; }
+    .modal.show { display: flex !important; }
+    .tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+    .form-error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; border-radius: 8px; padding: 8px 12px; font-size: 12px; font-weight: 500; display: none; }
+    .form-error.show { display: flex; align-items: center; gap: 6px; }
+  </style>
+</head>
+<body class="flex min-h-screen">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar flex-shrink-0 flex flex-col fixed top-0 left-0 h-full z-30 overflow-y-auto">
+    <div class="px-4 py-5 border-b border-gray-100">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-building-columns text-2xl" style="color:#007dc1;"></i>
+        <div>
+          <div class="sidebar-brand">HQ<span>Medan</span></div>
+          <div class="text-xs text-gray-400" style="margin-top:1px;">SSO Portal</div>
+        </div>
+      </div>
+    </div>
+    <nav class="flex-1 py-2">
+      <div class="nav-item" onclick="window.location.href='/dashboard'">
+        <i class="fa-solid fa-house-chimney"></i> My Apps
+      </div>
+      <div class="nav-section-label mt-2">Manage</div>
+      <div class="nav-item active">
+        <i class="fa-solid fa-users-gear"></i> Manajemen User
+      </div>
+      <div id="navAdminPanel" class="nav-item hidden" onclick="window.location.href='/admin'">
+        <i class="fa-solid fa-sliders"></i> Admin Panel
+        <span class="admin-badge ml-auto">SA</span>
+      </div>
+      <div class="nav-item" onclick="window.location.href='/profile'">
+        <i class="fa-regular fa-circle-user"></i> Settings
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="flex items-center gap-3 mb-2">
+        <div id="sidebarAvatarCircle" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">?</div>
+        <div class="min-w-0">
+          <div class="sidebar-user truncate" id="sidebarName">Memuat...</div>
+          <div class="sidebar-role" id="sidebarRole">-</div>
+        </div>
+      </div>
+      <div class="flex justify-end mt-1">
+        <button onclick="handleLogout()" class="text-xs text-red-400 hover:text-red-600 transition-colors flex items-center gap-1">
+          <i class="fa-solid fa-right-from-bracket text-xs"></i> Sign out
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1" style="margin-left:220px;">
+    <div class="topbar flex items-center justify-between">
+      <h1 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
+        <i class="fa-solid fa-users-gear text-blue-600"></i> Manajemen User
+      </h1>
+      <div id="currentRoleBadge" class="tag bg-orange-100 text-orange-700 border border-orange-200">
+        <i class="fa-solid fa-shield-halved text-xs"></i>
+        <span id="currentRoleText">ADMIN</span>
+      </div>
+    </div>
+
+    <div class="p-6">
+      <div class="panel">
+        <div class="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass text-gray-400 text-xs absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+            <input type="text" id="searchUser" placeholder="Cari user..." class="input-field pl-9" style="width:240px" oninput="filterUsers(this.value)">
+          </div>
+          <div class="flex items-center gap-2">
+            <!-- Filter role -->
+            <select id="filterRole" class="input-field" style="width:auto;padding:8px 12px" onchange="filterUsers(document.getElementById('searchUser').value)">
+              <option value="">Semua Role</option>
+              <option value="USER">USER</option>
+              <option value="ADMIN">ADMIN</option>
+              <option value="SUPERADMIN">SUPERADMIN</option>
+            </select>
+            <button onclick="showUserModal()" class="btn-primary">
+              <i class="fa-solid fa-plus text-xs"></i> Tambah User
+            </button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-gray-500 text-xs font-semibold uppercase tracking-wider">
+              <tr>
+                <th class="px-5 py-3 text-left">User</th>
+                <th class="px-5 py-3 text-left">Username</th>
+                <th class="px-5 py-3 text-left">PT / Area</th>
+                <th class="px-5 py-3 text-left">Jabatan / Dept</th>
+                <th class="px-5 py-3 text-left">Role</th>
+                <th class="px-5 py-3 text-left">Status</th>
+                <th class="px-5 py-3 text-left">Last Login</th>
+                <th class="px-5 py-3 text-left">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="usersTable" class="divide-y divide-gray-50">
+              <tr><td colspan="8" class="text-center py-10 text-gray-400 text-sm">
+                <i class="fa-solid fa-spinner fa-spin text-blue-400 mr-2"></i>Memuat...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
+          <span class="text-xs text-gray-400" id="userCount">-</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- USER MODAL -->
+  <div id="userModal" class="modal items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl max-h-[92vh] overflow-y-auto">
+
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+            <i class="fa-solid fa-user-plus text-blue-600 text-sm"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-gray-900" id="userModalTitle">Tambah User</h3>
+            <p class="text-xs text-gray-400" id="userModalSub">Isi data pengguna baru</p>
+          </div>
+        </div>
+        <button onclick="closeModal('userModal')" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition-all">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <form id="userForm" onsubmit="submitUserForm(event)">
+        <input type="hidden" id="userId">
+
+        <!-- Section ① Informasi Akun -->
+        <div class="px-6 pt-5 pb-3">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">1</span>
+            <span class="text-xs font-bold text-gray-700 uppercase tracking-wider">Informasi Akun</span>
+          </div>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <i class="fa-solid fa-id-card absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs"></i>
+                <input type="text" id="userFullName" required class="input-field pl-8" placeholder="Nama lengkap user">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Username <span class="text-red-500">*</span></label>
+                <div class="relative">
+                  <i class="fa-solid fa-at absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs"></i>
+                  <input type="text" id="userUsername" required class="input-field pl-8" placeholder="username">
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Role <span class="text-red-500">*</span></label>
+                <select id="userRole" class="input-field" onchange="onRoleChange()">
+                  <option value="USER">USER</option>
+                  <!-- Option ADMIN hanya muncul untuk SUPERADMIN (diatur lewat JS) -->
+                </select>
+              </div>
+            </div>
+            <div id="passwordField">
+              <label class="block text-xs font-medium text-gray-500 mb-1">Password <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs"></i>
+                <input type="password" id="userPassword" class="input-field pl-8" placeholder="Minimal 6 karakter">
+              </div>
+            </div>
+            <div id="statusField" style="display:none">
+              <label id="statusLabel" class="flex items-center gap-3 cursor-pointer p-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-all">
+                <input type="checkbox" id="userIsActive" class="w-4 h-4 accent-blue-600 rounded">
+                <div>
+                  <div class="text-xs font-semibold text-gray-700">Status Akun Aktif</div>
+                  <div id="statusDesc" class="text-xs text-gray-400">User dapat login ke sistem</div>
+                </div>
+                <span id="statusProtectedBadge" class="hidden ml-auto text-xs text-red-500 font-semibold flex items-center gap-1"><i class="fa-solid fa-shield-halved"></i> Protected</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="mx-6 border-t border-dashed border-gray-200 my-1"></div>
+
+        <!-- Section ② Penempatan -->
+        <div class="px-6 pt-3 pb-3">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-5 h-5 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center font-bold">2</span>
+            <span class="text-xs font-bold text-gray-700 uppercase tracking-wider">Penempatan</span>
+          </div>
+          <div class="space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">PT <span class="text-red-500" id="ptRequired">*</span></label>
+                <select id="userPt" class="input-field" onchange="onPtChange()">
+                  <option value="">— Pilih PT —</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Area / DC <span class="text-red-500" id="areaRequired">*</span></label>
+                <select id="userArea" class="input-field" onchange="onAreaChange()" disabled>
+                  <option value="">— Pilih Area —</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Jabatan <span class="text-red-500">*</span></label>
+                <select id="userJabatan" class="input-field" onchange="onJabatanChange()" disabled>
+                  <option value="">— Pilih Jabatan —</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Departemen <span class="text-red-500">*</span></label>
+                <select id="userDivisi" class="input-field" disabled>
+                  <option value="">— Pilih Departemen —</option>
+                </select>
+              </div>
+            </div>
+            <!-- Info note for Head ACC / Head AR -->
+            <div id="jabatanNote" class="hidden rounded-lg px-3 py-2 text-xs flex items-start gap-2">
+              <i class="fa-solid fa-circle-info mt-0.5 flex-shrink-0"></i>
+              <span id="jabatanNoteText"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error message -->
+        <div id="formError" class="form-error mx-6 mb-2" style="display:none; gap:6px;">
+          <i class="fa-solid fa-circle-exclamation flex-shrink-0"></i>
+          <span></span>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 rounded-b-2xl flex gap-3">
+          <button type="button" onclick="closeModal('userModal')" class="flex-1 border border-gray-200 bg-white text-gray-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-all">
+            Batal
+          </button>
+          <button type="submit" class="flex-1 btn-primary justify-center rounded-xl py-2.5">
+            <i class="fa-solid fa-floppy-disk text-xs"></i> Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let allUsers = [];
+    let currentUserRole = 'ADMIN';
+
+    // Jabatan berdasarkan role
+    const JABATAN_USER  = ['Admin FAT', 'Admin TRP', 'Admin FG', 'Admin BS'];
+    const JABATAN_ADMIN = ['Head ACC', 'Head AR', 'KA Admin', 'KA Transport', 'KA WRH FG', 'KA WRH BS', 'IT'];
+
+    // Jabatan yang punya scope khusus
+    const HEAD_ACC_JABATAN = 'Head ACC'; // Lihat semua PT
+    const HEAD_AR_JABATAN  = 'Head AR';  // Lihat semua area dalam 1 PT
+
+    // ── Master Data (sync dengan localStorage dari admin.html) ──
+    var PT_AREAS = {};
+    var JABATAN_DEPARTEMEN = {};
+
+    function getMasterData() {
+      const defaults = {
+        pt: [
+          { name: 'MDR 1' }, { name: 'MDR 2' }, { name: 'MDR 3' }, { name: 'MDR 4' }
+        ],
+        area: [
+          { name: 'DC Medan', pt: 'MDR 1' }, { name: 'DC Stabat', pt: 'MDR 1' },
+          { name: 'DC Siantar', pt: 'MDR 2' }, { name: 'DC Tanjung Balai Asahan', pt: 'MDR 2' }, { name: 'DC Kabanjahe', pt: 'MDR 2' },
+          { name: 'DC Sibolga', pt: 'MDR 3' }, { name: 'DC Padang Sidimpuan', pt: 'MDR 3' }, { name: 'DC Rantau Prapat', pt: 'MDR 3' },
+          { name: 'DC Pancur Batu', pt: 'MDR 4' }, { name: 'DC Nias', pt: 'MDR 4' }, { name: 'DC Sei Rampah', pt: 'MDR 4' }
+        ],
+        jabatan: [
+          { name: 'Head ACC', departemen: 'FAT' }, { name: 'Head AR', departemen: 'FAT' },
+          { name: 'KA Admin', departemen: 'FAT' }, { name: 'Admin FAT', departemen: 'FAT' },
+          { name: 'KA Transport', departemen: 'TRP' }, { name: 'Admin TRP', departemen: 'TRP' },
+          { name: 'KA WRH FG', departemen: 'WRH' }, { name: 'KA WRH BS', departemen: 'WRH' },
+          { name: 'Admin FG', departemen: 'WRH' }, { name: 'Admin BS', departemen: 'WRH' },
+          { name: 'IT', departemen: null }
+        ],
+        departemen: [
+          { name: 'FAT' }, { name: 'TRP' }, { name: 'WRH' }
+        ]
+      };
+      try {
+        const saved = localStorage.getItem('sso_master_data');
+        return saved ? JSON.parse(saved) : defaults;
+      } catch { return defaults; }
+    }
+
+    function buildCascadeData() {
+      const data = getMasterData();
+      PT_AREAS = {};
+      data.pt.forEach(function(p) {
+        PT_AREAS[p.name] = data.area.filter(function(a) { return a.pt === p.name; }).map(function(a) { return a.name; });
+      });
+      JABATAN_DEPARTEMEN = {};
+      data.jabatan.forEach(function(j) {
+        if (j.departemen) JABATAN_DEPARTEMEN[j.name] = [j.departemen];
+      });
+      // Rebuild PT select
+      var ptEl = document.getElementById('userPt');
+      ptEl.innerHTML = '<option value="">— Pilih PT —</option>';
+      data.pt.forEach(function(p) {
+        var o = document.createElement('option'); o.value = p.name; o.textContent = 'PT. ' + p.name;
+        ptEl.appendChild(o);
+      });
+    }
+
+    // ── Cascade dropdown logic ──────────────────────────────
+    function onPtChange() {
+      var pt = document.getElementById('userPt').value;
+      var areaEl = document.getElementById('userArea');
+      var jabatanEl = document.getElementById('userJabatan');
+      var deptEl = document.getElementById('userDivisi');
+      areaEl.innerHTML = '<option value="">— Pilih Area —</option>';
+      if (pt && PT_AREAS[pt]) {
+        PT_AREAS[pt].forEach(function(a) { var o = document.createElement('option'); o.value = a; o.textContent = a; areaEl.appendChild(o); });
+        areaEl.disabled = false;
+      } else { areaEl.disabled = true; }
+      jabatanEl.value = ''; jabatanEl.disabled = true;
+      deptEl.innerHTML = '<option value="">— Pilih Departemen —</option>'; deptEl.value = ''; deptEl.disabled = true;
+    }
+
+    function onAreaChange() {
+      var area = document.getElementById('userArea').value;
+      var jabatanEl = document.getElementById('userJabatan');
+      var deptEl = document.getElementById('userDivisi');
+      jabatanEl.disabled = !area; jabatanEl.value = '';
+      deptEl.innerHTML = '<option value="">— Pilih Departemen —</option>'; deptEl.value = ''; deptEl.disabled = true;
+      onJabatanChange();
+    }
+
+    // Dipanggil saat role berubah — rebuild jabatan list dan update PT/Area visibility
+    function onRoleChange() {
+      var role = document.getElementById('userRole').value;
+      var jabatanEl = document.getElementById('userJabatan');
+      var ptEl = document.getElementById('userPt');
+      var areaEl = document.getElementById('userArea');
+      var note = document.getElementById('jabatanNote');
+
+      // Reset jabatan dropdown
+      jabatanEl.innerHTML = '<option value="">— Pilih Jabatan —</option>';
+      var jabList = role === 'ADMIN' ? JABATAN_ADMIN : JABATAN_USER;
+      jabList.forEach(function(j) {
+        var o = document.createElement('option'); o.value = j; o.textContent = j; jabatanEl.appendChild(o);
+      });
+      jabatanEl.value = '';
+      jabatanEl.disabled = !(document.getElementById('userArea').value) && role !== 'ADMIN';
+
+      // Untuk ADMIN: jabatan langsung bisa dipilih tanpa harus pilih area dulu
+      if (role === 'ADMIN') {
+        jabatanEl.disabled = false;
+      }
+
+      note.classList.add('hidden');
+      resetDeptField();
+    }
+
+    function onJabatanChange() {
+      var jab = document.getElementById('userJabatan').value;
+      var role = document.getElementById('userRole').value;
+      var opts = JABATAN_DEPARTEMEN[jab];
+      var deptEl = document.getElementById('userDivisi');
+      var note = document.getElementById('jabatanNote');
+      var noteText = document.getElementById('jabatanNoteText');
+      var ptEl = document.getElementById('userPt');
+      var areaEl = document.getElementById('userArea');
+
+      // Show note for special admin positions
+      note.classList.add('hidden');
+      if (role === 'ADMIN' && jab === HEAD_ACC_JABATAN) {
+        note.className = 'rounded-lg px-3 py-2 text-xs flex items-start gap-2 bg-blue-50 text-blue-700 border border-blue-100';
+        noteText.textContent = 'Head ACC dapat melihat seluruh aplikasi di semua PT. PT dan Area/DC tetap diisi sebagai lokasi penempatan.';
+        note.classList.remove('hidden');
+      } else if (role === 'ADMIN' && jab === HEAD_AR_JABATAN) {
+        note.className = 'rounded-lg px-3 py-2 text-xs flex items-start gap-2 bg-indigo-50 text-indigo-700 border border-indigo-100';
+        noteText.textContent = 'Head AR dapat melihat seluruh aplikasi dalam 1 PT berdasarkan Area/DC yang didaftarkan.';
+        note.classList.remove('hidden');
+      }
+
+      deptEl.innerHTML = '<option value="">— Pilih Departemen —</option>';
+      if (jab) {
+        deptEl.disabled = false;
+        var data = getMasterData();
+        // Untuk jabatan IT: tidak ada departemen otomatis → tampilkan semua
+        var deptList = opts || data.departemen.map(function(d){ return d.name; });
+        deptList.forEach(function(d) {
+          var o = document.createElement('option'); o.value = d; o.textContent = d; deptEl.appendChild(o);
+        });
+        if (opts && opts.length === 1) deptEl.value = opts[0];
+      } else {
+        deptEl.disabled = true;
+      }
+    }
+
+    function resetDeptField() {
+      var deptEl = document.getElementById('userDivisi');
+      deptEl.innerHTML = '<option value="">— Pilih Departemen —</option>';
+      deptEl.value = ''; deptEl.disabled = true;
+    }
+
+    function resetUserDropdowns() {
+      buildCascadeData();
+      var role = document.getElementById('userRole').value || 'USER';
+      var areaEl = document.getElementById('userArea');
+      areaEl.innerHTML = '<option value="">— Pilih Area —</option>'; areaEl.disabled = true;
+
+      var jabEl = document.getElementById('userJabatan');
+      jabEl.innerHTML = '<option value="">— Pilih Jabatan —</option>';
+      var jabList = role === 'ADMIN' ? JABATAN_ADMIN : JABATAN_USER;
+      jabList.forEach(function(j) { var o = document.createElement('option'); o.value = j; o.textContent = j; jabEl.appendChild(o); });
+      jabEl.value = '';
+      jabEl.disabled = role !== 'ADMIN'; // ADMIN: langsung bisa pilih jabatan
+
+      resetDeptField();
+      document.getElementById('jabatanNote').classList.add('hidden');
+    }
+
+    function populateUserDropdowns(u) {
+      buildCascadeData();
+      var data = getMasterData();
+      var role = u.role || 'USER';
+      document.getElementById('userPt').value = u.pt || '';
+      var areaEl = document.getElementById('userArea');
+      areaEl.innerHTML = '<option value="">— Pilih Area —</option>';
+      if (u.pt && PT_AREAS[u.pt]) {
+        PT_AREAS[u.pt].forEach(function(a) { var o = document.createElement('option'); o.value = a; o.textContent = a; areaEl.appendChild(o); });
+        areaEl.disabled = false; areaEl.value = u.area || '';
+      } else { areaEl.disabled = true; }
+
+      var jabEl = document.getElementById('userJabatan');
+      jabEl.innerHTML = '<option value="">— Pilih Jabatan —</option>';
+      var jabList = role === 'ADMIN' ? JABATAN_ADMIN : JABATAN_USER;
+      jabList.forEach(function(j) { var o = document.createElement('option'); o.value = j; o.textContent = j; jabEl.appendChild(o); });
+      jabEl.disabled = false;
+      jabEl.value = u.jabatan || '';
+
+      var deptEl = document.getElementById('userDivisi');
+      var opts = u.jabatan ? JABATAN_DEPARTEMEN[u.jabatan] : null;
+      deptEl.innerHTML = '<option value="">— Pilih Departemen —</option>';
+      if (u.jabatan) {
+        deptEl.disabled = false;
+        (opts || data.departemen.map(function(d){return d.name;})).forEach(function(d) { var o = document.createElement('option'); o.value = d; o.textContent = d; deptEl.appendChild(o); });
+        deptEl.value = u.divisi || (opts && opts.length === 1 ? opts[0] : '');
+      } else { deptEl.disabled = true; }
+
+      // Show note if needed
+      onJabatanChange();
+    }
+
+    // ── Role select setup berdasarkan role login ────────────
+    function setupRoleSelect(myRole) {
+      var sel = document.getElementById('userRole');
+      sel.innerHTML = '<option value="USER">USER</option>';
+      if (myRole === 'SUPERADMIN') {
+        sel.innerHTML += '<option value="ADMIN">ADMIN</option>';
+        // SUPERADMIN tidak bisa ditambah via UI (hanya 1 boleh ada)
+      }
+    }
+
+    // ── Auth & Init ─────────────────────────────────────────
+    async function init() {
+      try {
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        if (!res.ok) { window.location.href = '/login'; return; }
+        const { user } = await res.json();
+        if (!['ADMIN','SUPERADMIN'].includes(user.role)) { window.location.href = '/dashboard'; return; }
+        currentUserRole = user.role;
+        const initials = user.fullName.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+        document.getElementById('sidebarName').textContent = user.fullName;
+        document.getElementById('sidebarRole').textContent = user.role;
+        document.getElementById('sidebarAvatarCircle').textContent = initials;
+        document.getElementById('currentRoleText').textContent = user.role;
+        if (user.role === 'SUPERADMIN') {
+          document.getElementById('currentRoleBadge').className = 'tag bg-red-100 text-red-700 border border-red-200';
+          document.getElementById('navAdminPanel').classList.remove('hidden');
+        }
+        setupRoleSelect(user.role);
+        buildCascadeData();
+      } catch { window.location.href = '/login'; }
+    }
+
+    // ── Load & Render Users ─────────────────────────────────
+    async function loadUsers() {
+      try {
+        const res = await fetch('/api/admin/users', { credentials: 'include' });
+        if (!res.ok) return;
+        const data = await res.json();
+        allUsers = data.users || [];
+        renderUsers(allUsers);
+      } catch(e) {}
+    }
+
+    function filterUsers(q) {
+      q = (q || '').toLowerCase();
+      const role = document.getElementById('filterRole').value;
+      const filtered = allUsers.filter(u =>
+        u.role !== 'SUPERADMIN' &&
+        (!role || u.role === role) &&
+        (!q || u.fullName.toLowerCase().includes(q) || u.username.toLowerCase().includes(q))
+      );
+      renderUsers(filtered);
+    }
+
+    function renderUsers(users) {
+      const tbody = document.getElementById('usersTable');
+      // Sembunyikan SUPERADMIN dari tampilan
+      const visible = users.filter(u => u.role !== 'SUPERADMIN');
+      document.getElementById('userCount').textContent = visible.length + ' user ditampilkan';
+      if (!visible.length) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-10 text-gray-400 text-sm">Tidak ada user ditemukan</td></tr>';
+        return;
+      }
+      tbody.innerHTML = visible.map(u => {
+        const initials = u.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        const roleColor = u.role === 'ADMIN' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600';
+        const stColor = u.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+        const ud = JSON.stringify(u).replace(/"/g, '&quot;');
+        // Edit: SUPERADMIN bisa edit semua; ADMIN hanya bisa edit USER (bukan sesama ADMIN)
+        const canEdit = currentUserRole === 'SUPERADMIN' || u.role === 'USER';
+        // Toggle nonaktif: SUPERADMIN bisa toggle USER & ADMIN; ADMIN hanya bisa toggle USER
+        const canToggle = currentUserRole === 'SUPERADMIN' || u.role === 'USER';
+        const toggleBtn = canToggle
+          ? `<button onclick="toggleUserStatus('${u.id}', ${u.isActive})" class="text-xs font-semibold px-2 py-1 rounded transition-all ${u.isActive ? 'text-red-500 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'}">${u.isActive ? 'Nonaktifkan' : 'Aktifkan'}</button>`
+          : '';
+        // Hapus: SUPERADMIN bisa hapus USER & ADMIN; ADMIN hanya bisa hapus USER
+        const canDelete = currentUserRole === 'SUPERADMIN' || u.role === 'USER';
+        const deleteBtn = canDelete
+          ? `<button onclick="deleteUser('${u.id}', '${u.fullName.replace(/'/g, "\\'")}')" class="text-xs font-semibold px-2 py-1 rounded text-red-500 hover:text-red-700 hover:bg-red-50 transition-all" title="Hapus user"><i class="fa-solid fa-trash-can"></i></button>`
+          : '';
+        return `<tr class="table-row">
+          <td class="px-5 py-3">
+            <div class="flex items-center gap-3">
+              <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">${initials}</div>
+              <div>
+                <div class="font-medium text-gray-900 text-sm">${u.fullName}</div>
+                <div class="text-gray-400 text-xs">@${u.username}</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-5 py-3 text-gray-500 text-xs">@${u.username}</td>
+          <td class="px-5 py-3 text-xs text-gray-500">
+            <div>${u.pt ? '<span class="font-medium text-gray-700">'+u.pt+'</span>' : '<span class="text-gray-300">—</span>'}</div>
+            <div class="text-gray-400">${u.area || ''}</div>
+          </td>
+          <td class="px-5 py-3 text-xs text-gray-500">
+            <div>${u.jabatan ? '<span class="font-medium text-gray-700">'+u.jabatan+'</span>' : '<span class="text-gray-300">—</span>'}</div>
+            <div class="text-gray-400">${u.divisi || ''}</div>
+          </td>
+          <td class="px-5 py-3"><span class="tag ${roleColor}">${u.role}</span></td>
+          <td class="px-5 py-3"><span class="tag ${stColor}">${u.isActive ? 'Aktif' : 'Nonaktif'}</span></td>
+          <td class="px-5 py-3 text-gray-400 text-xs">${u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString('id-ID') : '-'}</td>
+          <td class="px-5 py-3">
+            <div class="flex items-center gap-1">
+              ${canEdit ? `<button onclick='editUser(${ud})' class="text-blue-600 hover:text-blue-800 text-xs font-semibold px-2 py-1 rounded hover:bg-blue-50 transition-all">Edit</button>` : ''}
+              ${toggleBtn}
+              ${deleteBtn}
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ── Modal: Add / Edit ───────────────────────────────────
+    function showUserModal() {
+      document.getElementById('userModalTitle').textContent = 'Tambah User';
+      document.getElementById('userModalSub').textContent = 'Isi data pengguna baru';
+      document.getElementById('userForm').reset();
+      document.getElementById('userId').value = '';
+      document.getElementById('passwordField').style.display = '';
+      document.getElementById('userPassword').required = true;
+      document.getElementById('statusField').style.display = 'none';
+      document.getElementById('formError').style.display = 'none';
+      document.getElementById('jabatanNote').classList.add('hidden');
+      setupRoleSelect(currentUserRole);
+      resetUserDropdowns();
+      document.getElementById('userModal').classList.add('show');
+    }
+
+    function editUser(u) {
+      document.getElementById('userModalTitle').textContent = 'Edit User';
+      document.getElementById('userModalSub').textContent = u.username;
+      document.getElementById('userId').value = u.id;
+      document.getElementById('userFullName').value = u.fullName;
+      document.getElementById('userUsername').value = u.username;
+      // Setup role select sesuai hak akses
+      setupRoleSelect(currentUserRole);
+      // Jika edit SUPERADMIN — tampilkan opsi SUPERADMIN (tidak bisa diubah, disabled)
+      var roleEl = document.getElementById('userRole');
+      if (u.role === 'SUPERADMIN') {
+        roleEl.innerHTML = '<option value="SUPERADMIN">SUPERADMIN</option>';
+        roleEl.disabled = true;
+      } else {
+        roleEl.disabled = false;
+        // ADMIN hanya bisa set USER; SUPERADMIN bisa set USER/ADMIN
+        if (currentUserRole === 'ADMIN') {
+          roleEl.innerHTML = '<option value="USER">USER</option>';
+        }
+      }
+      roleEl.value = u.role;
+      document.getElementById('passwordField').style.display = 'none';
+      document.getElementById('userPassword').required = false;
+      document.getElementById('statusField').style.display = '';
+
+      // Lock status jika SUPERADMIN
+      var isSuperadmin = u.role === 'SUPERADMIN';
+      var cbIsActive = document.getElementById('userIsActive');
+      var statusLabel = document.getElementById('statusLabel');
+      cbIsActive.disabled = isSuperadmin;
+      cbIsActive.checked = u.isActive;
+      if (isSuperadmin) {
+        statusLabel.classList.add('cursor-not-allowed', 'opacity-70');
+        statusLabel.classList.remove('cursor-pointer', 'hover:bg-gray-100');
+        document.getElementById('statusDesc').textContent = 'SUPERADMIN tidak dapat dinonaktifkan';
+        document.getElementById('statusProtectedBadge').classList.remove('hidden');
+      } else {
+        statusLabel.classList.remove('cursor-not-allowed', 'opacity-70');
+        statusLabel.classList.add('cursor-pointer', 'hover:bg-gray-100');
+        document.getElementById('statusDesc').textContent = 'User dapat login ke sistem';
+        document.getElementById('statusProtectedBadge').classList.add('hidden');
+      }
+
+      populateUserDropdowns(u);
+      document.getElementById('formError').style.display = 'none';
+      document.getElementById('userModal').classList.add('show');
+    }
+
+    async function toggleUserStatus(id, isActive) {
+      const res = await fetch('/api/admin/users/' + id, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', body: JSON.stringify({ isActive: !isActive })
+      });
+      const data = await res.json();
+      if (!res.ok) { alert(data.error || 'Gagal mengubah status'); return; }
+      loadUsers();
+    }
+
+    function showFormError(msg) {
+      var el = document.getElementById('formError');
+      el.querySelector('span').textContent = msg;
+      el.style.display = 'flex';
+    }
+
+    async function submitUserForm(e) {
+      e.preventDefault();
+      const id = document.getElementById('userId').value;
+      document.getElementById('formError').style.display = 'none';
+
+      const fullName = document.getElementById('userFullName').value.trim();
+      const username = document.getElementById('userUsername').value.trim();
+      const password = document.getElementById('userPassword').value;
+
+      if (!fullName) { showFormError('Nama lengkap wajib diisi.'); return; }
+      if (!username) { showFormError('Username wajib diisi.'); return; }
+      if (!id && !password) { showFormError('Password wajib diisi untuk user baru.'); return; }
+      if (!id && password.length < 6) { showFormError('Password minimal 6 karakter.'); return; }
+
+      const pt = document.getElementById('userPt').value;
+      const area = document.getElementById('userArea').value;
+      const jabatan = document.getElementById('userJabatan').value;
+      const divisi = document.getElementById('userDivisi').value;
+      const role = document.getElementById('userRole').value;
+
+      // Saat tambah user baru, semua penempatan wajib diisi
+      // Kecuali Head ACC: tidak wajib area (akses semua PT)
+      if (!id) {
+        if (!pt)      { showFormError('PT wajib dipilih.'); return; }
+        if (!jabatan) { showFormError('Jabatan wajib dipilih.'); return; }
+        if (!divisi)  { showFormError('Departemen wajib dipilih.'); return; }
+        // Head ACC tidak wajib area, jabatan lain wajib area
+        if (jabatan !== HEAD_ACC_JABATAN && !area) { showFormError('Area / DC wajib dipilih.'); return; }
+      }
+
+      const opts = JABATAN_DEPARTEMEN[jabatan];
+      const body = {
+        fullName: fullName,
+        username: username,
+        role:     role,
+        pt:       pt || null,
+        area:     area || null,
+        jabatan:  jabatan || null,
+        divisi:   divisi || (opts && opts.length === 1 ? opts[0] : null),
+      };
+      if (!id) body.password = password;
+      if (id) body.isActive = document.getElementById('userIsActive').checked;
+
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const origText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i> Menyimpan...';
+
+      try {
+        const res = await fetch('/api/admin/users' + (id ? '/' + id : ''), {
+          method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          closeModal('userModal');
+          loadUsers();
+        } else {
+          showFormError(data.error || 'Terjadi kesalahan, coba lagi.');
+        }
+      } catch (err) {
+        showFormError('Koneksi gagal, periksa koneksi Anda.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origText;
+      }
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    async function deleteUser(id, fullName) {
+      if (!confirm(`Hapus user "${fullName}"?\n\nTindakan ini tidak dapat dibatalkan.`)) return;
+      try {
+        const res = await fetch('/api/admin/users/' + id, {
+          method: 'DELETE', credentials: 'include'
+        });
+        const data = await res.json();
+        if (res.ok) {
+          loadUsers();
+        } else {
+          alert(data.error || 'Gagal menghapus user.');
+        }
+      } catch {
+        alert('Koneksi gagal, periksa koneksi Anda.');
+      }
+    }
+
+    async function handleLogout() {
+      try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } finally { window.location.href = '/login'; }
+    }
+
+    init().then(() => loadUsers());
+  </script>
+</body>
+</html>

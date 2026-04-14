@@ -1,0 +1,455 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Settings — SSO Portal HQ Medan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+    body { background: #f1f5f9; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width: 220px; min-height: 100vh; background: #fff; border-right: 1px solid #e5e7eb; }
+    .sidebar-brand { color: #00297a; font-weight: 700; font-size: 1.4rem; letter-spacing: -0.5px; }
+    .sidebar-brand span { color: #007dc1; }
+    .nav-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; padding: 16px 16px 4px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
+    .nav-item:hover { background: #f3f4f6; color: #111827; }
+    .nav-item.active { background: #eff6ff; color: #1d4ed8; border-left-color: #1d4ed8; font-weight: 600; }
+    .nav-item i { width: 16px; text-align: center; font-size: 13px; }
+    .admin-badge { font-size: 11px; background: #fee2e2; color: #b91c1c; border-radius: 99px; padding: 2px 8px; font-weight: 700; }
+    .sidebar-footer { border-top: 1px solid #e5e7eb; padding: 12px 16px; }
+
+    /* ── TOPBAR ── */
+    .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 14px 28px; }
+
+    /* ── CARDS ── */
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+    }
+
+    /* ── AVATAR HERO ── */
+    .avatar-ring {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; font-weight: 800; color: #fff;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(99,102,241,0.30);
+      position: relative;
+    }
+    .avatar-status {
+      position: absolute; bottom: 2px; right: 2px;
+      width: 14px; height: 14px;
+      background: #22c55e; border-radius: 50%;
+      border: 2.5px solid #fff;
+    }
+
+    /* ── INFO GRID ── */
+    .info-row {
+      display: flex; align-items: center;
+      padding: 13px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-icon-wrap {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-right: 12px;
+    }
+    .info-key { font-size: 12px; font-weight: 600; color: #94a3b8; min-width: 130px; }
+    .info-val { font-size: 13.5px; font-weight: 600; color: #0f172a; }
+
+    /* ── FORM ── */
+    .field-label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 6px; letter-spacing: 0.1px; }
+    .input-wrap  { position: relative; }
+    .input-icon  { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #cbd5e1; font-size: 13px; pointer-events: none; transition: color 0.15s; }
+    .input-wrap:focus-within .input-icon { color: #6366f1; }
+    .input-field {
+      width: 100%; padding: 10px 14px 10px 38px;
+      border: 1.5px solid #e2e8f0; border-radius: 10px;
+      font-size: 14px; color: #0f172a; background: #f8fafc;
+      outline: none; transition: all 0.18s;
+    }
+    .input-field:focus {
+      border-color: #6366f1; background: #fff;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.10);
+    }
+    .input-field::placeholder { color: #cbd5e1; font-size: 13px; }
+    .eye-btn {
+      position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: #cbd5e1; font-size: 13px; padding: 4px;
+      transition: color 0.15s;
+    }
+    .eye-btn:hover { color: #6366f1; }
+
+    /* ── STRENGTH BAR ── */
+    .strength-bar { height: 4px; border-radius: 2px; background: #e2e8f0; margin-top: 8px; overflow: hidden; }
+    .strength-fill { height: 100%; border-radius: 2px; transition: width 0.3s, background 0.3s; width: 0%; }
+
+    /* ── BUTTON ── */
+    .btn-save {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 22px; border-radius: 10px; border: none; cursor: pointer;
+      font-size: 13.5px; font-weight: 700; color: #fff;
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      box-shadow: 0 2px 10px rgba(99,102,241,0.28);
+      transition: all 0.18s;
+    }
+    .btn-save:hover:not(:disabled) {
+      background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+      box-shadow: 0 4px 16px rgba(99,102,241,0.36);
+      transform: translateY(-1px);
+    }
+    .btn-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* ── ALERT ── */
+    .alert {
+      display: none; align-items: flex-start; gap: 9px;
+      border-radius: 10px; padding: 11px 14px; font-size: 13px;
+      margin-bottom: 20px;
+    }
+    .alert.show { display: flex; }
+    .alert-success { background: #f0fdf4; border: 1.5px solid #86efac; color: #15803d; }
+    .alert-error   { background: #fff1f2; border: 1.5px solid #fecdd3; color: #be123c; }
+
+    /* Spinner */
+    .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.65s linear infinite; flex-shrink: 0; display: inline-block; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Tag */
+    .tag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 99px; font-size: 11.5px; font-weight: 700; }
+
+    /* Section divider title */
+    .section-title { font-size: 13px; font-weight: 700; color: #0f172a; }
+    .section-sub   { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  </style>
+</head>
+<body class="flex min-h-screen">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar flex-shrink-0 flex flex-col fixed top-0 left-0 h-full z-30 overflow-y-auto">
+    <div class="px-4 py-5 border-b border-gray-100">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-building-columns text-2xl" style="color:#007dc1;"></i>
+        <div>
+          <div class="sidebar-brand">HQ<span>Medan</span></div>
+          <div class="text-xs text-gray-400" style="margin-top:1px;">SSO Portal</div>
+        </div>
+      </div>
+    </div>
+    <nav class="flex-1 py-2">
+      <div class="nav-item" onclick="window.location.href='/dashboard'">
+        <i class="fa-solid fa-house-chimney"></i> My Apps
+      </div>
+      <div class="nav-section-label mt-2">Account</div>
+      <div class="nav-item active">
+        <i class="fa-regular fa-circle-user"></i> Settings
+      </div>
+      <div id="adminNavItem" class="nav-item hidden" onclick="window.location.href='/admin'">
+        <i class="fa-solid fa-sliders"></i> Admin Panel
+        <span class="admin-badge ml-auto">ADMIN</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="flex items-center gap-3 mb-3">
+        <div id="sidebarAvatarCircle" class="w-9 h-9 rounded-full bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">?</div>
+        <div class="min-w-0 flex-1">
+          <div class="text-sm font-semibold text-gray-900 truncate" id="sidebarName">Memuat...</div>
+          <div class="text-xs text-gray-500" id="sidebarRole">-</div>
+        </div>
+      </div>
+      <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg py-2 transition-all font-medium border border-red-200 hover:border-red-300">
+        <i class="fa-solid fa-right-from-bracket text-xs"></i> Sign out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1" style="margin-left:220px;">
+
+    <!-- TOPBAR -->
+    <div class="topbar flex items-center gap-3">
+      <div class="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
+        <i class="fa-regular fa-circle-user text-indigo-500 text-xs"></i>
+      </div>
+      <div>
+        <div class="text-sm font-bold text-gray-900">Welcome, <span id="topbarUserName">-</span></div>
+        <div class="text-xs text-gray-400">Kelola informasi dan keamanan akun Anda</div>
+      </div>
+    </div>
+
+    <div class="p-7 max-w-2xl mx-auto space-y-5">
+
+      <!-- ── PROFILE HERO CARD ── -->
+      <div class="card overflow-hidden">
+        <!-- Banner gradient -->
+        <div class="h-20 bg-gradient-to-r from-slate-800 via-indigo-900 to-slate-800 relative">
+          <div class="absolute inset-0" style="background:repeating-linear-gradient(45deg,rgba(255,255,255,0.02) 0,rgba(255,255,255,0.02) 1px,transparent 0,transparent 50%) center/20px 20px;"></div>
+        </div>
+        <!-- Avatar + name -->
+        <div class="px-6 pb-6">
+          <div class="flex items-center gap-4 -mt-10 mb-2">
+            <div class="avatar-ring ring-4 ring-white" id="profileAvatar">
+              <span id="profileInitials">?</span>
+              <div class="avatar-status"></div>
+            </div>
+          </div>
+          <div class="mb-5">
+            <h2 id="profileName" class="text-lg font-bold text-gray-900 leading-tight">-</h2>
+            <span id="profileRoleBadge" class="tag bg-blue-100 text-blue-700 mt-1.5 inline-flex">
+              <i class="fa-solid fa-user-shield text-xs"></i>
+              <span id="profileRoleText">-</span>
+            </span>
+          </div>
+
+          <!-- Info rows -->
+          <div class="divide-y divide-gray-50">
+
+            <div class="info-row">
+              <div class="info-icon-wrap bg-blue-50">
+                <i class="fa-solid fa-at text-blue-400 text-xs"></i>
+              </div>
+              <span class="info-key">Username</span>
+              <span class="info-val" id="profileUsername">-</span>
+            </div>
+
+            <div class="info-row">
+              <div class="info-icon-wrap bg-green-50">
+                <i class="fa-solid fa-circle-check text-green-400 text-xs"></i>
+              </div>
+              <span class="info-key">Status Akun</span>
+              <span class="flex items-center gap-1.5 text-green-600 text-sm font-semibold">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse inline-block"></span> Aktif
+              </span>
+            </div>
+
+            <div class="info-row">
+              <div class="info-icon-wrap bg-purple-50">
+                <i class="fa-regular fa-clock text-purple-400 text-xs"></i>
+              </div>
+              <span class="info-key">Login Terakhir</span>
+              <span class="info-val" id="profileLastLogin">-</span>
+            </div>
+
+            <div class="info-row">
+              <div class="info-icon-wrap bg-amber-50">
+                <i class="fa-solid fa-calendar-days text-amber-400 text-xs"></i>
+              </div>
+              <span class="info-key">Bergabung Sejak</span>
+              <span class="info-val" id="profileCreatedAt">-</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CHANGE PASSWORD CARD ── -->
+      <div class="card p-6">
+
+        <!-- Card header -->
+        <div class="flex items-start gap-3 mb-6 pb-5 border-b border-gray-100">
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-lock text-indigo-500 text-sm"></i>
+          </div>
+          <div>
+            <div class="section-title">Ganti Password</div>
+            <div class="section-sub">Gunakan password kuat minimal 6 karakter</div>
+          </div>
+        </div>
+
+        <!-- Alert -->
+        <div id="pwAlert" class="alert"></div>
+
+        <!-- Form -->
+        <form id="pwForm" onsubmit="changePassword(event)" class="space-y-4">
+
+          <div>
+            <label class="field-label">Password Saat Ini</label>
+            <div class="input-wrap">
+              <i class="fa-solid fa-lock input-icon"></i>
+              <input type="password" id="currentPw" required class="input-field" placeholder="Masukkan password saat ini" style="padding-right:38px">
+              <button type="button" class="eye-btn" onclick="toggleEye('currentPw', this)"><i class="fa-regular fa-eye"></i></button>
+            </div>
+          </div>
+
+          <div>
+            <label class="field-label">Password Baru</label>
+            <div class="input-wrap">
+              <i class="fa-solid fa-key input-icon"></i>
+              <input type="password" id="newPw" required minlength="6" class="input-field" placeholder="Min. 6 karakter" style="padding-right:38px" oninput="checkStrength(this.value)">
+              <button type="button" class="eye-btn" onclick="toggleEye('newPw', this)"><i class="fa-regular fa-eye"></i></button>
+            </div>
+            <!-- Strength bar -->
+            <div class="strength-bar mt-2"><div id="strengthFill" class="strength-fill"></div></div>
+            <div id="strengthLabel" class="text-xs text-gray-400 mt-1"></div>
+          </div>
+
+          <div>
+            <label class="field-label">Konfirmasi Password Baru</label>
+            <div class="input-wrap">
+              <i class="fa-solid fa-shield-halved input-icon"></i>
+              <input type="password" id="confirmPw" required class="input-field" placeholder="Ulangi password baru" style="padding-right:38px">
+              <button type="button" class="eye-btn" onclick="toggleEye('confirmPw', this)"><i class="fa-regular fa-eye"></i></button>
+            </div>
+          </div>
+
+          <div class="pt-2 flex items-center gap-3">
+            <button type="submit" id="saveBtn" class="btn-save">
+              <i class="fa-solid fa-floppy-disk text-xs"></i>
+              <span id="saveBtnText">Simpan Password</span>
+            </button>
+            <button type="reset" class="text-xs text-gray-400 hover:text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all font-medium" onclick="resetForm()">Reset</button>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // Toggle show/hide password
+    function toggleEye(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const icon  = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-regular fa-eye';
+      }
+    }
+
+    // Password strength meter
+    function checkStrength(val) {
+      const fill  = document.getElementById('strengthFill');
+      const label = document.getElementById('strengthLabel');
+      if (!val) { fill.style.width = '0%'; label.textContent = ''; return; }
+      let score = 0;
+      if (val.length >= 6)  score++;
+      if (val.length >= 12) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      const levels = [
+        { pct: '20%', color: '#ef4444', text: 'Sangat lemah' },
+        { pct: '40%', color: '#f97316', text: 'Lemah' },
+        { pct: '60%', color: '#eab308', text: 'Cukup' },
+        { pct: '80%', color: '#22c55e', text: 'Kuat' },
+        { pct: '100%', color: '#10b981', text: 'Sangat kuat' },
+      ];
+      const lv = levels[Math.min(score, 4)];
+      fill.style.width = lv.pct;
+      fill.style.background = lv.color;
+      label.textContent = lv.text;
+      label.style.color = lv.color;
+    }
+
+    // Reset form
+    function resetForm() {
+      ['currentPw', 'newPw', 'confirmPw'].forEach(id => {
+        const el = document.getElementById(id);
+        el.type = 'password';
+        el.nextElementSibling && (el.nextElementSibling.querySelector('i').className = 'fa-regular fa-eye');
+      });
+      checkStrength('');
+      const alert = document.getElementById('pwAlert');
+      alert.className = 'alert';
+    }
+
+    // Show alert
+    function showAlert(type, msg) {
+      const el = document.getElementById('pwAlert');
+      el.className = 'alert show ' + (type === 'ok' ? 'alert-success' : 'alert-error');
+      el.innerHTML = `<i class="fa-solid ${type === 'ok' ? 'fa-circle-check' : 'fa-circle-exclamation'} flex-shrink-0 mt-0.5"></i><span>${msg}</span>`;
+    }
+
+    async function loadProfile() {
+      const res = await fetch('/api/auth/me', { credentials: 'include' });
+      if (!res.ok) { window.location.href = '/login'; return; }
+      const { user } = await res.json();
+
+      const initials = user.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      document.getElementById('profileInitials').textContent = initials;
+      document.getElementById('sidebarAvatarCircle').textContent = initials;
+      document.getElementById('sidebarName').textContent = user.fullName;
+      document.getElementById('sidebarRole').textContent = user.role;
+      document.getElementById('topbarUserName').textContent = user.fullName;
+      document.getElementById('profileName').textContent = user.fullName;
+      document.getElementById('profileRoleText').textContent = user.role;
+      document.getElementById('profileUsername').textContent = '@' + user.username;
+
+      const badge = document.getElementById('profileRoleBadge');
+      if (user.role === 'SUPERADMIN') badge.className = 'tag bg-red-100 text-red-600 mt-1';
+      else if (user.role === 'ADMIN') badge.className = 'tag bg-orange-100 text-orange-600 mt-1';
+      else badge.className = 'tag bg-blue-100 text-blue-600 mt-1';
+
+      document.getElementById('profileLastLogin').textContent = user.lastLoginAt
+        ? new Date(user.lastLoginAt).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+        : 'Belum pernah';
+      document.getElementById('profileCreatedAt').textContent = new Date(user.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      if (['ADMIN', 'SUPERADMIN'].includes(user.role)) {
+        document.getElementById('adminNavItem').classList.remove('hidden');
+        document.getElementById('adminNavItem').classList.add('flex');
+      }
+    }
+
+    async function changePassword(e) {
+      e.preventDefault();
+      const newPw     = document.getElementById('newPw').value;
+      const confirmPw = document.getElementById('confirmPw').value;
+
+      if (newPw !== confirmPw) {
+        showAlert('err', 'Password baru dan konfirmasi tidak cocok.');
+        return;
+      }
+      if (newPw.length < 6) {
+        showAlert('err', 'Password baru minimal 6 karakter.');
+        return;
+      }
+
+      const btn     = document.getElementById('saveBtn');
+      const btnText = document.getElementById('saveBtnText');
+      btn.disabled = true;
+      btnText.innerHTML = '<div class="spinner"></div> Menyimpan...';
+
+      const res = await fetch('/api/auth/change-password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ currentPassword: document.getElementById('currentPw').value, newPassword: newPw })
+      });
+      const data = await res.json();
+
+      btn.disabled = false;
+      btnText.innerHTML = '<i class="fa-solid fa-floppy-disk text-xs"></i> Simpan Password';
+
+      if (res.ok) {
+        showAlert('ok', (data.message || 'Password berhasil diubah.') + ' Anda akan dialihkan ke halaman login...');
+        document.getElementById('pwForm').reset();
+        checkStrength('');
+        setTimeout(() => window.location.href = '/login', 2500);
+      } else {
+        showAlert('err', data.error || 'Gagal mengubah password. Coba lagi.');
+      }
+    }
+
+    async function handleLogout() {
+      try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } finally { window.location.href = '/login'; }
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>
