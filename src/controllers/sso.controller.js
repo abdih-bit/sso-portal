@@ -29,9 +29,11 @@ async function authorize(req, res) {
       return res.status(404).json({ error: 'Aplikasi tidak ditemukan.' });
     }
 
-    // Validasi redirect URL (harus match dengan callbackUrl)
+    // Validasi redirect URL (harus berasal dari origin yang sama dengan callbackUrl)
     const redirectUrl = redirect || application.callbackUrl;
-    if (!redirectUrl.startsWith(application.callbackUrl.split('/sso')[0])) {
+    const allowedOrigin = new URL(application.callbackUrl).origin;
+    const redirectOrigin = new URL(redirectUrl).origin;
+    if (allowedOrigin !== redirectOrigin) {
       return res.status(400).json({ error: 'Redirect URL tidak diizinkan.' });
     }
 

@@ -261,7 +261,7 @@
     function scrollToTop(){window.scrollTo({top:0,behavior:"smooth"});}
     function openApp(slug,url,isLink){
       if(isLink){window.open(url,"_blank");}
-      else{window.location.href=`/api/sso/authorize?app=${slug}&redirect=${encodeURIComponent(url+"/sso/callback")}`;}
+      else{window.location.href=`/api/sso/authorize?app=${slug}&redirect=${encodeURIComponent(url)}`;}
     }
     function handleAddApp(){window.location.href="/admin";}
 
