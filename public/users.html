@@ -533,7 +533,7 @@
       q = (q || '').toLowerCase();
       const role = document.getElementById('filterRole').value;
       const filtered = allUsers.filter(u =>
-        u.role !== 'SUPERADMIN' &&
+        (currentUserRole === 'SUPERADMIN' || u.role !== 'SUPERADMIN') &&
         (!role || u.role === role) &&
         (!q || u.fullName.toLowerCase().includes(q) || u.username.toLowerCase().includes(q))
       );
@@ -542,8 +542,8 @@
 
     function renderUsers(users) {
       const tbody = document.getElementById('usersTable');
-      // Sembunyikan SUPERADMIN dari tampilan
-      const visible = users.filter(u => u.role !== 'SUPERADMIN');
+      // Sembunyikan SUPERADMIN dari tampilan kecuali jika yang login adalah SUPERADMIN
+      const visible = users.filter(u => currentUserRole === 'SUPERADMIN' || u.role !== 'SUPERADMIN');
       document.getElementById('userCount').textContent = visible.length + ' user ditampilkan';
       if (!visible.length) {
         tbody.innerHTML = '<tr><td colspan="8" class="text-center py-10 text-gray-400 text-sm">Tidak ada user ditemukan</td></tr>';
@@ -565,6 +565,10 @@
         const canDelete = currentUserRole === 'SUPERADMIN' || u.role === 'USER';
         const deleteBtn = canDelete
           ? `<button onclick="deleteUser('${u.id}', '${u.fullName.replace(/'/g, "\\'")}')" class="text-xs font-semibold px-2 py-1 rounded text-red-500 hover:text-red-700 hover:bg-red-50 transition-all" title="Hapus user"><i class="fa-solid fa-trash-can"></i></button>`
+          : '';
+        // Reset Password: hanya SUPERADMIN yang bisa reset password user mana pun
+        const resetPwdBtn = currentUserRole === 'SUPERADMIN'
+          ? `<button onclick="resetUserPassword('${u.id}', '${u.fullName.replace(/'/g, "\\'")}')" class="text-xs font-semibold px-2 py-1 rounded text-purple-600 hover:text-purple-800 hover:bg-purple-50 transition-all" title="Reset Password"><i class="fa-solid fa-key"></i></button>`
           : '';
         return `<tr class="table-row">
           <td class="px-5 py-3">
@@ -591,6 +595,7 @@
           <td class="px-5 py-3">
             <div class="flex items-center gap-1">
               ${canEdit ? `<button onclick='editUser(${ud})' class="text-blue-600 hover:text-blue-800 text-xs font-semibold px-2 py-1 rounded hover:bg-blue-50 transition-all">Edit</button>` : ''}
+              ${resetPwdBtn}
               ${toggleBtn}
               ${deleteBtn}
             </div>
@@ -748,6 +753,21 @@
     }
 
     function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    async function resetUserPassword(id, fullName) {
+      const newPassword = prompt('Reset password untuk "' + fullName + '":\n\nMasukkan password baru (minimal 6 karakter):');
+      if (newPassword === null) return;
+      if (newPassword.trim().length < 6) { alert('Password minimal 6 karakter.'); return; }
+      try {
+        const res = await fetch('/api/admin/users/' + id, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', body: JSON.stringify({ newPassword: newPassword.trim() })
+        });
+        const data = await res.json();
+        if (res.ok) { alert('Password berhasil direset.'); }
+        else { alert(data.error || 'Gagal mereset password.'); }
+      } catch { alert('Koneksi gagal, periksa koneksi Anda.'); }
+    }
 
     async function deleteUser(id, fullName) {
       if (!confirm(`Hapus user "${fullName}"?\n\nTindakan ini tidak dapat dibatalkan.`)) return;

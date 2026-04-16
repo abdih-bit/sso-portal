@@ -143,7 +143,7 @@ async function createUser(req, res) {
 async function updateUser(req, res) {
   try {
     const { id } = req.params;
-    const { fullName, role, isActive, pt, area, jabatan, divisi } = req.body;
+    const { fullName, role, isActive, pt, area, jabatan, divisi, newPassword } = req.body;
 
     // Cek user yang akan diupdate
     const existing = await prisma.user.findUnique({ where: { id }, select: { role: true } });
@@ -187,6 +187,18 @@ async function updateUser(req, res) {
       return res.json({ message: 'User berhasil diperbarui.', user });
     }
 
+    // Hanya SUPERADMIN yang dapat mereset password
+    let hashedNewPassword;
+    if (newPassword !== undefined && newPassword !== '') {
+      if (req.user.role !== 'SUPERADMIN') {
+        return res.status(403).json({ error: 'Hanya SUPERADMIN yang dapat mereset password user.' });
+      }
+      if (newPassword.length < 6) {
+        return res.status(400).json({ error: 'Password baru minimal 6 karakter.' });
+      }
+      hashedNewPassword = await bcrypt.hash(newPassword, parseInt(process.env.BCRYPT_ROUNDS) || 12);
+    }
+
     const user = await prisma.user.update({
       where: { id },
       data: {
@@ -197,6 +209,7 @@ async function updateUser(req, res) {
         ...(area !== undefined && { area: area || null }),
         ...(jabatan !== undefined && { jabatan: jabatan || null }),
         ...(divisi !== undefined && { divisi: divisi || null }),
+        ...(hashedNewPassword && { password: hashedNewPassword }),
       },
       select: {
         id: true, username: true, fullName: true, role: true,
