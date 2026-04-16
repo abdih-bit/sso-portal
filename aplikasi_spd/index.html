@@ -533,7 +533,8 @@
             const exportPdfBtn = document.getElementById('export-pdf-btn');
             const exportExcelBtn = document.getElementById('export-excel-btn');
             const reportTableBody = document.getElementById('report-table-body');
-            const addUserForm = document.getElementById('add-user-form');
+            const addUserForm = null; // digantikan SSO Portal
+            const userList = document.getElementById('user-list');
             const userList = document.getElementById('user-list');
             const manualScanInput = document.getElementById('manual-scan-input');
             const exportLogPdfBtn = document.getElementById('export-log-pdf-btn');
@@ -1521,35 +1522,6 @@
             });
 
 
-            addUserForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const username = document.getElementById('new-username').value.trim();
-                const password = document.getElementById('new-password').value.trim();
-                const role = document.getElementById('new-role').value;
-                const res = await api('add_user', { username, password, role }, 'POST');
-                if (res && res.status === 'success') {
-                    await refreshData('users');
-                    showAlert('Pengguna baru berhasil ditambahkan.', 'success');
-                    addUserForm.reset();
-                } else {
-                    showAlert(res.data.message, 'error');
-                }
-            });
-
-            userList.addEventListener('click', async (e) => {
-                const deleteBtn = e.target.closest('.delete-user-btn');
-                if (deleteBtn) {
-                    const userId = deleteBtn.dataset.id;
-                    if (confirm(`Yakin ingin menghapus pengguna ini?`)) {
-                        const res = await api('delete_user', { id: userId }, 'POST');
-                        if (res && res.status === 'success') {
-                            await refreshData('users');
-                            showAlert('Pengguna berhasil dihapus.', 'info');
-                        }
-                    }
-                }
-            });
-            
             revisiTableBody.addEventListener('click', async (e) => {
                 const deleteBtn = e.target.closest('.delete-revisi-btn');
                 if (deleteBtn) {
@@ -1725,13 +1697,7 @@
                     }
                 }
                 if (type === 'all' || type === 'users') {
-                    if (currentUser.role === 'Super Admin') {
-                        const res = await api('get_users');
-                        if (res && res.status === 'success') { 
-                            users = res.data; 
-                            renderUserList(); 
-                        }
-                    }
+                    // User management ditangani oleh SSO Portal
                 }
                 if (needsDashboardUpdate) {
                     updateDashboard();
