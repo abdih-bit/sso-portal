@@ -62,8 +62,8 @@ async function authorize(req, res) {
       return res.redirect(`/login?app=${appSlug}&redirect=${encodeURIComponent(redirectUrl)}`);
     }
 
-    // Cek role permission
-    if (!application.allowedRoles.includes(user.role)) {
+    // Cek role permission — SUPERADMIN bypass semua restriksi role
+    if (user.role !== 'SUPERADMIN' && !application.allowedRoles.includes(user.role)) {
       return res.status(403).sendFile(require('path').join(__dirname, '../../public/403.html'));
     }
 
@@ -191,10 +191,15 @@ async function validateToken(req, res) {
  */
 async function getAccessibleApps(req, res) {
   try {
+    // SUPERADMIN dapat melihat semua aplikasi tanpa filter role
+    const roleFilter = req.user.role === 'SUPERADMIN'
+      ? {}
+      : { allowedRoles: { has: req.user.role } };
+
     const applications = await prisma.application.findMany({
       where: {
         isActive: true,
-        allowedRoles: { has: req.user.role }
+        ...roleFilter
       },
       select: {
         id: true,

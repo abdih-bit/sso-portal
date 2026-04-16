@@ -557,8 +557,8 @@
         const ud = JSON.stringify(u).replace(/"/g, '&quot;');
         // Edit: SUPERADMIN bisa edit semua; ADMIN hanya bisa edit USER (bukan sesama ADMIN)
         const canEdit = currentUserRole === 'SUPERADMIN' || u.role === 'USER';
-        // Toggle nonaktif: SUPERADMIN bisa toggle USER & ADMIN; ADMIN hanya bisa toggle USER
-        const canToggle = currentUserRole === 'SUPERADMIN' || u.role === 'USER';
+        // Toggle nonaktif: SUPERADMIN tidak bisa dinonaktifkan; ADMIN hanya bisa toggle USER
+        const canToggle = u.role !== 'SUPERADMIN' && (currentUserRole === 'SUPERADMIN' || u.role === 'USER');
         const toggleBtn = canToggle
           ? `<button onclick="toggleUserStatus('${u.id}', ${u.isActive})" class="text-xs font-semibold px-2 py-1 rounded transition-all ${u.isActive ? 'text-red-500 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'}">${u.isActive ? 'Nonaktifkan' : 'Aktifkan'}</button>`
           : '';
