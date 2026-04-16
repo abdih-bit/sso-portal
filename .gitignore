@@ -5,4 +5,3 @@ logs/
 dist/
 .DS_Store
 Thumbs.db
-prisma/migrations/
