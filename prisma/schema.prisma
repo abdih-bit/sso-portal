@@ -37,6 +37,7 @@ model User {
   auditLogs     AuditLog[]
   passwordResets PasswordReset[]
   resetRequests  PasswordResetRequest[]
+  spdAuditLogs  SpdAuditLog[]
 
   @@map("users")
 }
@@ -167,4 +168,34 @@ model AuditLog {
   user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("audit_logs")
+}
+
+// ===========================
+// SPD — DOKUMEN SERAH TERIMA
+// ===========================
+model SpdDocument {
+  docId     String        @id @map("doc_id")
+  title     String
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  auditLogs SpdAuditLog[]
+
+  @@map("spd_documents")
+}
+
+// ===========================
+// SPD — AUDIT LOG SERAH TERIMA
+// ===========================
+model SpdAuditLog {
+  logId     Int         @id @default(autoincrement()) @map("log_id")
+  docId     String      @map("doc_id")
+  userId    String      @map("user_id")
+  action    String      @db.VarChar(50)
+  details   String?
+  timestamp DateTime    @default(now())
+
+  document  SpdDocument @relation(fields: [docId], references: [docId], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@map("spd_audit_log")
 }

@@ -140,6 +140,8 @@ async function validateToken(req, res) {
             role: true,
             avatar: true,
             isActive: true,
+            jabatan: true,
+            divisi: true,
           }
         }
       }
