@@ -857,6 +857,7 @@
             };
 
             const renderRevisiTable = () => {
+                if (!revisiTableBody) return;
                 const latestStatusMap = new Map();
                 auditLog.forEach(log => {
                     if (!latestStatusMap.has(log.doc_id) || new Date(log.timestamp) > new Date(latestStatusMap.get(log.doc_id).timestamp)) {
@@ -952,8 +953,8 @@
                 // Set link ke SSO Portal untuk manajemen user
                 const linkSsoUsers = document.getElementById('link-sso-users');
                 if (linkSsoUsers) linkSsoUsers.href = SSO_PUBLIC_URL + '/users';
-                scanReturnTabItem.classList.toggle('hidden-tab', role === 'Admin Transport');
-                revisiTab.classList.toggle('hidden-tab', role === 'Admin Invoice');
+                if (scanReturnTabItem) scanReturnTabItem.classList.toggle('hidden-tab', role === 'Admin Transport');
+                if (revisiTab) revisiTab.classList.toggle('hidden-tab', role === 'Admin Invoice');
 
                 if (role === 'Admin Transport') {
                     scanTabTitle.textContent = 'Pindai & Serah Terima';
@@ -1152,6 +1153,7 @@
             };
 
             const resetReturnScanUI = () => {
+                if (!returnForm) return;
                 returnForm.classList.add('d-none');
                 returnScanInput.disabled = false;
                 returnScanInput.value = '';
@@ -1232,7 +1234,7 @@
                 }
             });
             
-            returnScanInput.addEventListener('keydown', (e) => {
+            if (returnScanInput) returnScanInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     const code = returnScanInput.value.trim();
                     if (code) {
@@ -1242,7 +1244,7 @@
                 }
             });
 
-            returnForm.addEventListener('submit', async (e) => {
+            if (returnForm) returnForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const docId = returnDocId.textContent;
                 const notes = returnNotes.value.trim();
@@ -1522,7 +1524,7 @@
             });
 
 
-            revisiTableBody.addEventListener('click', async (e) => {
+            if (revisiTableBody) revisiTableBody.addEventListener('click', async (e) => {
                 const deleteBtn = e.target.closest('.delete-revisi-btn');
                 if (deleteBtn) {
                     const docId = deleteBtn.dataset.docId;
