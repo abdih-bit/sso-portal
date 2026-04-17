@@ -3,6 +3,10 @@
 // Router untuk semua request dari frontend Serah Terima SP Digital.
 // Autentikasi menggunakan SSO Portal (tidak ada login lokal).
 
+// Sembunyikan PHP warnings/notices agar tidak merusak JSON output
+error_reporting(0);
+ini_set('display_errors', 0);
+
 header('Content-Type: application/json');
 session_start();
 
