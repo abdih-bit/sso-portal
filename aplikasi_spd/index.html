@@ -534,8 +534,7 @@
             const exportExcelBtn = document.getElementById('export-excel-btn');
             const reportTableBody = document.getElementById('report-table-body');
             const addUserForm = null; // digantikan SSO Portal
-            const userList = document.getElementById('user-list');
-            const userList = document.getElementById('user-list');
+            const userList = document.getElementById('user-list'); // null jika elemen tidak ada (manajemen user via SSO Portal)
             const manualScanInput = document.getElementById('manual-scan-input');
             const exportLogPdfBtn = document.getElementById('export-log-pdf-btn');
             const themeToggle = document.getElementById('theme-toggle');
@@ -1774,6 +1773,12 @@
                         initApp();
                         return;
                     }
+                    // SSO token gagal divalidasi — tampilkan error, jangan redirect lagi
+                    // agar tidak terjadi infinite redirect loop
+                    const errMsg = res?.data?.message || 'Validasi SSO token gagal. Silakan muat ulang halaman.';
+                    loginScreen.querySelector('p.text-muted').textContent = errMsg;
+                    loginScreen.querySelector('.spinner-border, .fa-spin, svg.text-primary')?.remove?.();
+                    return;
                 }
 
                 // 2. Cek sesi PHP yang masih aktif
