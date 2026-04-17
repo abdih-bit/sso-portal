@@ -19,13 +19,22 @@ function json_response(string $status, $data = null): void {
 }
 
 /**
- * Map role SSO + divisi ke role aplikasi SPD.
- * SUPERADMIN          → Super Admin
- * divisi TRP          → Admin Transport
- * FAT / WRH / lainnya → Admin Invoice
+ * Map role SSO ke role aplikasi SPD.
+ * SUPERADMIN                       → Super Admin
+ * jabatan 'Admin Transport'        → Admin Transport
+ * jabatan sub-FAT (Invoice, dll)   → jabatan itu sendiri (langsung dari SSO)
+ * fallback divisi TRP              → Admin Transport
+ * fallback lainnya                 → Admin Invoice
  */
 function mapSsoRole(array $user): string {
     if ($user['role'] === 'SUPERADMIN') return 'Super Admin';
+    // Sub-jabatan Admin FAT dikirim langsung oleh SSO sebagai jabatan efektif
+    $jabatan = trim($user['jabatan'] ?? '');
+    if ($jabatan === 'Admin Transport') return 'Admin Transport';
+    if (in_array($jabatan, ['Admin Invoice', 'Admin Kasir', 'Admin Collection', 'Admin Settle', 'Admin CSF'])) {
+        return $jabatan;
+    }
+    // Fallback: cek divisi untuk kompatibilitas user lama
     if (isset($user['divisi']) && strtoupper($user['divisi']) === 'TRP') return 'Admin Transport';
     return 'Admin Invoice';
 }

@@ -173,9 +173,21 @@ async function validateToken(req, res) {
       req
     });
 
+    // Resolusi jabatan efektif untuk aplikasi:
+    // Jika jabatan format 'Admin FAT - SubJabatan', kirim sub-jabatan saja
+    // agar setiap aplikasi bisa membedakan akses berdasarkan sub-jabatan
+    const rawJabatan = ssoRecord.user.jabatan || '';
+    const effectiveJabatan = rawJabatan.startsWith('Admin FAT - ')
+      ? rawJabatan.replace('Admin FAT - ', '')
+      : rawJabatan;
+
     return res.json({
       valid: true,
-      user: ssoRecord.user,
+      user: {
+        ...ssoRecord.user,
+        jabatan: effectiveJabatan,
+        jabatanFull: rawJabatan, // jabatan lengkap jika aplikasi butuh
+      },
       token: appJwt,
     });
 
