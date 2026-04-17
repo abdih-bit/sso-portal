@@ -10,28 +10,28 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     * { font-family: "Inter", sans-serif; }
-    body { background: #f5f7ff; }
+    body { background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 40%, #e0f7fa 70%, #ccfbf1 100%); }
     .sidebar { width:236px; background:#fff; border-right:1px solid #e8ecf4; min-height:100vh; }
     .sidebar-brand { font-weight:800; font-size:1.2rem; letter-spacing:-0.5px; color:#1e293b; }
-    .sidebar-brand span { color:#4f46e5; }
+    .sidebar-brand span { color:#0284c7; }
     .nav-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:#b0b9cc; padding:14px 18px 4px; }
     .nav-item { display:flex; align-items:center; gap:10px; padding:9px 12px; margin:2px 8px; border-radius:10px; font-size:13px; font-weight:500; color:#64748b; cursor:pointer; transition:all 0.15s; }
-    .nav-item:hover { background:#f1f5ff; color:#4f46e5; }
-    .nav-item.active { background:#eef2ff; color:#4338ca; font-weight:600; }
+    .nav-item:hover { background:#f0f9ff; color:#0284c7; }
+    .nav-item.active { background:#e0f2fe; color:#0369a1; font-weight:600; }
     .nav-item i { width:16px; text-align:center; font-size:13px; color:#94a3b8; }
-    .nav-item.active i { color:#4f46e5; }
+    .nav-item.active i { color:#0284c7; }
     .nav-sub { font-size:12px; padding:6px 12px 6px 42px; margin:1px 8px; border-radius:8px; color:#94a3b8; cursor:pointer; transition:all 0.14s; }
-    .nav-sub:hover { background:#f8f9ff; color:#6366f1; }
+    .nav-sub:hover { background:#f0f9ff; color:#0284c7; }
     .sidebar-footer { border-top:1px solid #f1f5f9; padding:14px; }
     .sidebar-user { font-size:13px; font-weight:700; color:#1e293b; }
     .sidebar-role { font-size:11px; color:#94a3b8; margin-top:1px; }
     .topbar { background:#fff; border-bottom:1px solid #e8ecf4; padding:12px 28px; }
     .search-wrap { position:relative; }
-    .search-input { background:#f5f7ff; border:1.5px solid #e0e7ff; border-radius:10px; padding:9px 14px 9px 38px; font-size:13px; color:#374151; width:270px; outline:none; transition:all 0.2s; }
-    .search-input:focus { background:#fff; border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,0.12); width:310px; }
+    .search-input { background:#f0f9ff; border:1.5px solid #bae6fd; border-radius:10px; padding:9px 14px 9px 38px; font-size:13px; color:#374151; width:270px; outline:none; transition:all 0.2s; }
+    .search-input:focus { background:#fff; border-color:#0ea5e9; box-shadow:0 0 0 3px rgba(14,165,233,0.12); width:310px; }
     .search-input::placeholder { color:#a5b4c8; }
     .search-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#a5b4c8; font-size:12px; pointer-events:none; }
-    .hero-wrap { background:linear-gradient(120deg,#4f46e5 0%,#7c3aed 55%,#a855f7 100%); border-radius:20px; padding:28px 32px; position:relative; overflow:hidden; color:#fff; }
+    .hero-wrap { background:linear-gradient(150deg,#0c4a6e 0%,#075985 30%,#0369a1 60%,#0284c7 85%,#0ea5e9 100%); border-radius:20px; padding:28px 32px; position:relative; overflow:hidden; color:#fff; }
     .hero-wrap::before { content:""; position:absolute; top:-50px; right:-50px; width:220px; height:220px; background:rgba(255,255,255,0.06); border-radius:50%; }
     .hero-wrap::after { content:""; position:absolute; bottom:-40px; right:120px; width:150px; height:150px; background:rgba(255,255,255,0.04); border-radius:50%; }
     .hero-stat { display:inline-flex; align-items:center; gap:7px; background:rgba(255,255,255,0.14); border:1px solid rgba(255,255,255,0.2); border-radius:99px; padding:5px 14px; font-size:12px; font-weight:600; color:#fff; }
@@ -39,19 +39,19 @@
     .sec-icon { width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; }
     .sec-count { font-size:11px; font-weight:600; background:#f1f5f9; color:#64748b; border-radius:99px; padding:2px 9px; }
     .app-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(175px,1fr)); gap:16px; }
-    .app-card { background:#fff; border:1.5px solid #e2e8f0; border-radius:18px; padding:28px 18px 20px; display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); position:relative; overflow:hidden; box-shadow:0 2px 8px rgba(99,102,241,0.06); }
-    .app-card:hover { border-color:transparent; box-shadow:0 14px 36px rgba(99,102,241,0.18); transform:translateY(-5px) scale(1.02); }
+    .app-card { background:#fff; border:1.5px solid #e2e8f0; border-radius:18px; padding:28px 18px 20px; display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); position:relative; overflow:hidden; box-shadow:0 2px 8px rgba(14,165,233,0.07); }
+    .app-card:hover { border-color:transparent; box-shadow:0 14px 36px rgba(14,165,233,0.18); transform:translateY(-5px) scale(1.02); }
     .app-card:hover .app-menu-btn { opacity:1; }
-    .app-card.sso-card { border-bottom:3px solid #e0e7ff; }
-    .app-card.sso-card:hover { border-bottom-color:#6366f1; box-shadow:0 14px 36px rgba(99,102,241,0.18); }
+    .app-card.sso-card { border-bottom:3px solid #bae6fd; }
+    .app-card.sso-card:hover { border-bottom-color:#0ea5e9; box-shadow:0 14px 36px rgba(14,165,233,0.18); }
     .app-card.link-card { border-bottom:3px solid #e9d5ff; }
     .app-card.link-card:hover { border-bottom-color:#a855f7; box-shadow:0 14px 36px rgba(168,85,247,0.18); }
     .app-logo { width:66px; height:66px; border-radius:18px; display:flex; align-items:center; justify-content:center; margin-bottom:14px; font-size:26px; box-shadow:0 6px 16px rgba(0,0,0,0.09); }
     .app-name { font-size:13px; font-weight:700; color:#1e293b; line-height:1.4; }
     .app-type-badge { font-size:10px; font-weight:600; color:#94a3b8; margin-top:3px; }
     .app-desc { font-size:11px; color:#94a3b8; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; }
-    .app-open-btn { margin-top:12px; width:100%; padding:7px 0; border-radius:10px; font-size:11px; font-weight:700; background:#f5f7ff; color:#4f46e5; border:1.5px solid #e0e7ff; transition:all 0.15s; }
-    .app-card:hover .app-open-btn { background:#4f46e5; color:#fff; border-color:#4f46e5; }
+    .app-open-btn { margin-top:12px; width:100%; padding:7px 0; border-radius:10px; font-size:11px; font-weight:700; background:#f0f9ff; color:#0284c7; border:1.5px solid #bae6fd; transition:all 0.15s; }
+    .app-card:hover .app-open-btn { background:#0284c7; color:#fff; border-color:#0284c7; }
     .app-card.link-card:hover .app-open-btn { background:#9333ea; color:#fff; border-color:#9333ea; }
     .app-menu-btn { position:absolute; top:10px; right:10px; opacity:0; color:#c7d0e0; font-size:13px; cursor:pointer; transition:opacity 0.15s; }
     .tag-area { display:inline-flex; align-items:center; gap:3px; font-size:9px; font-weight:700; background:#faf5ff; color:#9333ea; border:1px solid #e9d5ff; border-radius:99px; padding:2px 8px; margin-top:6px; }
@@ -59,11 +59,11 @@
     .quick-strip { display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
     .quick-strip::-webkit-scrollbar { display:none; }
     .quick-pill { flex-shrink:0; background:#fff; border:1.5px solid #eef0f6; border-radius:12px; padding:10px 15px; display:flex; align-items:center; gap:10px; cursor:pointer; transition:all 0.18s; min-width:156px; }
-    .quick-pill:hover { border-color:#c7d2fe; box-shadow:0 4px 14px rgba(99,102,241,0.12); transform:translateY(-1px); }
+    .quick-pill:hover { border-color:#7dd3fc; box-shadow:0 4px 14px rgba(14,165,233,0.12); transform:translateY(-1px); }
     .quick-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
     .quick-name { font-size:12px; font-weight:700; color:#1e293b; white-space:nowrap; }
     .quick-sub { font-size:10px; color:#94a3b8; }
-    .skeleton { background:linear-gradient(90deg,#eef0f6 25%,#f5f7ff 50%,#eef0f6 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:14px; }
+    .skeleton { background:linear-gradient(90deg,#e0f2fe 25%,#f0f9ff 50%,#e0f2fe 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:14px; }
     @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
     @media(max-width:768px) { .sidebar{display:none;} .app-grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px;} }
   </style>
@@ -72,7 +72,7 @@
 
   <aside class="sidebar flex-shrink-0 flex flex-col fixed top-0 left-0 h-full z-30 overflow-y-auto">
     <div class="px-5 py-5 flex items-center gap-3" style="border-bottom:1px solid #f1f5f9;">
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#0369a1,#0ea5e9);">
         <i class="fa-solid fa-building-columns text-white" style="font-size:15px;"></i>
       </div>
       <div>
@@ -97,7 +97,7 @@
     </nav>
     <div class="sidebar-footer">
       <div class="flex items-center gap-3">
-        <div id="sidebarAvatarCircle" class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);">?</div>
+        <div id="sidebarAvatarCircle" class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:linear-gradient(135deg,#0369a1,#0ea5e9);">?</div>
         <div class="min-w-0 flex-1">
           <div class="sidebar-user truncate" id="sidebarName">Memuat...</div>
           <div class="sidebar-role" id="sidebarRole">—</div>
@@ -116,10 +116,10 @@
         <input type="text" id="searchApp" class="search-input" placeholder="Cari aplikasi...">
       </div>
       <div class="flex items-center gap-3">
-        <button onclick="handleAddApp()" id="addAppBtn" class="hidden items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;">
+        <button onclick="handleAddApp()" id="addAppBtn" class="hidden items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl" style="background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;">
           <i class="fa-solid fa-plus text-xs"></i> Add Apps
         </button>
-        <div id="topbarAvatar" class="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold cursor-pointer" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);" onclick="window.location.href='/profile'">?</div>
+        <div id="topbarAvatar" class="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold cursor-pointer" style="background:linear-gradient(135deg,#0369a1,#0ea5e9);" onclick="window.location.href='/profile'">?</div>
       </div>
     </div>
 
@@ -130,10 +130,10 @@
           <h1 class="text-2xl font-extrabold text-white mb-1">Selamat datang, <span id="heroName">...</span> 👋</h1>
           <p class="text-sm mb-4" style="color:rgba(255,255,255,0.75);" id="heroSub">Kelola dan akses seluruh aplikasi perusahaan secara terpusat melalui satu portal terintegrasi.</p>
           <div class="flex flex-wrap gap-2">
-            <div class="hero-stat"><i class="fa-solid fa-grid-2 text-xs" style="color:#c4b5fd;"></i><span id="heroAppCount">0 Aplikasi</span></div>
-            <div class="hero-stat"><i class="fa-solid fa-id-badge text-xs" style="color:#c4b5fd;"></i><span id="heroRole">—</span></div>
-            <div id="heroAreaBadge" class="hero-stat hidden"><i class="fa-solid fa-location-dot text-xs" style="color:#c4b5fd;"></i><span id="heroArea">—</span></div>
-            <div class="hero-stat"><i class="fa-regular fa-calendar text-xs" style="color:#c4b5fd;"></i><span id="heroDate">—</span></div>
+            <div class="hero-stat"><i class="fa-solid fa-grid-2 text-xs" style="color:#7dd3fc;"></i><span id="heroAppCount">0 Aplikasi</span></div>
+            <div class="hero-stat"><i class="fa-solid fa-id-badge text-xs" style="color:#7dd3fc;"></i><span id="heroRole">—</span></div>
+            <div id="heroAreaBadge" class="hero-stat hidden"><i class="fa-solid fa-location-dot text-xs" style="color:#7dd3fc;"></i><span id="heroArea">—</span></div>
+            <div class="hero-stat"><i class="fa-regular fa-calendar text-xs" style="color:#7dd3fc;"></i><span id="heroDate">—</span></div>
           </div>
         </div>
       </div>
@@ -159,12 +159,12 @@
             Akses Cepat
           </div>
           <div id="quickStrip" class="quick-strip"></div>
-          <div class="mt-5 mb-5" style="height:1px;background:linear-gradient(to right,#e0e7ff,transparent);"></div>
+          <div class="mt-5 mb-5" style="height:1px;background:linear-gradient(to right,#bae6fd,transparent);"></div>
         </div>
         <div id="allSections"></div>
         <div id="emptyState" class="hidden text-center py-24">
-          <div class="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4" style="background:#f0f4ff;">
-            <i class="fa-regular fa-folder-open text-4xl" style="color:#c7d2fe;"></i>
+          <div class="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4" style="background:#e0f2fe;">
+            <i class="fa-regular fa-folder-open text-4xl" style="color:#7dd3fc;"></i>
           </div>
           <p class="font-semibold" style="color:#475569;">Tidak ada aplikasi ditemukan</p>
           <p class="text-sm mt-1" style="color:#94a3b8;">Coba kata kunci yang berbeda</p>
@@ -243,8 +243,8 @@
       else qS.classList.add("hidden");
       let h="",n="";
       if(sso.length){
-        h+=`<div class="mb-8" id="section-sso"><div class="sec-label"><div class="sec-icon" style="background:#eff6ff;"><i class="fa-solid fa-globe" style="color:#2563eb;"></i></div>Aplikasi SSO<span class="sec-count">${sso.length}</span></div><div class="app-grid">${sso.map((a,i)=>buildCard(a,i)).join("")}</div></div>`;
-        n+=`<div class="nav-sub" onclick="scrollToSection('sso')"><i class="fa-solid fa-globe mr-1" style="color:#6366f1;font-size:10px;"></i>Aplikasi SSO</div>`;
+        h+=`<div class="mb-8" id="section-sso"><div class="sec-label"><div class="sec-icon" style="background:#e0f2fe;"><i class="fa-solid fa-globe" style="color:#0284c7;"></i></div>Aplikasi SSO<span class="sec-count">${sso.length}</span></div><div class="app-grid">${sso.map((a,i)=>buildCard(a,i)).join("")}</div></div>`;
+        n+=`<div class="nav-sub" onclick="scrollToSection('sso')"><i class="fa-solid fa-globe mr-1" style="color:#0ea5e9;font-size:10px;"></i>Aplikasi SSO</div>`;
       }
       if(lnk.length){
         h+=`<div class="mb-8" id="section-links"><div class="sec-label"><div class="sec-icon" style="background:#faf5ff;"><i class="fa-solid fa-link" style="color:#9333ea;"></i></div>Link AppScript<span class="sec-count">${lnk.length}</span></div><div class="app-grid">${lnk.map((a,i)=>buildCard(a,i)).join("")}</div></div>`;
