@@ -169,7 +169,7 @@ switch ($action) {
                     $stmt->execute([$input['id'], $input['title'], $currentUser['pt'], $currentUser['area']]);
                     json_response('success', array_merge($input, ['pt' => $currentUser['pt'], 'area' => $currentUser['area']]));
                 } catch (PDOException $e) {
-                    json_response('error', ['message' => 'ID Dokumen sudah ada.']);
+                    json_response('error', ['message' => 'ID Dokumen sudah ada di DC ini.']);
                 }
                 break;
 
@@ -179,20 +179,21 @@ switch ($action) {
                 }
                 // Pastikan dokumen ada dalam scope user sebelum dihapus
                 $scope = getScopeFilter($currentUser);
-                $checkStmt = $pdo->prepare("SELECT doc_id FROM spd_documents d WHERE d.doc_id = ?" . $scope['sql']);
+                $checkStmt = $pdo->prepare("SELECT doc_id, area FROM spd_documents d WHERE d.doc_id = ?" . $scope['sql']);
                 $checkStmt->execute(array_merge([$input['id']], $scope['params']));
-                if (!$checkStmt->fetch()) {
+                $docToDelete = $checkStmt->fetch();
+                if (!$docToDelete) {
                     json_response('error', ['message' => 'Dokumen tidak ditemukan atau akses ditolak.']);
                 }
-                $stmt = $pdo->prepare("DELETE FROM spd_documents WHERE doc_id = ?");
-                $stmt->execute([$input['id']]);
+                $stmt = $pdo->prepare("DELETE FROM spd_documents WHERE doc_id = ? AND area = ?");
+                $stmt->execute([$input['id'], $docToDelete['area']]);
                 json_response('success');
                 break;
 
             // ── Audit Log ────────────────────────────────────────────────────
             case 'get_audit_log':
                 $scope = getScopeFilter($currentUser);
-                // Join ke spd_documents untuk filter pt/area
+                // Join ke spd_documents untuk filter pt/area (composite key: doc_id + area)
                 // LEFT JOIN ke users karena user mungkin sudah dihapus (user_id nullable)
                 $stmt  = $pdo->prepare("
                     SELECT al.timestamp, al.doc_id, al.action,
@@ -200,7 +201,7 @@ switch ($action) {
                            al.details, d.pt, d.area
                     FROM spd_audit_log al
                     LEFT JOIN users u ON al.user_id = u.id
-                    JOIN spd_documents d ON al.doc_id = d.doc_id
+                    JOIN spd_documents d ON al.doc_id = d.doc_id AND al.area = d.area
                     WHERE 1=1" . $scope['sql'] . "
                     ORDER BY al.timestamp DESC
                 ");
@@ -209,21 +210,23 @@ switch ($action) {
                 break;
 
             case 'add_audit_log':
-                // Validasi: dokumen harus dalam scope user
+                // Validasi: dokumen harus dalam scope user; ambil area dari dokumen
                 $scope = getScopeFilter($currentUser);
-                $checkStmt = $pdo->prepare("SELECT doc_id FROM spd_documents d WHERE d.doc_id = ?" . $scope['sql']);
+                $checkStmt = $pdo->prepare("SELECT doc_id, area FROM spd_documents d WHERE d.doc_id = ?" . $scope['sql']);
                 $checkStmt->execute(array_merge([$input['docId']], $scope['params']));
-                if (!$checkStmt->fetch()) {
+                $docRow = $checkStmt->fetch();
+                if (!$docRow) {
                     json_response('error', ['message' => 'Dokumen tidak ditemukan atau akses ditolak.']);
                 }
                 $stmt = $pdo->prepare(
-                    "INSERT INTO spd_audit_log (doc_id, user_id, action, details) VALUES (?, ?, ?, ?)"
+                    "INSERT INTO spd_audit_log (doc_id, area, user_id, action, details) VALUES (?, ?, ?, ?, ?)"
                 );
                 $stmt->execute([
                     $input['docId'],
+                    $docRow['area'],
                     $currentUser['id'],
                     $input['action'],
-                    $input['details'],
+                    $input['details'] ?? null,
                 ]);
                 json_response('success');
                 break;

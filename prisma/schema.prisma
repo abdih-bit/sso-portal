@@ -174,14 +174,15 @@ model AuditLog {
 // SPD — DOKUMEN SERAH TERIMA
 // ===========================
 model SpdDocument {
-  docId     String        @id @map("doc_id")
+  docId     String        @map("doc_id")
   title     String
-  pt        String?
-  area      String?
+  pt        String
+  area      String
   createdAt DateTime      @default(now()) @map("created_at")
 
   auditLogs SpdAuditLog[]
 
+  @@id([docId, area])
   @@index([pt, area])
   @@map("spd_documents")
 }
@@ -192,12 +193,13 @@ model SpdDocument {
 model SpdAuditLog {
   logId     Int         @id @default(autoincrement()) @map("log_id")
   docId     String      @map("doc_id")
+  area      String
   userId    String?     @map("user_id")
   action    String      @db.VarChar(50)
   details   String?
   timestamp DateTime    @default(now())
 
-  document  SpdDocument @relation(fields: [docId], references: [docId], onDelete: Cascade)
+  document  SpdDocument @relation(fields: [docId, area], references: [docId, area], onDelete: Cascade)
   user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("spd_audit_log")
