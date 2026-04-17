@@ -84,6 +84,9 @@ switch ($action) {
             'fullName' => $ssoUser['fullName'],
             'role'     => mapSsoRole($ssoUser),
             'ssoRole'  => $ssoUser['role'],
+            'pt'       => $ssoUser['pt'] ?? null,
+            'area'     => $ssoUser['area'] ?? null,
+            'jabatan'  => $ssoUser['jabatan'] ?? null,
         ];
 
         json_response('success', $_SESSION['user']);
@@ -113,13 +116,30 @@ switch ($action) {
 
         $currentUser = $_SESSION['user'];
 
-        switch ($action) {
+        // ── Helper: scope filter berdasarkan PT dan Area/DC user ──
+        // Super Admin & Head ACC : melihat semua data tanpa filter
+        // Head AR                : melihat semua area dalam PT-nya
+        // Lainnya                : hanya PT + area sendiri
+        function getScopeFilter(array $user, string $alias = 'd'): array {
+            $role    = $user['role'] ?? '';
+            $jabatan = $user['jabatan'] ?? '';
+            if ($role === 'Super Admin' || $jabatan === 'Head ACC') {
+                return ['sql' => '', 'params' => []];
+            }
+            if ($jabatan === 'Head AR') {
+                return ['sql' => " AND {$alias}.pt = ?", 'params' => [$user['pt']]];
+            }
+            return ['sql' => " AND {$alias}.pt = ? AND {$alias}.area = ?", 'params' => [$user['pt'], $user['area']]];
+        }
 
             // ── Dokumen ──────────────────────────────────────────────────────
             case 'check_document':
                 $doc_id = $input['id'] ?? '';
-                $stmt = $pdo->prepare("SELECT doc_id as id, title FROM spd_documents WHERE doc_id = ?");
-                $stmt->execute([$doc_id]);
+                $scope  = getScopeFilter($currentUser);
+                $stmt = $pdo->prepare(
+                    "SELECT doc_id as id, title, pt, area FROM spd_documents d WHERE d.doc_id = ?" . $scope['sql']
+                );
+                $stmt->execute(array_merge([$doc_id], $scope['params']));
                 $document = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($document) {
                     json_response('success', ['status' => 'found', 'document' => $document]);
@@ -129,7 +149,11 @@ switch ($action) {
                 break;
 
             case 'get_documents':
-                $stmt = $pdo->query("SELECT doc_id as id, title FROM spd_documents ORDER BY created_at DESC");
+                $scope = getScopeFilter($currentUser);
+                $stmt  = $pdo->prepare(
+                    "SELECT doc_id as id, title, pt, area FROM spd_documents d WHERE 1=1" . $scope['sql'] . " ORDER BY d.created_at DESC"
+                );
+                $stmt->execute($scope['params']);
                 json_response('success', $stmt->fetchAll(PDO::FETCH_ASSOC));
                 break;
 
@@ -137,10 +161,10 @@ switch ($action) {
                 if ($currentUser['role'] === 'Admin Invoice') {
                     json_response('error', ['message' => 'Akses ditolak.']);
                 }
-                $stmt = $pdo->prepare("INSERT INTO spd_documents (doc_id, title) VALUES (?, ?)");
+                $stmt = $pdo->prepare("INSERT INTO spd_documents (doc_id, title, pt, area) VALUES (?, ?, ?, ?)");
                 try {
-                    $stmt->execute([$input['id'], $input['title']]);
-                    json_response('success', $input);
+                    $stmt->execute([$input['id'], $input['title'], $currentUser['pt'], $currentUser['area']]);
+                    json_response('success', array_merge($input, ['pt' => $currentUser['pt'], 'area' => $currentUser['area']]));
                 } catch (PDOException $e) {
                     json_response('error', ['message' => 'ID Dokumen sudah ada.']);
                 }
@@ -150,6 +174,13 @@ switch ($action) {
                 if ($currentUser['role'] === 'Admin Invoice') {
                     json_response('error', ['message' => 'Akses ditolak.']);
                 }
+                // Pastikan dokumen ada dalam scope user sebelum dihapus
+                $scope = getScopeFilter($currentUser);
+                $checkStmt = $pdo->prepare("SELECT doc_id FROM spd_documents d WHERE d.doc_id = ?" . $scope['sql']);
+                $checkStmt->execute(array_merge([$input['id']], $scope['params']));
+                if (!$checkStmt->fetch()) {
+                    json_response('error', ['message' => 'Dokumen tidak ditemukan atau akses ditolak.']);
+                }
                 $stmt = $pdo->prepare("DELETE FROM spd_documents WHERE doc_id = ?");
                 $stmt->execute([$input['id']]);
                 json_response('success');
@@ -157,18 +188,30 @@ switch ($action) {
 
             // ── Audit Log ────────────────────────────────────────────────────
             case 'get_audit_log':
-                $stmt = $pdo->query("
+                $scope = getScopeFilter($currentUser);
+                // Join ke spd_documents untuk filter pt/area
+                $stmt  = $pdo->prepare("
                     SELECT al.timestamp, al.doc_id, al.action,
                            CONCAT(u.full_name, ' (', u.username, ')') AS actor,
-                           al.details
+                           al.details, d.pt, d.area
                     FROM spd_audit_log al
                     JOIN users u ON al.user_id = u.id
+                    JOIN spd_documents d ON al.doc_id = d.doc_id
+                    WHERE 1=1" . $scope['sql'] . "
                     ORDER BY al.timestamp DESC
                 ");
+                $stmt->execute($scope['params']);
                 json_response('success', $stmt->fetchAll(PDO::FETCH_ASSOC));
                 break;
 
             case 'add_audit_log':
+                // Validasi: dokumen harus dalam scope user
+                $scope = getScopeFilter($currentUser);
+                $checkStmt = $pdo->prepare("SELECT doc_id FROM spd_documents d WHERE d.doc_id = ?" . $scope['sql']);
+                $checkStmt->execute(array_merge([$input['docId']], $scope['params']));
+                if (!$checkStmt->fetch()) {
+                    json_response('error', ['message' => 'Dokumen tidak ditemukan atau akses ditolak.']);
+                }
                 $stmt = $pdo->prepare(
                     "INSERT INTO spd_audit_log (doc_id, user_id, action, details) VALUES (?, ?, ?, ?)"
                 );

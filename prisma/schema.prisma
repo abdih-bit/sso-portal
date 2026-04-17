@@ -176,10 +176,13 @@ model AuditLog {
 model SpdDocument {
   docId     String        @id @map("doc_id")
   title     String
+  pt        String?
+  area      String?
   createdAt DateTime      @default(now()) @map("created_at")
 
   auditLogs SpdAuditLog[]
 
+  @@index([pt, area])
   @@map("spd_documents")
 }
 

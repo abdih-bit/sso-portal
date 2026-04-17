@@ -144,6 +144,8 @@ async function validateToken(req, res) {
             isActive: true,
             jabatan: true,
             divisi: true,
+            pt: true,
+            area: true,
           }
         }
       }
