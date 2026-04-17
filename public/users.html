@@ -599,8 +599,8 @@
         const toggleBtn = canToggle
           ? `<button onclick="toggleUserStatus('${u.id}', ${u.isActive})" class="text-xs font-semibold px-2 py-1 rounded transition-all ${u.isActive ? 'text-red-500 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'}">${u.isActive ? 'Nonaktifkan' : 'Aktifkan'}</button>`
           : '';
-        // Hapus: SUPERADMIN bisa hapus USER & ADMIN; ADMIN hanya bisa hapus USER
-        const canDelete = currentUserRole === 'SUPERADMIN' || u.role === 'USER';
+        // Hapus: akun SUPERADMIN tidak bisa dihapus siapapun; SUPERADMIN bisa hapus USER & ADMIN; ADMIN hanya bisa hapus USER
+        const canDelete = u.role !== 'SUPERADMIN' && (currentUserRole === 'SUPERADMIN' || u.role === 'USER');
         const deleteBtn = canDelete
           ? `<button onclick="deleteUser('${u.id}', '${u.fullName.replace(/'/g, "\\'")}')" class="text-xs font-semibold px-2 py-1 rounded text-red-500 hover:text-red-700 hover:bg-red-50 transition-all" title="Hapus user"><i class="fa-solid fa-trash-can"></i></button>`
           : '';
