@@ -17,13 +17,14 @@ async function getUsers(req, res) {
     // ── Scope filter berdasarkan jabatan yang sedang login ──
     if (requester.role === 'ADMIN') {
       if (requester.jabatan === 'Head AR') {
-        // Head AR: hanya lihat user dalam PT yang sama
-        where.pt = requester.pt;
+        // Head AR: hanya lihat user dengan role USER dalam PT yang sama (semua area/DC)
+        where.pt   = requester.pt;
+        where.role = 'USER';
       } else if (requester.jabatan === 'Head ACC') {
-        // Head ACC: hanya lihat user di departemen FAT
+        // Head ACC: lihat semua user (ADMIN & USER) di dept FAT, lintas semua PT
         where.divisi = 'FAT';
       } else {
-        // ADMIN biasa: hanya lihat dirinya sendiri (tidak punya akses user management)
+        // ADMIN biasa: hanya lihat dirinya sendiri
         where.id = requester.id;
       }
     }
@@ -39,7 +40,8 @@ async function getUsers(req, res) {
         }
       ];
     }
-    if (role) where.role = role;
+    // Filter role dari query param hanya berlaku jika scope belum mengunci role
+    if (role && !where.role) where.role = role;
     if (isActive !== undefined) where.isActive = isActive === 'true';
 
     const [users, total] = await Promise.all([
