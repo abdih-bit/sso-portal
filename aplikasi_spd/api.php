@@ -113,6 +113,7 @@ switch ($action) {
             http_response_code(401);
             json_response('error', ['message' => 'Akses ditolak. Silakan login melalui portal.']);
         }
+        try {
 
         $currentUser = $_SESSION['user'];
 
@@ -131,6 +132,8 @@ switch ($action) {
             }
             return ['sql' => " AND {$alias}.pt = ? AND {$alias}.area = ?", 'params' => [$user['pt'], $user['area']]];
         }
+
+        switch ($action) {
 
             // ── Dokumen ──────────────────────────────────────────────────────
             case 'check_document':
@@ -190,12 +193,13 @@ switch ($action) {
             case 'get_audit_log':
                 $scope = getScopeFilter($currentUser);
                 // Join ke spd_documents untuk filter pt/area
+                // LEFT JOIN ke users karena user mungkin sudah dihapus (user_id nullable)
                 $stmt  = $pdo->prepare("
                     SELECT al.timestamp, al.doc_id, al.action,
-                           CONCAT(u.full_name, ' (', u.username, ')') AS actor,
+                           COALESCE(CONCAT(u.full_name, ' (', u.username, ')'), '[User Dihapus]') AS actor,
                            al.details, d.pt, d.area
                     FROM spd_audit_log al
-                    JOIN users u ON al.user_id = u.id
+                    LEFT JOIN users u ON al.user_id = u.id
                     JOIN spd_documents d ON al.doc_id = d.doc_id
                     WHERE 1=1" . $scope['sql'] . "
                     ORDER BY al.timestamp DESC
@@ -226,6 +230,13 @@ switch ($action) {
 
             default:
                 json_response('error', ['message' => 'Action tidak dikenal.']);
+        }
+        } catch (PDOException $e) {
+            http_response_code(500);
+            json_response('error', ['message' => 'Terjadi kesalahan database. Pastikan migration sudah dijalankan.']);
+        } catch (Throwable $e) {
+            http_response_code(500);
+            json_response('error', ['message' => 'Terjadi kesalahan server.']);
         }
         break;
 }

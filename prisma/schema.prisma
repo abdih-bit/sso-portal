@@ -192,13 +192,13 @@ model SpdDocument {
 model SpdAuditLog {
   logId     Int         @id @default(autoincrement()) @map("log_id")
   docId     String      @map("doc_id")
-  userId    String      @map("user_id")
+  userId    String?     @map("user_id")
   action    String      @db.VarChar(50)
   details   String?
   timestamp DateTime    @default(now())
 
   document  SpdDocument @relation(fields: [docId], references: [docId], onDelete: Cascade)
-  user      User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("spd_audit_log")
 }
