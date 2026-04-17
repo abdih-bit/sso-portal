@@ -89,6 +89,19 @@ router.get('/', authenticate, async (req, res) => {
       if (!userDivisi) return false;
       if (!app.allowedDepartemen.includes(userDivisi)) return false;
 
+      // Tambahan filter sub-jabatan untuk FAT
+      if (userDivisi === 'FAT') {
+        const fatSubs = app.allowedDepartemen.filter(d => d.startsWith('FAT:'));
+        // Jika tidak ada sub-jabatan FAT yang dipilih → tidak tampil ke siapapun
+        if (fatSubs.length === 0) return false;
+        // Ekstrak sub-jabatan user dari jabatan lengkap ("Admin FAT - Admin Kasir" → "Admin Kasir")
+        const subJabatan = userJabatan && userJabatan.startsWith('Admin FAT - ')
+          ? userJabatan.replace('Admin FAT - ', '')
+          : null;
+        if (!subJabatan) return false;
+        if (!fatSubs.includes('FAT:' + subJabatan)) return false;
+      }
+
       // Untuk Link App: tambahan filter by area
       if (isLinkApp(app)) {
         if (!userArea) return false;
