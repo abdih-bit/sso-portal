@@ -254,6 +254,18 @@
                 </select>
               </div>
             </div>
+            <!-- Sub-jabatan untuk Admin FAT -->
+            <div id="subJabatanRow" class="hidden">
+              <label class="block text-xs font-medium text-gray-500 mb-1">Sub Jabatan Admin FAT <span class="text-red-500">*</span></label>
+              <select id="userSubJabatan" class="input-field">
+                <option value="">— Pilih Sub Jabatan —</option>
+                <option value="Admin Invoice">Admin Invoice</option>
+                <option value="Admin Kasir">Admin Kasir</option>
+                <option value="Admin Collection">Admin Collection</option>
+                <option value="Admin Settle">Admin Settle</option>
+                <option value="Admin CSF">Admin CSF</option>
+              </select>
+            </div>
             <!-- Info note for Head ACC / Head AR -->
             <div id="jabatanNote" class="hidden rounded-lg px-3 py-2 text-xs flex items-start gap-2">
               <i class="fa-solid fa-circle-info mt-0.5 flex-shrink-0"></i>
@@ -402,8 +414,17 @@
       var deptEl = document.getElementById('userDivisi');
       var note = document.getElementById('jabatanNote');
       var noteText = document.getElementById('jabatanNoteText');
-      var ptEl = document.getElementById('userPt');
-      var areaEl = document.getElementById('userArea');
+      var subRow = document.getElementById('subJabatanRow');
+      var subEl = document.getElementById('userSubJabatan');
+
+      // Show/hide sub-jabatan dropdown untuk Admin FAT
+      if (jab === 'Admin FAT') {
+        subRow.classList.remove('hidden');
+        subEl.value = '';
+      } else {
+        subRow.classList.add('hidden');
+        subEl.value = '';
+      }
 
       // Show note for special admin positions
       note.classList.add('hidden');
@@ -453,6 +474,8 @@
 
       resetDeptField();
       document.getElementById('jabatanNote').classList.add('hidden');
+      document.getElementById('subJabatanRow').classList.add('hidden');
+      document.getElementById('userSubJabatan').value = '';
     }
 
     function populateUserDropdowns(u) {
@@ -472,12 +495,26 @@
       var jabList = role === 'ADMIN' ? JABATAN_ADMIN : JABATAN_USER;
       jabList.forEach(function(j) { var o = document.createElement('option'); o.value = j; o.textContent = j; jabEl.appendChild(o); });
       jabEl.disabled = false;
-      jabEl.value = u.jabatan || '';
+
+      // Restore jabatan: jika 'Admin FAT - X', set jabatan ke 'Admin FAT' dan sub ke 'X'
+      var storedJab = u.jabatan || '';
+      var subRow = document.getElementById('subJabatanRow');
+      var subEl = document.getElementById('userSubJabatan');
+      if (storedJab.startsWith('Admin FAT - ')) {
+        jabEl.value = 'Admin FAT';
+        subRow.classList.remove('hidden');
+        subEl.value = storedJab.replace('Admin FAT - ', '');
+      } else {
+        jabEl.value = storedJab;
+        subRow.classList.add('hidden');
+        subEl.value = '';
+      }
 
       var deptEl = document.getElementById('userDivisi');
-      var opts = u.jabatan ? JABATAN_DEPARTEMEN[u.jabatan] : null;
+      var jabatanBase = jabEl.value;
+      var opts = jabatanBase ? JABATAN_DEPARTEMEN[jabatanBase] : null;
       deptEl.innerHTML = '<option value="">— Pilih Departemen —</option>';
-      if (u.jabatan) {
+      if (jabatanBase) {
         deptEl.disabled = false;
         (opts || data.departemen.map(function(d){return d.name;})).forEach(function(d) { var o = document.createElement('option'); o.value = d; o.textContent = d; deptEl.appendChild(o); });
         deptEl.value = u.divisi || (opts && opts.length === 1 ? opts[0] : '');
@@ -701,21 +738,25 @@
 
       const pt = document.getElementById('userPt').value;
       const area = document.getElementById('userArea').value;
-      const jabatan = document.getElementById('userJabatan').value;
+      const jabatanRaw = document.getElementById('userJabatan').value;
+      const subJabatan = document.getElementById('userSubJabatan').value;
+      // Jika Admin FAT, gabungkan dengan sub-jabatan sebagai nilai jabatan: 'Admin FAT - Admin Invoice'
+      const jabatan = jabatanRaw === 'Admin FAT' && subJabatan ? 'Admin FAT - ' + subJabatan : jabatanRaw;
       const divisi = document.getElementById('userDivisi').value;
       const role = document.getElementById('userRole').value;
 
       // Saat tambah user baru, semua penempatan wajib diisi
       // Kecuali Head ACC: tidak wajib area (akses semua PT)
       if (!id) {
-        if (!pt)      { showFormError('PT wajib dipilih.'); return; }
-        if (!jabatan) { showFormError('Jabatan wajib dipilih.'); return; }
-        if (!divisi)  { showFormError('Departemen wajib dipilih.'); return; }
+        if (!pt)        { showFormError('PT wajib dipilih.'); return; }
+        if (!jabatanRaw){ showFormError('Jabatan wajib dipilih.'); return; }
+        if (jabatanRaw === 'Admin FAT' && !subJabatan) { showFormError('Sub Jabatan Admin FAT wajib dipilih.'); return; }
+        if (!divisi)    { showFormError('Departemen wajib dipilih.'); return; }
         // Head ACC tidak wajib area, jabatan lain wajib area
-        if (jabatan !== HEAD_ACC_JABATAN && !area) { showFormError('Area / DC wajib dipilih.'); return; }
+        if (jabatanRaw !== HEAD_ACC_JABATAN && !area) { showFormError('Area / DC wajib dipilih.'); return; }
       }
 
-      const opts = JABATAN_DEPARTEMEN[jabatan];
+      const opts = JABATAN_DEPARTEMEN[jabatanRaw];
       const body = {
         fullName: fullName,
         username: username,
