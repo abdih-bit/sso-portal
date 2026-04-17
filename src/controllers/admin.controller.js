@@ -10,12 +10,33 @@ async function getUsers(req, res) {
   try {
     const { page = 1, limit = 20, search, role, isActive } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
+    const requester = req.user;
 
     const where = {};
+
+    // ── Scope filter berdasarkan jabatan yang sedang login ──
+    if (requester.role === 'ADMIN') {
+      if (requester.jabatan === 'Head AR') {
+        // Head AR: hanya lihat user dalam PT yang sama
+        where.pt = requester.pt;
+      } else if (requester.jabatan === 'Head ACC') {
+        // Head ACC: hanya lihat user di departemen FAT
+        where.divisi = 'FAT';
+      } else {
+        // ADMIN biasa: hanya lihat dirinya sendiri (tidak punya akses user management)
+        where.id = requester.id;
+      }
+    }
+    // SUPERADMIN: tidak ada filter → lihat semua user
+
     if (search) {
-      where.OR = [
-        { username: { contains: search, mode: 'insensitive' } },
-        { fullName: { contains: search, mode: 'insensitive' } },
+      where.AND = [
+        {
+          OR: [
+            { username: { contains: search, mode: 'insensitive' } },
+            { fullName: { contains: search, mode: 'insensitive' } },
+          ]
+        }
       ];
     }
     if (role) where.role = role;

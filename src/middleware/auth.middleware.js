@@ -28,6 +28,9 @@ async function authenticate(req, res, next) {
         role: true,
         isActive: true,
         avatar: true,
+        jabatan: true,
+        pt: true,
+        divisi: true,
       }
     });
 
@@ -72,6 +75,9 @@ async function requireAuth(req, res, next) {
         role: true,
         isActive: true,
         avatar: true,
+        jabatan: true,
+        pt: true,
+        divisi: true,
       }
     });
 
