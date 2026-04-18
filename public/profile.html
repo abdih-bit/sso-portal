@@ -10,86 +10,43 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
-    body { background: #f1f5f9; }
+    body { background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 40%, #e0f7fa 70%, #ccfbf1 100%); min-height: 100vh; }
 
-    /* ── SIDEBAR ── */
-    .sidebar { width: 220px; min-height: 100vh; background: #fff; border-right: 1px solid #e5e7eb; }
-    .sidebar-brand { color: #00297a; font-weight: 700; font-size: 1.4rem; letter-spacing: -0.5px; }
-    .sidebar-brand span { color: #007dc1; }
-    .nav-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; padding: 16px 16px 4px; }
-    .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
-    .nav-item:hover { background: #f3f4f6; color: #111827; }
-    .nav-item.active { background: #eff6ff; color: #1d4ed8; border-left-color: #1d4ed8; font-weight: 600; }
-    .nav-item i { width: 16px; text-align: center; font-size: 13px; }
+    /* ── SIDEBAR — identik dashboard ── */
+    .sidebar { width: 236px; background: #fff; border-right: 1px solid #e8ecf4; min-height: 100vh; }
+    .sidebar-brand { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; color: #1e293b; }
+    .sidebar-brand span { color: #0284c7; }
+    .nav-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #b0b9cc; padding: 14px 18px 4px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; margin: 2px 8px; border-radius: 10px; font-size: 13px; font-weight: 500; color: #64748b; cursor: pointer; transition: all 0.15s; }
+    .nav-item:hover { background: #f0f9ff; color: #0284c7; }
+    .nav-item.active { background: #e0f2fe; color: #0369a1; font-weight: 600; }
+    .nav-item i { width: 16px; text-align: center; font-size: 13px; color: #94a3b8; }
+    .nav-item.active i { color: #0284c7; }
+    .sidebar-footer { border-top: 1px solid #f1f5f9; padding: 14px; }
+    .sidebar-user { font-size: 13px; font-weight: 700; color: #1e293b; }
+    .sidebar-role { font-size: 11px; color: #94a3b8; margin-top: 1px; }
     .admin-badge { font-size: 11px; background: #fee2e2; color: #b91c1c; border-radius: 99px; padding: 2px 8px; font-weight: 700; }
-    .sidebar-footer { border-top: 1px solid #e5e7eb; padding: 12px 16px; }
 
     /* ── TOPBAR ── */
-    .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 10px 20px; }
+    .topbar { background: #fff; border-bottom: 1px solid #e8ecf4; padding: 12px 28px; }
 
     /* ── CARDS ── */
-    .card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
-    }
-
-    /* ── AVATAR HERO ── */
-    .avatar-ring {
-      width: 60px; height: 60px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; font-weight: 800; color: #fff;
-      flex-shrink: 0;
-      box-shadow: 0 4px 16px rgba(99,102,241,0.30);
-      position: relative;
-    }
-    .avatar-status {
-      position: absolute; bottom: 2px; right: 2px;
-      width: 14px; height: 14px;
-      background: #22c55e; border-radius: 50%;
-      border: 2.5px solid #fff;
-    }
-
-    /* ── INFO GRID ── */
-    .info-row {
-      display: flex; align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid #f1f5f9;
-    }
-    .info-row:last-child { border-bottom: none; }
-    .info-icon-wrap {
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; margin-right: 12px;
-    }
-    .info-key { font-size: 12px; font-weight: 600; color: #94a3b8; min-width: 130px; }
-    .info-val { font-size: 13.5px; font-weight: 600; color: #0f172a; }
+    .card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 18px; box-shadow: 0 2px 8px rgba(14,165,233,0.07); }
 
     /* ── FORM ── */
-    .field-label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 6px; letter-spacing: 0.1px; }
+    .field-label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 6px; }
     .input-wrap  { position: relative; }
     .input-icon  { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #cbd5e1; font-size: 13px; pointer-events: none; transition: color 0.15s; }
     .input-wrap:focus-within .input-icon { color: #0ea5e9; }
     .input-field {
       width: 100%; padding: 10px 14px 10px 38px;
       border: 1.5px solid #e2e8f0; border-radius: 10px;
-      font-size: 14px; color: #0f172a; background: #f8fafc;
+      font-size: 13.5px; color: #0f172a; background: #f8fafc;
       outline: none; transition: all 0.18s;
     }
-    .input-field:focus {
-      border-color: #0ea5e9; background: #fff;
-      box-shadow: 0 0 0 3px rgba(14,165,233,0.12);
-    }
+    .input-field:focus { border-color: #0ea5e9; background: #fff; box-shadow: 0 0 0 3px rgba(14,165,233,0.12); }
     .input-field::placeholder { color: #cbd5e1; font-size: 13px; }
-    .eye-btn {
-      position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
-      background: none; border: none; cursor: pointer; color: #cbd5e1; font-size: 13px; padding: 4px;
-      transition: color 0.15s;
-    }
+    .eye-btn { position: absolute; right: 11px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #cbd5e1; font-size: 13px; padding: 4px; transition: color 0.15s; }
     .eye-btn:hover { color: #0ea5e9; }
 
     /* ── STRENGTH BAR ── */
@@ -102,192 +59,179 @@
       padding: 10px 22px; border-radius: 10px; border: none; cursor: pointer;
       font-size: 13.5px; font-weight: 700; color: #fff;
       background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
-      box-shadow: 0 2px 10px rgba(14,165,233,0.28);
-      transition: all 0.18s;
+      box-shadow: 0 2px 10px rgba(14,165,233,0.28); transition: all 0.18s;
     }
-    .btn-save:hover:not(:disabled) {
-      background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
-      box-shadow: 0 4px 16px rgba(14,165,233,0.36);
-      transform: translateY(-1px);
-    }
+    .btn-save:hover:not(:disabled) { background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%); box-shadow: 0 4px 16px rgba(14,165,233,0.36); transform: translateY(-1px); }
     .btn-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
     /* ── ALERT ── */
-    .alert {
-      display: none; align-items: flex-start; gap: 9px;
-      border-radius: 10px; padding: 11px 14px; font-size: 13px;
-      margin-bottom: 20px;
-    }
+    .alert { display: none; align-items: flex-start; gap: 9px; border-radius: 10px; padding: 11px 14px; font-size: 13px; }
     .alert.show { display: flex; }
     .alert-success { background: #f0fdf4; border: 1.5px solid #86efac; color: #15803d; }
     .alert-error   { background: #fff1f2; border: 1.5px solid #fecdd3; color: #be123c; }
 
-    /* Spinner */
     .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.65s linear infinite; flex-shrink: 0; display: inline-block; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-    /* Tag */
-    .tag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 99px; font-size: 11.5px; font-weight: 700; }
-
-    /* Section divider title */
-    .section-title { font-size: 13px; font-weight: 700; color: #0f172a; }
-    .section-sub   { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+    .info-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid #f1f5f9; }
+    .info-row:last-child { border-bottom: none; }
+    .info-icon { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   </style>
 </head>
 <body class="flex min-h-screen">
 
-  <!-- SIDEBAR -->
+  <!-- SIDEBAR — identik dashboard -->
   <aside class="sidebar flex-shrink-0 flex flex-col fixed top-0 left-0 h-full z-30 overflow-y-auto">
-    <div class="px-4 py-5 border-b border-gray-100">
-      <div class="flex items-center gap-3">
-        <i class="fa-solid fa-building-columns text-2xl" style="color:#007dc1;"></i>
-        <div>
-          <div class="sidebar-brand">HQ<span>Medan</span></div>
-          <div class="text-xs text-gray-400" style="margin-top:1px;">SSO Portal</div>
-        </div>
+    <div class="px-5 py-5 flex items-center gap-3" style="border-bottom:1px solid #f1f5f9;">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#0369a1,#0ea5e9);">
+        <i class="fa-solid fa-building-columns text-white" style="font-size:15px;"></i>
+      </div>
+      <div>
+        <div class="sidebar-brand">HQ<span>Medan</span></div>
+        <div style="font-size:10px;color:#94a3b8;">SSO Portal</div>
       </div>
     </div>
-    <nav class="flex-1 py-2">
+    <nav class="flex-1 py-3">
       <div class="nav-item" onclick="window.location.href='/dashboard'">
         <i class="fa-solid fa-house-chimney"></i> My Apps
       </div>
-      <div class="nav-section-label mt-2">Account</div>
+      <div class="nav-label mt-1">Account</div>
       <div class="nav-item active">
         <i class="fa-regular fa-circle-user"></i> Settings
       </div>
       <div id="adminNavItem" class="nav-item hidden" onclick="window.location.href='/admin'">
         <i class="fa-solid fa-sliders"></i> Admin Panel
-        <span class="admin-badge ml-auto">ADMIN</span>
+        <span class="admin-badge ml-auto">SA</span>
       </div>
     </nav>
     <div class="sidebar-footer">
-      <div class="flex items-center gap-3 mb-3">
-        <div id="sidebarAvatarCircle" class="w-9 h-9 rounded-full bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">?</div>
+      <div class="flex items-center gap-3">
+        <div id="sidebarAvatarCircle" class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:linear-gradient(135deg,#0369a1,#0ea5e9);">?</div>
         <div class="min-w-0 flex-1">
-          <div class="text-sm font-semibold text-gray-900 truncate" id="sidebarName">Memuat...</div>
-          <div class="text-xs text-gray-500" id="sidebarRole">-</div>
+          <div class="sidebar-user truncate" id="sidebarName">Memuat...</div>
+          <div class="sidebar-role" id="sidebarRole">—</div>
         </div>
+        <button onclick="handleLogout()" title="Sign out" class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#fef2f2;color:#ef4444;">
+          <i class="fa-solid fa-right-from-bracket text-xs"></i>
+        </button>
       </div>
-      <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg py-2 transition-all font-medium border border-red-200 hover:border-red-300">
-        <i class="fa-solid fa-right-from-bracket text-xs"></i> Sign out
-      </button>
     </div>
   </aside>
 
   <!-- MAIN -->
-  <main class="flex flex-col" style="margin-left:220px; height:100vh; overflow:hidden;">
+  <main class="flex-1 flex flex-col min-h-screen" style="margin-left:236px;">
 
     <!-- TOPBAR -->
-    <div class="topbar flex items-center gap-3 flex-shrink-0">
-      <div class="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
-        <i class="fa-regular fa-circle-user text-indigo-500 text-xs"></i>
+    <div class="topbar flex items-center justify-between sticky top-0 z-20">
+      <div class="flex items-center gap-3">
+        <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:#e0f2fe;">
+          <i class="fa-regular fa-circle-user text-xs" style="color:#0284c7;"></i>
+        </div>
+        <div>
+          <div class="text-sm font-bold" style="color:#1e293b;">Account Settings</div>
+          <div class="text-xs" style="color:#94a3b8;">Kelola informasi dan keamanan akun Anda</div>
+        </div>
       </div>
-      <div>
-        <div class="text-sm font-bold text-gray-900">Welcome, <span id="topbarUserName">-</span></div>
-        <div class="text-xs text-gray-400">Kelola informasi dan keamanan akun Anda</div>
-      </div>
+      <div id="topbarAvatar" class="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold" style="background:linear-gradient(135deg,#0369a1,#0ea5e9);">?</div>
     </div>
 
-    <div class="flex-1 overflow-hidden" style="display:grid; grid-template-columns:320px 1fr; gap:0;">
+    <div class="p-6 w-full">
 
-      <!-- ══ KIRI: PROFILE CARD ══ -->
-      <div style="background:linear-gradient(150deg,#0c4a6e 0%,#075985 30%,#0369a1 60%,#0284c7 85%,#0ea5e9 100%); display:flex; flex-direction:column; padding:32px 28px; gap:0; overflow-y:auto; position:relative; overflow:hidden;">
-
-        <!-- Avatar area -->
-        <div style="display:flex; flex-direction:column; align-items:center; text-align:center; padding-bottom:28px; border-bottom:1px solid rgba(255,255,255,0.08);">
-          <div id="profileAvatar" style="width:88px;height:88px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.2);border:3px solid rgba(255,255,255,0.30);flex-shrink:0;margin-bottom:14px;position:relative;backdrop-filter:blur(8px);">
-            <span id="profileInitials">?</span>
-            <div style="position:absolute;bottom:4px;right:4px;width:14px;height:14px;background:#22c55e;border-radius:50%;border:2.5px solid #1e293b;"></div>
+      <!-- Hero banner — identik dashboard -->
+      <div style="background:linear-gradient(150deg,#0c4a6e 0%,#075985 30%,#0369a1 60%,#0284c7 85%,#0ea5e9 100%); border-radius:20px; padding:24px 32px; position:relative; overflow:hidden; color:#fff; margin-bottom:24px;">
+        <div style="position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:rgba(255,255,255,0.06);border-radius:50%;"></div>
+        <div style="position:absolute;bottom:-40px;right:120px;width:130px;height:130px;background:rgba(255,255,255,0.04);border-radius:50%;"></div>
+        <div class="relative" style="z-index:1;">
+          <p style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.6);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">HQMedan · SSO Portal</p>
+          <h1 style="font-size:22px;font-weight:800;margin:0 0 4px;">Selamat datang, <span id="topbarUserName">-</span> 👤</h1>
+          <p style="font-size:13px;color:rgba(255,255,255,0.6);margin:0 0 16px;">Kelola profil dan keamanan akun Anda dari sini.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <span id="heroBadgeRole" style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.2);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:600;">
+              <i class="fa-solid fa-user-shield" style="font-size:11px;"></i> <span id="heroBadgeRoleText">-</span>
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.15);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:600;">
+              <span style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;"></span> Akun Aktif
+            </span>
           </div>
-          <h2 id="profileName" style="color:#f8fafc;font-size:17px;font-weight:700;margin:0 0 6px;">-</h2>
-          <span id="profileRoleBadge" style="display:inline-flex;align-items:center;gap:5px;padding:3px 12px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.25);">
-            <i class="fa-solid fa-user-shield" style="font-size:10px;"></i>
-            <span id="profileRoleText">-</span>
-          </span>
         </div>
-
-        <!-- Info list -->
-        <div style="padding-top:20px;display:flex;flex-direction:column;gap:0;">
-
-            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.10);">
-            <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class="fa-solid fa-at" style="color:#fff;font-size:13px;"></i>
-            </div>
-            <div>
-              <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px;">Username</div>
-              <div style="font-size:13.5px;font-weight:600;color:#fff;" id="profileUsername">-</div>
-            </div>
-          </div>
-
-            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.10);">
-            <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class="fa-solid fa-circle-check" style="color:#fff;font-size:13px;"></i>
-            </div>
-            <div>
-              <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px;">Status Akun</div>
-              <div style="display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:#fff;">
-                <span style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;animation:pulse 2s infinite;"></span> Aktif
-              </div>
-            </div>
-          </div>
-
-            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.10);">
-            <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class="fa-regular fa-clock" style="color:#fff;font-size:13px;"></i>
-            </div>
-            <div>
-              <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px;">Login Terakhir</div>
-              <div style="font-size:13.5px;font-weight:600;color:#fff;" id="profileLastLogin">-</div>
-            </div>
-          </div>
-
-          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;">
-            <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class="fa-solid fa-calendar-days" style="color:#fff;font-size:13px;"></i>
-            </div>
-            <div>
-              <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px;">Bergabung Sejak</div>
-              <div style="font-size:13.5px;font-weight:600;color:#fff;" id="profileCreatedAt">-</div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Spacer -->
-        <div style="flex:1;"></div>
-
-        <!-- Footer hint -->
-        <div style="margin-top:20px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;gap:10px;">
-          <i class="fa-solid fa-shield-halved" style="color:#fff;font-size:14px;flex-shrink:0;"></i>
-          <span style="font-size:11.5px;color:rgba(255,255,255,0.55);line-height:1.5;">Ganti password secara berkala untuk menjaga keamanan akun Anda.</span>
-        </div>
-
       </div>
 
-      <!-- ══ KANAN: GANTI PASSWORD ══ -->
-      <div style="background:#fff;display:flex;flex-direction:column;justify-content:center;padding:40px 60px;overflow-y:auto;">
+      <!-- 2 cards side by side -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
 
-        <div style="max-width:480px;width:100%;">
-
-          <!-- Header -->
-          <div style="margin-bottom:28px;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
-              <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#0284c7,#0ea5e9);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(14,165,233,0.3);">
-                <i class="fa-solid fa-lock" style="color:#fff;font-size:15px;"></i>
-              </div>
-              <div>
-                <h3 style="margin:0;font-size:17px;font-weight:700;color:#0f172a;">Ganti Password</h3>
-                <p style="margin:2px 0 0;font-size:12px;color:#94a3b8;">Gunakan password kuat minimal 6 karakter</p>
-              </div>
+        <!-- ── CARD PROFIL ── -->
+        <div class="card p-6">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #f1f5f9;">
+            <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#0284c7,#0ea5e9);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(14,165,233,0.25);">
+              <span id="profileInitials" style="font-size:16px;font-weight:800;color:#fff;">?</span>
+            </div>
+            <div>
+              <h2 id="profileName" style="font-size:16px;font-weight:700;color:#0f172a;margin:0 0 2px;">-</h2>
+              <span id="profileRoleBadge" style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700;background:#e0f2fe;color:#0369a1;">
+                <i class="fa-solid fa-user-shield" style="font-size:9px;"></i>
+                <span id="profileRoleText">-</span>
+              </span>
             </div>
           </div>
 
-          <!-- Alert -->
+          <div>
+            <div class="info-row">
+              <div class="info-icon" style="background:#e0f2fe;">
+                <i class="fa-solid fa-at" style="color:#0284c7;font-size:12px;"></i>
+              </div>
+              <div>
+                <div style="font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">Username</div>
+                <div style="font-size:13.5px;font-weight:600;color:#0f172a;" id="profileUsername">-</div>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-icon" style="background:#dcfce7;">
+                <i class="fa-solid fa-circle-check" style="color:#16a34a;font-size:12px;"></i>
+              </div>
+              <div>
+                <div style="font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">Status Akun</div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:#16a34a;">
+                  <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block;animation:pulse 2s infinite;"></span> Aktif
+                </div>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-icon" style="background:#f5f3ff;">
+                <i class="fa-regular fa-clock" style="color:#7c3aed;font-size:12px;"></i>
+              </div>
+              <div>
+                <div style="font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">Login Terakhir</div>
+                <div style="font-size:13.5px;font-weight:600;color:#0f172a;" id="profileLastLogin">-</div>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-icon" style="background:#fefce8;">
+                <i class="fa-solid fa-calendar-days" style="color:#ca8a04;font-size:12px;"></i>
+              </div>
+              <div>
+                <div style="font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">Bergabung Sejak</div>
+                <div style="font-size:13.5px;font-weight:600;color:#0f172a;" id="profileCreatedAt">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── CARD GANTI PASSWORD ── -->
+        <div class="card p-6">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #f1f5f9;">
+            <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#0284c7,#0ea5e9);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(14,165,233,0.25);">
+              <i class="fa-solid fa-lock" style="color:#fff;font-size:15px;"></i>
+            </div>
+            <div>
+              <div style="font-size:15px;font-weight:700;color:#0f172a;">Ganti Password</div>
+              <div style="font-size:12px;color:#94a3b8;margin-top:2px;">Gunakan password kuat minimal 6 karakter</div>
+            </div>
+          </div>
+
           <div id="pwAlert" class="alert" style="margin-bottom:16px;"></div>
 
-          <!-- Form -->
-          <form id="pwForm" onsubmit="changePassword(event)" style="display:flex;flex-direction:column;gap:18px;">
-
+          <form id="pwForm" onsubmit="changePassword(event)" style="display:flex;flex-direction:column;gap:16px;">
             <div>
               <label class="field-label">Password Saat Ini</label>
               <div class="input-wrap">
@@ -296,7 +240,6 @@
                 <button type="button" class="eye-btn" onclick="toggleEye('currentPw', this)"><i class="fa-regular fa-eye"></i></button>
               </div>
             </div>
-
             <div>
               <label class="field-label">Password Baru</label>
               <div class="input-wrap">
@@ -304,10 +247,9 @@
                 <input type="password" id="newPw" required minlength="6" class="input-field" placeholder="Min. 6 karakter" style="padding-right:38px" oninput="checkStrength(this.value)">
                 <button type="button" class="eye-btn" onclick="toggleEye('newPw', this)"><i class="fa-regular fa-eye"></i></button>
               </div>
-              <div class="strength-bar mt-2"><div id="strengthFill" class="strength-fill"></div></div>
+              <div class="strength-bar"><div id="strengthFill" class="strength-fill"></div></div>
               <div id="strengthLabel" class="text-xs text-gray-400 mt-1"></div>
             </div>
-
             <div>
               <label class="field-label">Konfirmasi Password Baru</label>
               <div class="input-wrap">
@@ -316,25 +258,19 @@
                 <button type="button" class="eye-btn" onclick="toggleEye('confirmPw', this)"><i class="fa-regular fa-eye"></i></button>
               </div>
             </div>
-
-            <div style="display:flex;align-items:center;gap:12px;padding-top:4px;">
+            <div style="display:flex;align-items:center;gap:10px;padding-top:4px;">
               <button type="submit" id="saveBtn" class="btn-save" style="flex:1;justify-content:center;">
                 <i class="fa-solid fa-floppy-disk text-xs"></i>
                 <span id="saveBtnText">Simpan Password</span>
               </button>
-              <button type="reset" onclick="resetForm()" style="padding:10px 18px;border-radius:10px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">Reset</button>
+              <button type="reset" onclick="resetForm()" style="padding:10px 18px;border-radius:10px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='#fff'">Reset</button>
             </div>
-
           </form>
         </div>
-      </div>
 
+      </div>
     </div>
   </main>
-
-  <style>
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  </style>
 
   <script>
     // Toggle show/hide password
@@ -402,9 +338,11 @@
       const initials = user.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
       document.getElementById('profileInitials').textContent = initials;
       document.getElementById('sidebarAvatarCircle').textContent = initials;
+      document.getElementById('topbarAvatar').textContent = initials;
       document.getElementById('sidebarName').textContent = user.fullName;
       document.getElementById('sidebarRole').textContent = user.role;
       document.getElementById('topbarUserName').textContent = user.fullName;
+      document.getElementById('heroBadgeRoleText').textContent = user.role;
       document.getElementById('profileName').textContent = user.fullName;
       document.getElementById('profileRoleText').textContent = user.role;
       document.getElementById('profileUsername').textContent = '@' + user.username;
