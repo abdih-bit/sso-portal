@@ -520,8 +520,12 @@
         deptEl.value = u.divisi || (opts && opts.length === 1 ? opts[0] : '');
       } else { deptEl.disabled = true; }
 
+      // Simpan sub jabatan sebelum onJabatanChange() karena onJabatanChange() akan reset nilainya
+      var savedSubJabatan = subEl.value;
       // Show note if needed
       onJabatanChange();
+      // Restore sub jabatan setelah onJabatanChange()
+      if (savedSubJabatan) subEl.value = savedSubJabatan;
     }
 
     // ── Role select setup berdasarkan role login ────────────
