@@ -188,136 +188,153 @@
       </div>
     </div>
 
-    <div class="flex-1 overflow-hidden p-4">
-    <div class="grid gap-4 h-full" style="grid-template-columns:1fr 1fr; max-width:900px; margin:0 auto;">
+    <div class="flex-1 overflow-hidden" style="display:grid; grid-template-columns:340px 1fr; gap:0;">
 
-      <!-- ── PROFILE HERO CARD ── -->
-      <div class="card overflow-hidden flex flex-col">
-        <!-- Banner gradient -->
-        <div class="h-14 bg-gradient-to-r from-slate-800 via-indigo-900 to-slate-800 relative flex-shrink-0">
-          <div class="absolute inset-0" style="background:repeating-linear-gradient(45deg,rgba(255,255,255,0.02) 0,rgba(255,255,255,0.02) 1px,transparent 0,transparent 50%) center/20px 20px;"></div>
+      <!-- ══ KIRI: PROFILE CARD ══ -->
+      <div style="background:linear-gradient(160deg,#0f172a 0%,#1e293b 60%,#312e81 100%); display:flex; flex-direction:column; padding:32px 28px; gap:0; overflow-y:auto;">
+
+        <!-- Avatar area -->
+        <div style="display:flex; flex-direction:column; align-items:center; text-align:center; padding-bottom:28px; border-bottom:1px solid rgba(255,255,255,0.08);">
+          <div id="profileAvatar" style="width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#0ea5e9);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:#fff;box-shadow:0 8px 32px rgba(99,102,241,0.4);border:3px solid rgba(255,255,255,0.15);flex-shrink:0;margin-bottom:14px;position:relative;">
+            <span id="profileInitials">?</span>
+            <div style="position:absolute;bottom:4px;right:4px;width:14px;height:14px;background:#22c55e;border-radius:50%;border:2.5px solid #1e293b;"></div>
+          </div>
+          <h2 id="profileName" style="color:#f8fafc;font-size:17px;font-weight:700;margin:0 0 6px;">-</h2>
+          <span id="profileRoleBadge" style="display:inline-flex;align-items:center;gap:5px;padding:3px 12px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(99,102,241,0.2);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3);">
+            <i class="fa-solid fa-user-shield" style="font-size:10px;"></i>
+            <span id="profileRoleText">-</span>
+          </span>
         </div>
-        <!-- Avatar + name -->
-        <div class="px-5 pb-4 flex-1 overflow-y-auto">
-          <div class="flex items-center gap-3 -mt-7 mb-2">
-            <div class="avatar-ring ring-4 ring-white" id="profileAvatar">
-              <span id="profileInitials">?</span>
-              <div class="avatar-status"></div>
+
+        <!-- Info list -->
+        <div style="padding-top:20px;display:flex;flex-direction:column;gap:0;">
+
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(99,102,241,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa-solid fa-at" style="color:#818cf8;font-size:13px;"></i>
+            </div>
+            <div>
+              <div style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Username</div>
+              <div style="font-size:13.5px;font-weight:600;color:#e2e8f0;" id="profileUsername">-</div>
             </div>
           </div>
-          <div class="mb-3">
-            <h2 id="profileName" class="text-base font-bold text-gray-900 leading-tight">-</h2>
-            <span id="profileRoleBadge" class="tag bg-blue-100 text-blue-700 mt-1 inline-flex">
-              <i class="fa-solid fa-user-shield text-xs"></i>
-              <span id="profileRoleText">-</span>
-            </span>
+
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(34,197,94,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa-solid fa-circle-check" style="color:#4ade80;font-size:13px;"></i>
+            </div>
+            <div>
+              <div style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Status Akun</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:#4ade80;">
+                <span style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;animation:pulse 2s infinite;"></span> Aktif
+              </div>
+            </div>
           </div>
 
-          <!-- Info rows -->
-          <div class="divide-y divide-gray-50">
-
-            <div class="info-row">
-              <div class="info-icon-wrap bg-blue-50">
-                <i class="fa-solid fa-at text-blue-400 text-xs"></i>
-              </div>
-              <span class="info-key">Username</span>
-              <span class="info-val" id="profileUsername">-</span>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(139,92,246,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa-regular fa-clock" style="color:#a78bfa;font-size:13px;"></i>
             </div>
-
-            <div class="info-row">
-              <div class="info-icon-wrap bg-green-50">
-                <i class="fa-solid fa-circle-check text-green-400 text-xs"></i>
-              </div>
-              <span class="info-key">Status Akun</span>
-              <span class="flex items-center gap-1.5 text-green-600 text-sm font-semibold">
-                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse inline-block"></span> Aktif
-              </span>
+            <div>
+              <div style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Login Terakhir</div>
+              <div style="font-size:13.5px;font-weight:600;color:#e2e8f0;" id="profileLastLogin">-</div>
             </div>
-
-            <div class="info-row">
-              <div class="info-icon-wrap bg-purple-50">
-                <i class="fa-regular fa-clock text-purple-400 text-xs"></i>
-              </div>
-              <span class="info-key">Login Terakhir</span>
-              <span class="info-val" id="profileLastLogin">-</span>
-            </div>
-
-            <div class="info-row">
-              <div class="info-icon-wrap bg-amber-50">
-                <i class="fa-solid fa-calendar-days text-amber-400 text-xs"></i>
-              </div>
-              <span class="info-key">Bergabung Sejak</span>
-              <span class="info-val" id="profileCreatedAt">-</span>
-            </div>
-
           </div>
+
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(251,191,36,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa-solid fa-calendar-days" style="color:#fbbf24;font-size:13px;"></i>
+            </div>
+            <div>
+              <div style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Bergabung Sejak</div>
+              <div style="font-size:13.5px;font-weight:600;color:#e2e8f0;" id="profileCreatedAt">-</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Spacer -->
+        <div style="flex:1;"></div>
+
+        <!-- Footer hint -->
+        <div style="margin-top:20px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:10px;">
+          <i class="fa-solid fa-shield-halved" style="color:#818cf8;font-size:14px;flex-shrink:0;"></i>
+          <span style="font-size:11.5px;color:#64748b;line-height:1.5;">Ganti password secara berkala untuk menjaga keamanan akun Anda.</span>
+        </div>
+
+      </div>
+
+      <!-- ══ KANAN: GANTI PASSWORD ══ -->
+      <div style="background:#f8fafc;display:flex;flex-direction:column;justify-content:center;padding:40px 48px;overflow-y:auto;">
+
+        <div style="max-width:420px;width:100%;">
+
+          <!-- Header -->
+          <div style="margin-bottom:28px;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+              <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#6366f1);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(99,102,241,0.3);">
+                <i class="fa-solid fa-lock" style="color:#fff;font-size:15px;"></i>
+              </div>
+              <div>
+                <h3 style="margin:0;font-size:17px;font-weight:700;color:#0f172a;">Ganti Password</h3>
+                <p style="margin:2px 0 0;font-size:12px;color:#94a3b8;">Gunakan password kuat minimal 6 karakter</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alert -->
+          <div id="pwAlert" class="alert" style="margin-bottom:16px;"></div>
+
+          <!-- Form -->
+          <form id="pwForm" onsubmit="changePassword(event)" style="display:flex;flex-direction:column;gap:18px;">
+
+            <div>
+              <label class="field-label">Password Saat Ini</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-lock input-icon"></i>
+                <input type="password" id="currentPw" required class="input-field" placeholder="Masukkan password saat ini" style="padding-right:38px">
+                <button type="button" class="eye-btn" onclick="toggleEye('currentPw', this)"><i class="fa-regular fa-eye"></i></button>
+              </div>
+            </div>
+
+            <div>
+              <label class="field-label">Password Baru</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-key input-icon"></i>
+                <input type="password" id="newPw" required minlength="6" class="input-field" placeholder="Min. 6 karakter" style="padding-right:38px" oninput="checkStrength(this.value)">
+                <button type="button" class="eye-btn" onclick="toggleEye('newPw', this)"><i class="fa-regular fa-eye"></i></button>
+              </div>
+              <div class="strength-bar mt-2"><div id="strengthFill" class="strength-fill"></div></div>
+              <div id="strengthLabel" class="text-xs text-gray-400 mt-1"></div>
+            </div>
+
+            <div>
+              <label class="field-label">Konfirmasi Password Baru</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-shield-halved input-icon"></i>
+                <input type="password" id="confirmPw" required class="input-field" placeholder="Ulangi password baru" style="padding-right:38px">
+                <button type="button" class="eye-btn" onclick="toggleEye('confirmPw', this)"><i class="fa-regular fa-eye"></i></button>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:12px;padding-top:4px;">
+              <button type="submit" id="saveBtn" class="btn-save" style="flex:1;justify-content:center;">
+                <i class="fa-solid fa-floppy-disk text-xs"></i>
+                <span id="saveBtnText">Simpan Password</span>
+              </button>
+              <button type="reset" onclick="resetForm()" style="padding:10px 18px;border-radius:10px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">Reset</button>
+            </div>
+
+          </form>
         </div>
       </div>
 
-      <!-- ── CHANGE PASSWORD CARD ── -->
-      <div class="card p-5 flex flex-col">
-
-        <!-- Card header -->
-        <div class="flex items-start gap-3 mb-4 pb-3 border-b border-gray-100 flex-shrink-0">
-          <div class="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0">
-            <i class="fa-solid fa-lock text-indigo-500 text-sm"></i>
-          </div>
-          <div>
-            <div class="section-title">Ganti Password</div>
-            <div class="section-sub">Gunakan password kuat minimal 6 karakter</div>
-          </div>
-        </div>
-
-        <!-- Alert -->
-        <div id="pwAlert" class="alert"></div>
-
-        <!-- Form -->
-        <form id="pwForm" onsubmit="changePassword(event)" class="space-y-3 flex-1">
-
-          <div>
-            <label class="field-label">Password Saat Ini</label>
-            <div class="input-wrap">
-              <i class="fa-solid fa-lock input-icon"></i>
-              <input type="password" id="currentPw" required class="input-field" placeholder="Masukkan password saat ini" style="padding-right:38px">
-              <button type="button" class="eye-btn" onclick="toggleEye('currentPw', this)"><i class="fa-regular fa-eye"></i></button>
-            </div>
-          </div>
-
-          <div>
-            <label class="field-label">Password Baru</label>
-            <div class="input-wrap">
-              <i class="fa-solid fa-key input-icon"></i>
-              <input type="password" id="newPw" required minlength="6" class="input-field" placeholder="Min. 6 karakter" style="padding-right:38px" oninput="checkStrength(this.value)">
-              <button type="button" class="eye-btn" onclick="toggleEye('newPw', this)"><i class="fa-regular fa-eye"></i></button>
-            </div>
-            <!-- Strength bar -->
-            <div class="strength-bar mt-1.5"><div id="strengthFill" class="strength-fill"></div></div>
-            <div id="strengthLabel" class="text-xs text-gray-400 mt-1"></div>
-          </div>
-
-          <div>
-            <label class="field-label">Konfirmasi Password Baru</label>
-            <div class="input-wrap">
-              <i class="fa-solid fa-shield-halved input-icon"></i>
-              <input type="password" id="confirmPw" required class="input-field" placeholder="Ulangi password baru" style="padding-right:38px">
-              <button type="button" class="eye-btn" onclick="toggleEye('confirmPw', this)"><i class="fa-regular fa-eye"></i></button>
-            </div>
-          </div>
-
-          <div class="pt-1 flex items-center gap-3">
-            <button type="submit" id="saveBtn" class="btn-save">
-              <i class="fa-solid fa-floppy-disk text-xs"></i>
-              <span id="saveBtnText">Simpan Password</span>
-            </button>
-            <button type="reset" class="text-xs text-gray-400 hover:text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all font-medium" onclick="resetForm()">Reset</button>
-          </div>
-
-        </form>
-      </div>
-
-    </div>
     </div>
   </main>
+
+  <style>
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  </style>
 
   <script>
     // Toggle show/hide password
