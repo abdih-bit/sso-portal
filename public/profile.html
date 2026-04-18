@@ -73,7 +73,7 @@
     .field-label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 6px; letter-spacing: 0.1px; }
     .input-wrap  { position: relative; }
     .input-icon  { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #cbd5e1; font-size: 13px; pointer-events: none; transition: color 0.15s; }
-    .input-wrap:focus-within .input-icon { color: #6366f1; }
+    .input-wrap:focus-within .input-icon { color: #0ea5e9; }
     .input-field {
       width: 100%; padding: 10px 14px 10px 38px;
       border: 1.5px solid #e2e8f0; border-radius: 10px;
@@ -81,8 +81,8 @@
       outline: none; transition: all 0.18s;
     }
     .input-field:focus {
-      border-color: #6366f1; background: #fff;
-      box-shadow: 0 0 0 3px rgba(99,102,241,0.10);
+      border-color: #0ea5e9; background: #fff;
+      box-shadow: 0 0 0 3px rgba(14,165,233,0.12);
     }
     .input-field::placeholder { color: #cbd5e1; font-size: 13px; }
     .eye-btn {
@@ -90,7 +90,7 @@
       background: none; border: none; cursor: pointer; color: #cbd5e1; font-size: 13px; padding: 4px;
       transition: color 0.15s;
     }
-    .eye-btn:hover { color: #6366f1; }
+    .eye-btn:hover { color: #0ea5e9; }
 
     /* ── STRENGTH BAR ── */
     .strength-bar { height: 4px; border-radius: 2px; background: #e2e8f0; margin-top: 8px; overflow: hidden; }
@@ -101,13 +101,13 @@
       display: inline-flex; align-items: center; gap: 7px;
       padding: 10px 22px; border-radius: 10px; border: none; cursor: pointer;
       font-size: 13.5px; font-weight: 700; color: #fff;
-      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-      box-shadow: 0 2px 10px rgba(99,102,241,0.28);
+      background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+      box-shadow: 0 2px 10px rgba(14,165,233,0.28);
       transition: all 0.18s;
     }
     .btn-save:hover:not(:disabled) {
-      background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
-      box-shadow: 0 4px 16px rgba(99,102,241,0.36);
+      background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+      box-shadow: 0 4px 16px rgba(14,165,233,0.36);
       transform: translateY(-1px);
     }
     .btn-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
@@ -188,19 +188,19 @@
       </div>
     </div>
 
-    <div class="flex-1 overflow-hidden" style="display:grid; grid-template-columns:340px 1fr; gap:0;">
+    <div class="flex-1 overflow-hidden" style="display:grid; grid-template-columns:320px 1fr; gap:0;">
 
       <!-- ══ KIRI: PROFILE CARD ══ -->
-      <div style="background:linear-gradient(160deg,#0f172a 0%,#1e293b 60%,#312e81 100%); display:flex; flex-direction:column; padding:32px 28px; gap:0; overflow-y:auto;">
+      <div style="background:linear-gradient(150deg,#0c4a6e 0%,#075985 30%,#0369a1 60%,#0284c7 85%,#0ea5e9 100%); display:flex; flex-direction:column; padding:32px 28px; gap:0; overflow-y:auto; position:relative; overflow:hidden;">
 
         <!-- Avatar area -->
         <div style="display:flex; flex-direction:column; align-items:center; text-align:center; padding-bottom:28px; border-bottom:1px solid rgba(255,255,255,0.08);">
-          <div id="profileAvatar" style="width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#0ea5e9);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:#fff;box-shadow:0 8px 32px rgba(99,102,241,0.4);border:3px solid rgba(255,255,255,0.15);flex-shrink:0;margin-bottom:14px;position:relative;">
+          <div id="profileAvatar" style="width:88px;height:88px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.2);border:3px solid rgba(255,255,255,0.30);flex-shrink:0;margin-bottom:14px;position:relative;backdrop-filter:blur(8px);">
             <span id="profileInitials">?</span>
             <div style="position:absolute;bottom:4px;right:4px;width:14px;height:14px;background:#22c55e;border-radius:50%;border:2.5px solid #1e293b;"></div>
           </div>
           <h2 id="profileName" style="color:#f8fafc;font-size:17px;font-weight:700;margin:0 0 6px;">-</h2>
-          <span id="profileRoleBadge" style="display:inline-flex;align-items:center;gap:5px;padding:3px 12px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(99,102,241,0.2);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3);">
+          <span id="profileRoleBadge" style="display:inline-flex;align-items:center;gap:5px;padding:3px 12px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.25);">
             <i class="fa-solid fa-user-shield" style="font-size:10px;"></i>
             <span id="profileRoleText">-</span>
           </span>
@@ -209,45 +209,45 @@
         <!-- Info list -->
         <div style="padding-top:20px;display:flex;flex-direction:column;gap:0;">
 
-          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-            <div style="width:34px;height:34px;border-radius:10px;background:rgba(99,102,241,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class="fa-solid fa-at" style="color:#818cf8;font-size:13px;"></i>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.10);">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa-solid fa-at" style="color:#fff;font-size:13px;"></i>
             </div>
             <div>
-              <div style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Username</div>
-              <div style="font-size:13.5px;font-weight:600;color:#e2e8f0;" id="profileUsername">-</div>
+              <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px;">Username</div>
+              <div style="font-size:13.5px;font-weight:600;color:#fff;" id="profileUsername">-</div>
             </div>
           </div>
 
-          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-            <div style="width:34px;height:34px;border-radius:10px;background:rgba(34,197,94,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class="fa-solid fa-circle-check" style="color:#4ade80;font-size:13px;"></i>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.10);">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa-solid fa-circle-check" style="color:#fff;font-size:13px;"></i>
             </div>
             <div>
-              <div style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Status Akun</div>
-              <div style="display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:#4ade80;">
+              <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px;">Status Akun</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:#fff;">
                 <span style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;animation:pulse 2s infinite;"></span> Aktif
               </div>
             </div>
           </div>
 
-          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-            <div style="width:34px;height:34px;border-radius:10px;background:rgba(139,92,246,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class="fa-regular fa-clock" style="color:#a78bfa;font-size:13px;"></i>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.10);">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa-regular fa-clock" style="color:#fff;font-size:13px;"></i>
             </div>
             <div>
-              <div style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Login Terakhir</div>
-              <div style="font-size:13.5px;font-weight:600;color:#e2e8f0;" id="profileLastLogin">-</div>
+              <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px;">Login Terakhir</div>
+              <div style="font-size:13.5px;font-weight:600;color:#fff;" id="profileLastLogin">-</div>
             </div>
           </div>
 
           <div style="display:flex;align-items:center;gap:12px;padding:12px 0;">
-            <div style="width:34px;height:34px;border-radius:10px;background:rgba(251,191,36,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class="fa-solid fa-calendar-days" style="color:#fbbf24;font-size:13px;"></i>
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa-solid fa-calendar-days" style="color:#fff;font-size:13px;"></i>
             </div>
             <div>
-              <div style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Bergabung Sejak</div>
-              <div style="font-size:13.5px;font-weight:600;color:#e2e8f0;" id="profileCreatedAt">-</div>
+              <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px;">Bergabung Sejak</div>
+              <div style="font-size:13.5px;font-weight:600;color:#fff;" id="profileCreatedAt">-</div>
             </div>
           </div>
 
@@ -257,22 +257,22 @@
         <div style="flex:1;"></div>
 
         <!-- Footer hint -->
-        <div style="margin-top:20px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:10px;">
-          <i class="fa-solid fa-shield-halved" style="color:#818cf8;font-size:14px;flex-shrink:0;"></i>
-          <span style="font-size:11.5px;color:#64748b;line-height:1.5;">Ganti password secara berkala untuk menjaga keamanan akun Anda.</span>
+        <div style="margin-top:20px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;gap:10px;">
+          <i class="fa-solid fa-shield-halved" style="color:#fff;font-size:14px;flex-shrink:0;"></i>
+          <span style="font-size:11.5px;color:rgba(255,255,255,0.55);line-height:1.5;">Ganti password secara berkala untuk menjaga keamanan akun Anda.</span>
         </div>
 
       </div>
 
       <!-- ══ KANAN: GANTI PASSWORD ══ -->
-      <div style="background:#f8fafc;display:flex;flex-direction:column;justify-content:center;padding:40px 48px;overflow-y:auto;">
+      <div style="background:#fff;display:flex;flex-direction:column;justify-content:center;padding:40px 60px;overflow-y:auto;">
 
-        <div style="max-width:420px;width:100%;">
+        <div style="max-width:480px;width:100%;">
 
           <!-- Header -->
           <div style="margin-bottom:28px;">
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
-              <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#6366f1);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(99,102,241,0.3);">
+              <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#0284c7,#0ea5e9);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(14,165,233,0.3);">
                 <i class="fa-solid fa-lock" style="color:#fff;font-size:15px;"></i>
               </div>
               <div>
