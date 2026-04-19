@@ -1,0 +1,68 @@
+-- 1. Membuat tabel baru untuk menyimpan jenis berkas
+CREATE TABLE `jenis_berkas` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nama_berkas` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nama_berkas` (`nama_berkas`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 2. Memasukkan data awal (default) ke tabel baru
+INSERT INTO `jenis_berkas` (`nama_berkas`) VALUES
+('BPK dan EBP'),
+('Laporan'),
+('STNK');
+
+CREATE TABLE `berkas_satu_arah` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `barcode_id` varchar(20) NOT NULL,
+  `sender_user_id` int(11) NOT NULL,
+  `receiver_area_id` int(11) NOT NULL,
+  `jenis_berkas` varchar(100) NOT NULL,
+  `notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `receiver_user_id` int(11) DEFAULT NULL,
+  `received_at` timestamp NULL DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'Dikirim',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `barcode_id` (`barcode_id`),
+  KEY `sender_user_id` (`sender_user_id`),
+  KEY `receiver_area_id` (`receiver_area_id`),
+  KEY `receiver_user_id` (`receiver_user_id`),
+  CONSTRAINT `fk_sender_user` FOREIGN KEY (`sender_user_id`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `fk_receiver_area` FOREIGN KEY (`receiver_area_id`) REFERENCES `areas` (`area_id`),
+  CONSTRAINT `fk_receiver_user` FOREIGN KEY (`receiver_user_id`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- Menambahkan kolom untuk menyimpan ID area HO tujuan
+ALTER TABLE `documents`
+ADD COLUMN `receiver_ho_area_id` INT(11) NULL DEFAULT NULL AFTER `sender_user_id`,
+ADD CONSTRAINT `fk_receiver_ho_area` FOREIGN KEY (`receiver_ho_area_id`) REFERENCES `areas` (`area_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- 1. Menambahkan kolom 'is_ho' ke tabel 'areas' untuk menandai area HO
+-- (Nilai 1 = HO, Nilai 0 = DC)
+ALTER TABLE `areas`
+ADD COLUMN `is_ho` TINYINT(1) NOT NULL DEFAULT 0 AFTER `area_name`;
+
+-- 2. Menambahkan kolom 'parent_ho_id' ke tabel 'areas'
+-- Ini akan mengaitkan area DC (is_ho=0) ke Induk HO-nya (is_ho=1)
+ALTER TABLE `areas`
+ADD COLUMN `parent_ho_id` INT(11) NULL DEFAULT NULL AFTER `is_ho`,
+ADD CONSTRAINT `fk_parent_ho` FOREIGN KEY (`parent_ho_id`) REFERENCES `areas` (`area_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- 3. Memperbarui area HO yang sudah ada agar ditandai sebagai 'is_ho = 1'
+UPDATE `areas`
+SET `is_ho` = 1
+WHERE `area_name` LIKE 'Head Office%' OR `area_name` = 'All Access';
+
+-- 4. Menambahkan kolom 'ho_area_id' ke tabel 'sales_offices'
+-- Ini akan mengaitkan Sales Office ke Induk HO-nya
+ALTER TABLE `sales_offices`
+ADD COLUMN `ho_area_id` INT(11) NULL DEFAULT NULL AFTER `so_name`,
+ADD CONSTRAINT `fk_so_ho_area` FOREIGN KEY (`ho_area_id`) REFERENCES `areas` (`area_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- Menambahkan kolom untuk menyimpan ID area HO tujuan
+ALTER TABLE `documents`
+ADD COLUMN `receiver_ho_area_id` INT(11) NULL DEFAULT NULL AFTER `sender_user_id`,
+ADD CONSTRAINT `fk_receiver_ho_area` FOREIGN KEY (`receiver_ho_area_id`) REFERENCES `areas` (`area_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+

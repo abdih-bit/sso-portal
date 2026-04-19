@@ -67,6 +67,18 @@ async function seed() {
         allowedRoles: ['USER', 'ADMIN', 'SUPERADMIN'],
         sortOrder: 3,
       },
+      {
+        name: 'Serah Terima Laporan',
+        slug: 'serah-terima',
+        description: 'Aplikasi manajemen serah terima laporan antar area',
+        url: process.env.SERAH_TERIMA_URL || 'https://stl.hqmedan.com',
+        callbackUrl: (process.env.SERAH_TERIMA_URL || 'https://stl.hqmedan.com') + '/index.html',
+        logoUrl: null,
+        clientId: process.env.SSO_STL_CLIENT_ID || 'serah-terima-client',
+        clientSecret: process.env.SSO_STL_CLIENT_SECRET || 'serah-terima-secret-CHANGE-ME',
+        allowedRoles: ['USER', 'ADMIN', 'SUPERADMIN'],
+        sortOrder: 4,
+      },
     ];
 
     for (const appData of apps) {
