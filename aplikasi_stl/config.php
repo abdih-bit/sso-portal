@@ -1,27 +1,29 @@
 <?php
 // =============================================================
 // Konfigurasi Aplikasi Serah Terima Laporan (STL)
-// Nilai diambil dari environment variable (diset via Nginx fastcgi_param).
-// Fallback ke nilai default untuk development lokal.
+// Isi nilai di bawah sesuai dengan konfigurasi server Anda.
 // =============================================================
 
 // URL internal SSO Portal (server-to-server, tidak perlu HTTPS)
-define('SSO_INTERNAL_URL', getenv('SSO_PORTAL_URL') ?: 'http://localhost:3000');
+// Gunakan localhost karena PHP dan Node.js berada di server yang sama
+define('SSO_INTERNAL_URL', 'http://localhost:3000');
 
-// Client ID & Secret — harus cocok dengan entri di tabel applications SSO Portal
-define('SSO_CLIENT_ID',     getenv('SSO_STL_CLIENT_ID') ?: 'serah-terima-client');
-define('SSO_CLIENT_SECRET', getenv('SSO_STL_CLIENT_SECRET') ?: 'serah-terima-secret-CHANGE-ME');
+// Client ID & Secret dari SSO Portal
+// Dapatkan setelah mendaftarkan aplikasi di: Admin Panel → Kelola Aplikasi
+define('SSO_CLIENT_ID',     'ISI_CLIENT_ID_DARI_ADMIN_PANEL');
+define('SSO_CLIENT_SECRET', 'ISI_CLIENT_SECRET_DARI_ADMIN_PANEL');
 
 // URL publik SSO Portal (untuk redirect login dari browser)
-define('SSO_PUBLIC_URL', getenv('SSO_PUBLIC_URL') ?: 'https://portal.hqmedan.com');
+define('SSO_PUBLIC_URL', 'https://portal.hqmedan.com');
 
 // Slug aplikasi yang didaftarkan di SSO Portal
 define('SSO_APP_SLUG', 'serah-terima');
 
-// Koneksi PostgreSQL — database yang sama dengan SSO Portal
-define('DB_DSN',      getenv('STL_DB_DSN') ?: 'pgsql:host=localhost;port=5432;dbname=sso_portal');
-define('DB_USERNAME', getenv('STL_DB_USER') ?: 'SSO_Project');
-define('DB_PASSWORD', getenv('STL_DB_PASS') ?: 'P@ssw0rd!!');
+// Koneksi PostgreSQL — sama dengan yang digunakan SSO Portal
+// Format: pgsql:host=HOST;port=PORT;dbname=DBNAME
+define('DB_DSN',      'pgsql:host=localhost;port=5433;dbname=sso_portal');
+define('DB_USERNAME', 'ISI_USERNAME_POSTGRES');
+define('DB_PASSWORD', 'ISI_PASSWORD_POSTGRES');
 
 // Konfigurasi session PHP
 define('SESSION_NAME',     'STL_SESSION');
