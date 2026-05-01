@@ -1926,7 +1926,7 @@ document.addEventListener('DOMContentLoaded', function() {
              const loadDashboardFilters = async () => {
                 let parentHoId = null;
                 // (DIUBAH) Jika user HO, ambil area_id mereka sebagai parentHoId
-                if (currentUser && currentUser.area_name.includes('Head Office')) {
+                if (currentUser && currentUser.area_name && currentUser.area_name.includes('Head Office')) {
                     parentHoId = currentUser.area_id;
                 }
                 await loadAreaOptions(document.getElementById('dashboard-area'), 'dc', 'Semua Area', parentHoId);
@@ -1935,7 +1935,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const loadReportFilters = async () => {
                 // (DIUBAH) Sama seperti dashboard, filter untuk HO
                 let parentHoId = null;
-                if (currentUser && currentUser.area_name.includes('Head Office')) {
+                if (currentUser && currentUser.area_name && currentUser.area_name.includes('Head Office')) {
                     parentHoId = currentUser.area_id;
                 }
                 await loadAreaOptions(document.getElementById('report-area'), 'dc', 'Semua Area', parentHoId);
@@ -2081,7 +2081,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (pageId === 'dashboard') {
                     const isAdminDc = currentUser && currentUser.role_id.startsWith('admin_dc');
                     // (BARU) Cek apakah user HO
-                    const isHoUser = currentUser && (currentUser.role_id === 'admin_ho' || currentUser.area_name.includes('Head Office'));
+                    const isHoUser = currentUser && (currentUser.role_id === 'admin_ho' || (currentUser.area_name && currentUser.area_name.includes('Head Office')));
                     
                     let initialAreaId = null;
                     if (isAdminDc) {
@@ -2274,7 +2274,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const areaFilterWrapper = document.getElementById('report-area-filter-wrapper');
                     // (DIUBAH) Logika filter area untuk HO
                     const isAdminDc = currentUser && currentUser.role_id.startsWith('admin_dc');
-                    const isHoUser = currentUser && (currentUser.role_id === 'admin_ho' || currentUser.area_name.includes('Head Office'));
+                    const isHoUser = currentUser && (currentUser.role_id === 'admin_ho' || (currentUser.area_name && currentUser.area_name.includes('Head Office')));
                     
                     if (isAdminDc) {
                         if (areaFilterWrapper) areaFilterWrapper.style.display = 'none';
@@ -2496,7 +2496,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (pageId === 'laporan-satu-arah') {
                     const laporanForm = document.getElementById('laporan-satu-arah-form');
                     const isAdminDc = currentUser && currentUser.role_id.startsWith('admin_dc');
-                    const isHoUser = currentUser && (currentUser.role_id === 'admin_ho' || currentUser.area_name.includes('Head Office'));
+                    const isHoUser = currentUser && (currentUser.role_id === 'admin_ho' || (currentUser.area_name && currentUser.area_name.includes('Head Office')));
 
                     await loadJenisBerkasOptions(document.getElementById('report-satu-arah-type'), 'Semua Jenis');
                     const areaSenderSelect = document.getElementById('report-satu-arah-area-sender');
@@ -2545,7 +2545,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const hoToDcCard = document.getElementById('ho-to-dc-card');
 
                     if (currentUser.role_id !== 'superadmin') {
-                        if (currentUser.area_name.includes('Head Office')) { 
+                        if (currentUser.area_name && currentUser.area_name.includes('Head Office')) { 
                             dcToHoCard.classList.add('d-none');
                             hoToDcCard.classList.remove('d-none');
                             hoToDcCard.classList.remove('col-lg-6');
@@ -2585,7 +2585,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         tableBodyDc.innerHTML = '';
                         tableBodyHo.innerHTML = '';
 
-                        const isHoUser = currentUser.area_name.includes('Head Office');
+                        const isHoUser = currentUser.area_name && currentUser.area_name.includes('Head Office');
                         const isDcUser = !isHoUser && currentUser.role_id !== 'superadmin';
 
                         const resiDcDocuments = fullResiData.filter(doc =>
@@ -2681,10 +2681,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const populateMenus = (role) => {
         let roleKey = role;
-        if (role.startsWith('admin_dc')) {
+        if (role && role.startsWith('admin_dc')) {
             roleKey = 'admin_dc';
         }
-        if (currentUser.area_name.includes('Head Office')) {
+        if (currentUser.area_name && currentUser.area_name.includes('Head Office')) {
             roleKey = 'admin_ho';
         }
         if (role === 'superadmin') {
@@ -2879,7 +2879,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const url = new URL(`${window.location.origin}${window.location.pathname.replace('index.html', '')}${API_BASE_URL}documents.php`);
             
             // (BARU) Tambahkan filter area_id untuk HO
-            if (currentUser && (currentUser.role_id === 'admin_ho' || currentUser.area_name.includes('Head Office'))) {
+            if (currentUser && (currentUser.role_id === 'admin_ho' || (currentUser.area_name && currentUser.area_name.includes('Head Office')))) {
                 params.ho_area_id = currentUser.area_id;
             }
 
@@ -3215,7 +3215,7 @@ document.addEventListener('DOMContentLoaded', function() {
         tableBodyDc.innerHTML = '';
         tableBodyHo.innerHTML = '';
 
-        const isHoUser = currentUser.area_name.includes('Head Office');
+        const isHoUser = currentUser.area_name && currentUser.area_name.includes('Head Office');
         const isDcUser = !isHoUser && currentUser.role_id !== 'superadmin';
 
         const resiDcDocuments = fullResiData.filter(doc =>
@@ -4212,8 +4212,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentUser.role_id !== 'superadmin') {
             if (currentUser.role_id.startsWith('admin_dc')) {
                 params.area_id_sender = currentUser.area_id;
-            } else if (currentUser.area_name.includes('Head Office')) {
-                // (DIUBAH) Admin HO melihat berdasarkan grup HO-nya
+            } else if (currentUser.area_name && currentUser.area_name.includes('Head Office')) {
                 params.ho_area_id = currentUser.area_id;
             }
         }
@@ -4286,7 +4285,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         // (BARU) Tambahkan filter HO
-        if (currentUser && (currentUser.role_id === 'admin_ho' || currentUser.area_name.includes('Head Office'))) {
+        if (currentUser && (currentUser.role_id === 'admin_ho' || (currentUser.area_name && currentUser.area_name.includes('Head Office')))) {
              params.ho_area_id = currentUser.area_id;
         }
 
