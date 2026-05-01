@@ -2762,11 +2762,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (sesData.status === 'success') {
                 showApp(sesData.user);
+            } else if (!ssoToken) {
+                // Belum login dan tidak ada token SSO — auto-redirect ke SSO Portal
+                redirectToSSO(sesData.sso_public_url, sesData.sso_app_slug);
             } else {
-                // Belum login — tampilkan tombol SSO
+                // Token SSO gagal — tampilkan tombol agar tidak loop tak terbatas
                 loginLoading.classList.add('d-none');
                 ssoBtnWrap.classList.remove('d-none');
-
+                loginError.textContent = 'Validasi SSO gagal. Silakan coba login ulang.';
+                loginError.classList.remove('d-none');
                 ssoLoginBtn.addEventListener('click', () => {
                     redirectToSSO(sesData.sso_public_url, sesData.sso_app_slug);
                 });
