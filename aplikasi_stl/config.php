@@ -9,9 +9,9 @@
 define('SSO_INTERNAL_URL', 'http://localhost:3000');
 
 // Client ID & Secret dari SSO Portal
-// Dapatkan setelah mendaftarkan aplikasi di: Admin Panel → Kelola Aplikasi
-define('SSO_CLIENT_ID',     'ISI_CLIENT_ID_DARI_ADMIN_PANEL');
-define('SSO_CLIENT_SECRET', 'ISI_CLIENT_SECRET_DARI_ADMIN_PANEL');
+// Di-generate oleh setup-apps.js
+define('SSO_CLIENT_ID',     'stl-client-hqmedan-2025');
+define('SSO_CLIENT_SECRET', 'stl-secret-hqmedan-2025-xK9mP');
 
 // URL publik SSO Portal (untuk redirect login dari browser)
 define('SSO_PUBLIC_URL', 'https://portal.hqmedan.com');
@@ -22,8 +22,8 @@ define('SSO_APP_SLUG', 'serah-terima');
 // Koneksi PostgreSQL — sama dengan yang digunakan SSO Portal
 // Format: pgsql:host=HOST;port=PORT;dbname=DBNAME
 define('DB_DSN',      'pgsql:host=localhost;port=5433;dbname=sso_portal');
-define('DB_USERNAME', 'ISI_USERNAME_POSTGRES');
-define('DB_PASSWORD', 'ISI_PASSWORD_POSTGRES');
+define('DB_USERNAME', 'sso_user');
+define('DB_PASSWORD', 'P@ssW0rd!!');
 
 // Konfigurasi session PHP
 define('SESSION_NAME',     'STL_SESSION');
