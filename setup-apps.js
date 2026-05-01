@@ -28,6 +28,9 @@ async function setup() {
     const stl = await prisma.application.upsert({
       where: { slug: 'serah-terima' },
       update: {
+        name:         'Serah Terima Laporan',
+        url:          'https://stl.hqmedan.com',
+        callbackUrl:  'https://stl.hqmedan.com',
         clientId:     STL_CLIENT_ID,
         clientSecret: STL_CLIENT_SECRET,
         allowedRoles: ['USER', 'ADMIN', 'SUPERADMIN'],
@@ -57,6 +60,9 @@ async function setup() {
     const spd = await prisma.application.upsert({
       where: { slug: 'spd' },
       update: {
+        name:         'Aplikasi SPD',
+        url:          'https://spd.hqmedan.com',
+        callbackUrl:  'https://spd.hqmedan.com',
         clientId:     SPD_CLIENT_ID,
         clientSecret: SPD_CLIENT_SECRET,
         allowedRoles: ['USER', 'ADMIN', 'SUPERADMIN'],
