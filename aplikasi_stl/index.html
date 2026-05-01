@@ -4407,27 +4407,6 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
 
-    // Initial check for session
-    const checkSession = () => {
-        const storedUser = sessionStorage.getItem('currentUser');
-        if (storedUser) {
-            currentUser = JSON.parse(storedUser);
-            
-            const userInfoDiv = document.getElementById('user-info');
-            userInfoDiv.innerHTML = `
-                <div class="fw-bold">${currentUser.full_name}</div>
-                <div class="text-muted small">${currentUser.area_name}</div>
-            `;
-            
-            populateMenus(currentUser.role_id);
-            
-            loginContainer.classList.add('d-none');
-            appContainer.classList.remove('d-none');
-            changePage('dashboard');
-        }
-    };
-
-    checkSession();
 });
     </script>
 </body>
