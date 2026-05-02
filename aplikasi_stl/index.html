@@ -4246,11 +4246,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const salesOfficeSelect = document.getElementById('sales-office');
             if (salesOfficeSelect) {
                 salesOfficeSelect.innerHTML = '<option value="" selected disabled>Pilih Sales Office...</option>';
+
+                // Kelompokkan berdasarkan DC/Area (ho_area_name)
+                const grouped = {};
                 offices.forEach(office => {
-                    const option = document.createElement('option');
-                    option.value = office.so_id;
-                    option.textContent = office.so_name;
-                    salesOfficeSelect.appendChild(option);
+                    const areaName = office.ho_area_name || 'Tanpa Area';
+                    if (!grouped[areaName]) grouped[areaName] = [];
+                    grouped[areaName].push(office);
+                });
+
+                Object.keys(grouped).sort().forEach(areaName => {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = areaName;
+                    grouped[areaName].forEach(office => {
+                        const option = document.createElement('option');
+                        option.value = office.so_id;
+                        option.textContent = office.so_name;
+                        optgroup.appendChild(option);
+                    });
+                    salesOfficeSelect.appendChild(optgroup);
                 });
             }
         } catch (error) {
