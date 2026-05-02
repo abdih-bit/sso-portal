@@ -2999,7 +2999,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 const cbData = await cbRes.json();
                 if (cbData.status === 'success') {
-                    showApp(cbData.user);
+                    // Ambil data lengkap dari session_check.php (termasuk ho_area_id/ho_area_name)
+                    const sesRes2 = await fetch(`${API_BASE_URL}session_check.php`, { credentials: 'same-origin' });
+                    const sesData2 = await sesRes2.json();
+                    showApp(sesData2.status === 'success' ? sesData2.user : cbData.user);
                     return;
                 }
             }
