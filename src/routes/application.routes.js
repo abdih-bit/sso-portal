@@ -19,6 +19,7 @@ router.get('/', authenticate, async (req, res) => {
     // Scope berdasarkan jabatan ADMIN
     const isHeadACC = userRole === 'ADMIN' && userJabatan === 'Head ACC';
     const isHeadAR  = userRole === 'ADMIN' && userJabatan === 'Head AR';
+    const isKaAdmin = userJabatan === 'KA Admin';
 
     const apps = await prisma.application.findMany({
       where: { isActive: true },
@@ -62,7 +63,8 @@ router.get('/', authenticate, async (req, res) => {
     // Filter rules:
     // SUPERADMIN         → semua tanpa filter
     // ADMIN Head ACC     → hanya app departemen FAT (semua area/PT)
-    // ADMIN Head AR      → bypass departemen filter, tapi link app harus ada minimal 1 area di PT-nya
+    // ADMIN Head AR      → SSO app harus ada FAT:Head AR; Link App filter by area dalam PT-nya
+    // KA Admin           → SSO app harus ada FAT:KA Admin; Link App filter by DC-nya sendiri
     // ADMIN lain / USER  → filter by departemen; Link App juga filter by area
     const HEAD_ACC_DEPT = 'FAT';
 
@@ -76,12 +78,23 @@ router.get('/', authenticate, async (req, res) => {
       }
 
       if (isHeadAR) {
-        // Head AR: filter Link App by PT, SSO App bypass departemen filter
+        // Head AR: Link App filter by PT; SSO App hanya yang ada FAT:Head AR
         if (isLinkApp(app)) {
           const ptAreas = getAreasInUserPt(app.areaLinks);
           return ptAreas.length > 0;
         }
-        return true; // SSO apps: Head AR bisa lihat semua SSO
+        if (!app.allowedDepartemen || !app.allowedDepartemen.includes('FAT:Head AR')) return false;
+        return true;
+      }
+
+      if (isKaAdmin) {
+        // KA Admin: Link App hanya DC-nya; SSO App hanya yang ada FAT:KA Admin
+        if (isLinkApp(app)) {
+          if (!userArea) return false;
+          return !!app.areaLinks[userArea];
+        }
+        if (!app.allowedDepartemen || !app.allowedDepartemen.includes('FAT:KA Admin')) return false;
+        return true;
       }
 
       // Regular ADMIN & USER: filter by departemen
