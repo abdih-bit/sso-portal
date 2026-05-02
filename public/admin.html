@@ -1477,7 +1477,7 @@
 
     async function loadDbAreas() {
       try {
-        var res = await apiFetch('/api/admin/areas');
+        var res = await fetch('/api/admin/areas', { credentials: 'include' });
         if (res.ok) {
           var data = await res.json();
           _dbAreasCache = data.areas || [];
@@ -1568,7 +1568,7 @@
       document.getElementById('deleteConfirmWarning').classList.add('hidden');
       document.getElementById('deleteConfirmBtn').onclick = async function() {
         try {
-          var res = await apiFetch('/api/admin/areas/' + areaId, { method: 'DELETE' });
+          var res = await fetch('/api/admin/areas/' + areaId, { method: 'DELETE', credentials: 'include' });
           if (res.ok) {
             closeModal('deleteConfirmModal');
             await loadDbAreas();
@@ -1865,8 +1865,8 @@
         var payload = { name: name, pt: pt || null, isHo: isHo };
         try {
           var res = areaDbId
-            ? await apiFetch('/api/admin/areas/' + areaDbId, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) })
-            : await apiFetch('/api/admin/areas', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+            ? await fetch('/api/admin/areas/' + areaDbId, { method: 'PUT', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(payload) })
+            : await fetch('/api/admin/areas', { method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(payload) });
           var d = await res.json();
           if (res.ok) {
             closeModal('masterModal');
