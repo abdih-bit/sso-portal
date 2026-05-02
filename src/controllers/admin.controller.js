@@ -624,6 +624,84 @@ async function rejectPasswordReset(req, res) {
   }
 }
 
+/**
+ * GET /api/admin/areas
+ */
+async function getAreas(req, res) {
+  try {
+    const areas = await prisma.area.findMany({
+      orderBy: [{ pt: 'asc' }, { isHo: 'desc' }, { name: 'asc' }]
+    });
+    return res.json({ areas });
+  } catch (error) {
+    console.error('Get areas error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * POST /api/admin/areas
+ */
+async function createArea(req, res) {
+  try {
+    const { name, pt, isHo } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Nama area wajib diisi.' });
+    }
+    const area = await prisma.area.create({
+      data: { name: name.trim(), pt: pt || null, isHo: !!isHo }
+    });
+    await createAuditLog({ userId: req.user.id, action: 'AREA_CREATED', resource: area.name, req });
+    return res.status(201).json({ message: 'Area berhasil ditambahkan.', area });
+  } catch (error) {
+    if (error.code === 'P2002') return res.status(400).json({ error: 'Nama area sudah ada.' });
+    console.error('Create area error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * PUT /api/admin/areas/:id
+ */
+async function updateArea(req, res) {
+  try {
+    const { id } = req.params;
+    const { name, pt, isHo } = req.body;
+    const area = await prisma.area.update({
+      where: { id: parseInt(id) },
+      data: {
+        ...(name && { name: name.trim() }),
+        ...(pt !== undefined && { pt: pt || null }),
+        ...(isHo !== undefined && { isHo: !!isHo }),
+      }
+    });
+    await createAuditLog({ userId: req.user.id, action: 'AREA_UPDATED', resource: area.name, req });
+    return res.json({ message: 'Area berhasil diperbarui.', area });
+  } catch (error) {
+    if (error.code === 'P2025') return res.status(404).json({ error: 'Area tidak ditemukan.' });
+    if (error.code === 'P2002') return res.status(400).json({ error: 'Nama area sudah ada.' });
+    console.error('Update area error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * DELETE /api/admin/areas/:id
+ */
+async function deleteArea(req, res) {
+  try {
+    const { id } = req.params;
+    const area = await prisma.area.findUnique({ where: { id: parseInt(id) } });
+    if (!area) return res.status(404).json({ error: 'Area tidak ditemukan.' });
+    await prisma.area.delete({ where: { id: parseInt(id) } });
+    await createAuditLog({ userId: req.user.id, action: 'AREA_DELETED', resource: area.name, req });
+    return res.json({ message: 'Area berhasil dihapus.' });
+  } catch (error) {
+    console.error('Delete area error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
 module.exports = {
   getUsers,
   createUser,
@@ -638,4 +716,8 @@ module.exports = {
   getPasswordResetRequests,
   approvePasswordReset,
   rejectPasswordReset,
+  getAreas,
+  createArea,
+  updateArea,
+  deleteArea,
 };

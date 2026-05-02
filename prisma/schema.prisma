@@ -205,3 +205,20 @@ model SpdAuditLog {
 
   @@map("spd_audit_log")
 }
+
+// ===========================
+// AREA / DC MASTER DATA
+// Tabel master area/DC yang digunakan lintas aplikasi.
+// is_ho = true → ini adalah Head Office (kantor pusat PT)
+// pt    = nama PT pengelola (MDR 1, MDR 2, dll.)
+// ===========================
+model Area {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  pt        String?
+  isHo      Boolean   @default(false) @map("is_ho")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("areas")
+}

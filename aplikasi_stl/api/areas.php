@@ -12,7 +12,19 @@ switch ($method) {
         $type        = $_GET['type']        ?? 'all';
         $parent_ho_id = isset($_GET['parent_ho_id']) ? (int)$_GET['parent_ho_id'] : null;
 
-        // Auto-sync: tambahkan area dari tabel users SSO yang belum ada di stl_areas
+        // Auto-sync 1: tambahkan area dari tabel SSO `areas` (master data resmi)
+        try {
+            $pdo->exec("
+                INSERT INTO stl_areas (area_name, is_ho)
+                SELECT a.name, a.is_ho
+                FROM areas a
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM stl_areas sa WHERE sa.area_name = a.name
+                )
+            ");
+        } catch (PDOException $e) { /* non-critical */ }
+
+        // Auto-sync 2: tambahkan area dari users.area sebagai fallback
         try {
             $pdo->exec("
                 INSERT INTO stl_areas (area_name, is_ho)

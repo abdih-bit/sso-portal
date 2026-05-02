@@ -462,6 +462,7 @@
       <form id="masterForm" onsubmit="submitMasterForm(event)" class="p-6 space-y-4">
         <input type="hidden" id="masterType">
         <input type="hidden" id="masterEditIndex" value="-1">
+        <input type="hidden" id="masterAreaDbId" value="">
         <div>
           <label class="block text-xs font-medium text-gray-500 mb-1" id="masterNameLabel">Nama</label>
           <input type="text" id="masterName" required class="input-field" placeholder="Masukkan nama...">
@@ -472,6 +473,13 @@
           <select id="masterPtParent" class="input-field">
             <option value="">— Pilih PT —</option>
           </select>
+        </div>
+        <!-- Untuk Area: is_ho flag -->
+        <div id="masterAreaIsHoField" class="hidden">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="masterAreaIsHo" class="w-4 h-4 rounded border-gray-300 text-amber-500">
+            <span class="text-xs font-medium text-gray-600">Tandai sebagai Head Office</span>
+          </label>
         </div>
         <!-- Untuk PT: pilih Head Office area -->
         <div id="masterPtHoField" class="hidden">
@@ -1070,7 +1078,7 @@
       if (tab === 'links') loadLinks();
       if (tab === 'appnames') renderAppNamesList();
       if (tab === 'logs') loadLogs();
-      if (tab === 'master') renderMasterLists();
+      if (tab === 'master') { renderMasterLists(); loadDbAreas(); }
       if (tab === 'reset') loadResetRequests('PENDING');
     }
 
@@ -1464,6 +1472,115 @@
       }
     }
 
+    // ── AREA DB CACHE (API-backed) ──────────────────────────
+    var _dbAreasCache = [];
+
+    async function loadDbAreas() {
+      try {
+        var res = await apiFetch('/api/admin/areas');
+        if (res.ok) {
+          var data = await res.json();
+          _dbAreasCache = data.areas || [];
+        }
+      } catch(e) { _dbAreasCache = []; }
+      renderDbAreaList();
+    }
+
+    function renderDbAreaList() {
+      var areaListEl = document.getElementById('masterAreaList');
+      if (!_dbAreasCache.length) {
+        areaListEl.innerHTML = '<div class="text-center py-6 text-gray-400 text-xs">Belum ada data</div>';
+        return;
+      }
+      var masterData = getMasterData();
+      var ptOrder = (masterData.pt || []).map(function(p) { return p.name; });
+      var groups = {};
+      ptOrder.forEach(function(pt) { groups[pt] = []; });
+      _dbAreasCache.forEach(function(area) {
+        var key = area.pt || '—';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(area);
+      });
+      Object.keys(groups).forEach(function(key) {
+        if (!ptOrder.includes(key)) ptOrder.push(key);
+      });
+      var html = '';
+      ptOrder.forEach(function(pt) {
+        var list = groups[pt];
+        if (!list || !list.length) return;
+        html += `<div class="px-4 pt-3 pb-1 flex items-center gap-1.5">
+          <i class="fa-solid fa-building text-blue-400 text-[10px]"></i>
+          <span class="text-[11px] font-bold text-blue-500 uppercase tracking-wide">${pt}</span>
+          <span class="ml-auto text-[10px] text-gray-400">${list.length} DC</span>
+        </div>`;
+        list.forEach(function(area) {
+          html += `<div class="flex items-center justify-between pl-8 pr-4 py-2 hover:bg-gray-50 group">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid ${area.isHo ? 'fa-crown text-amber-400' : 'fa-location-dot text-green-400'} text-xs w-4"></i>
+              <span class="text-sm text-gray-700 font-medium">${area.name}</span>
+              ${area.isHo ? '<span class="tag bg-amber-50 text-amber-600 text-[10px]">Head Office</span>' : ''}
+            </div>
+            <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button onclick="editDbArea(${area.id})" class="text-xs text-blue-500 hover:bg-blue-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-pen text-xs"></i></button>
+              <button onclick="deleteDbArea(${area.id}, '${area.name.replace(/'/g, "\\'")}}')" class="text-xs text-red-400 hover:bg-red-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-trash text-xs"></i></button>
+            </div>
+          </div>`;
+        });
+      });
+      areaListEl.innerHTML = html;
+    }
+
+    function editDbArea(areaId) {
+      var area = _dbAreasCache.find(function(a) { return a.id === areaId; });
+      if (!area) return;
+      var cfg = masterModalConfig['area'];
+      document.getElementById('masterModalTitle').textContent = 'Edit Area / DC';
+      document.getElementById('masterModalSub').textContent = cfg.sub;
+      document.getElementById('masterModalIcon').className = 'fa-solid fa-location-dot text-indigo-600 text-sm';
+      document.getElementById('masterNameLabel').textContent = cfg.label;
+      document.getElementById('masterName').placeholder = cfg.placeholder;
+      document.getElementById('masterName').value = area.name;
+      document.getElementById('masterType').value = 'area';
+      document.getElementById('masterEditIndex').value = -1;
+      document.getElementById('masterAreaDbId').value = areaId;
+      document.getElementById('masterPtParentField').classList.remove('hidden');
+      document.getElementById('masterPtHoField').classList.add('hidden');
+      document.getElementById('masterJabatanDeptField').classList.add('hidden');
+      // Checkbox is_ho
+      var isHoCheck = document.getElementById('masterAreaIsHo');
+      if (isHoCheck) isHoCheck.checked = !!area.isHo;
+      var ptSel = document.getElementById('masterPtParent');
+      ptSel.innerHTML = '<option value="">— Pilih PT —</option>';
+      var masterData = getMasterData();
+      masterData.pt.forEach(function(p) {
+        var o = document.createElement('option'); o.value = p.name; o.textContent = 'PT. ' + p.name;
+        ptSel.appendChild(o);
+      });
+      ptSel.value = area.pt || '';
+      document.getElementById('masterModal').classList.add('show');
+    }
+
+    function deleteDbArea(areaId, areaName) {
+      document.getElementById('deleteConfirmSub').textContent = 'Hapus Area / DC';
+      document.getElementById('deleteConfirmIcon').className = 'fa-solid fa-location-dot text-gray-400 text-sm w-4';
+      document.getElementById('deleteConfirmName').textContent = areaName;
+      document.getElementById('deleteConfirmBadge').classList.add('hidden');
+      document.getElementById('deleteConfirmWarning').classList.add('hidden');
+      document.getElementById('deleteConfirmBtn').onclick = async function() {
+        try {
+          var res = await apiFetch('/api/admin/areas/' + areaId, { method: 'DELETE' });
+          if (res.ok) {
+            closeModal('deleteConfirmModal');
+            await loadDbAreas();
+          } else {
+            var d = await res.json();
+            alert(d.error || 'Gagal menghapus area.');
+          }
+        } catch(e) { alert('Error: ' + e.message); }
+      };
+      document.getElementById('deleteConfirmModal').classList.add('show');
+    }
+
     // ── MASTER DATA ────────────────────────────────────────
     // Struktur master data: { pt, area, jabatan, departemen, linkAppNames }
     function getMasterData() {
@@ -1588,50 +1705,7 @@
         }).join('');
       });
 
-      // ── Area/DC: render dikelompokkan per PT ──
-      var areaListEl = document.getElementById('masterAreaList');
-      var areas = data.area || [];
-      if (!areas.length) {
-        areaListEl.innerHTML = '<div class="text-center py-6 text-gray-400 text-xs">Belum ada data</div>';
-      } else {
-        // Kelompokkan per PT, urut sesuai urutan PT
-        var ptOrder = (data.pt || []).map(function(p) { return p.name; });
-        var groups = {};
-        ptOrder.forEach(function(pt) { groups[pt] = []; });
-        areas.forEach(function(item, idx) {
-          var key = item.pt || '—';
-          if (!groups[key]) groups[key] = [];
-          groups[key].push({ item: item, idx: idx });
-        });
-        // PT tanpa grup (tidak dikenal) tetap tampil di bawah
-        Object.keys(groups).forEach(function(key) {
-          if (!ptOrder.includes(key)) ptOrder.push(key);
-        });
-
-        var html = '';
-        ptOrder.forEach(function(pt) {
-          var list = groups[pt];
-          if (!list || !list.length) return;
-          html += `<div class="px-4 pt-3 pb-1 flex items-center gap-1.5">
-            <i class="fa-solid fa-building text-blue-400 text-[10px]"></i>
-            <span class="text-[11px] font-bold text-blue-500 uppercase tracking-wide">${pt}</span>
-            <span class="ml-auto text-[10px] text-gray-400">${list.length} DC</span>
-          </div>`;
-          list.forEach(function(entry) {
-            html += `<div class="flex items-center justify-between pl-8 pr-4 py-2 hover:bg-gray-50 group">
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-location-dot text-green-400 text-xs w-4"></i>
-                <span class="text-sm text-gray-700 font-medium">${entry.item.name}</span>
-              </div>
-              <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onclick="editMasterItem('area', ${entry.idx})" class="text-xs text-blue-500 hover:bg-blue-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-pen text-xs"></i></button>
-                <button onclick="deleteMasterItem('area', ${entry.idx})" class="text-xs text-red-400 hover:bg-red-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-trash text-xs"></i></button>
-              </div>
-            </div>`;
-          });
-        });
-        areaListEl.innerHTML = html;
-      }
+      // Area/DC dirender oleh renderDbAreaList() yang dipanggil via loadDbAreas()
     }
 
     var masterModalConfig = {
@@ -1656,18 +1730,17 @@
       document.getElementById('masterPtParentField').classList.add('hidden');
       document.getElementById('masterPtHoField').classList.add('hidden');
       document.getElementById('masterJabatanDeptField').classList.add('hidden');
+      var _isHoField = document.getElementById('masterAreaIsHoField');
+      if (_isHoField) _isHoField.classList.add('hidden');
 
       var data = getMasterData();
       if (type === 'pt') {
-        // Populate HO area dropdown — tampilkan semua area milik PT ini
+        // Populate HO area dropdown dari DB cache
         var ptName = editIdx >= 0 ? data.pt[editIdx].name : null;
         var hoSel = document.getElementById('masterPtHo');
         hoSel.innerHTML = '<option value="">— Pilih Area sebagai Head Office —</option>';
-        var ptAreas = (data.area || []).filter(function(a) { return !ptName || a.pt === ptName; });
-        if (!ptAreas.length) {
-          // Jika belum ada area, tampilkan semua
-          ptAreas = data.area || [];
-        }
+        var ptAreas = _dbAreasCache.filter(function(a) { return !ptName || a.pt === ptName; });
+        if (!ptAreas.length) ptAreas = _dbAreasCache;
         ptAreas.forEach(function(a) {
           var o = document.createElement('option'); o.value = a.name; o.textContent = a.name;
           hoSel.appendChild(o);
@@ -1676,7 +1749,8 @@
         if (editIdx >= 0) hoSel.value = data.pt[editIdx].head_office || '';
       }
       if (type === 'area') {
-        // Populate PT select
+        // Buka modal untuk tambah area baru (edit via editDbArea())
+        document.getElementById('masterAreaDbId').value = '';
         var ptSel = document.getElementById('masterPtParent');
         ptSel.innerHTML = '<option value="">— Pilih PT —</option>';
         data.pt.forEach(function(p) {
@@ -1684,7 +1758,11 @@
           ptSel.appendChild(o);
         });
         document.getElementById('masterPtParentField').classList.remove('hidden');
-        if (editIdx >= 0) ptSel.value = data.area[editIdx].pt || '';
+        // Checkbox Head Office
+        var isHoField = document.getElementById('masterAreaIsHoField');
+        if (isHoField) isHoField.classList.remove('hidden');
+        var isHoCheck = document.getElementById('masterAreaIsHo');
+        if (isHoCheck) isHoCheck.checked = false;
       }
       if (type === 'jabatan') {
         // Populate Departemen select
@@ -1704,7 +1782,10 @@
       document.getElementById('masterModal').classList.add('show');
     }
 
-    function editMasterItem(type, idx) { openMasterModal(type, idx); }
+    function editMasterItem(type, idx) {
+      if (type === 'area') return; // area dihandle oleh editDbArea()
+      openMasterModal(type, idx);
+    }
 
     function deleteMasterItem(type, idx) {
       var data = getMasterData();
@@ -1769,17 +1850,38 @@
       document.getElementById('deleteConfirmModal').classList.add('show');
     }
 
-    function submitMasterForm(e) {
+    async function submitMasterForm(e) {
       e.preventDefault();
       var type = document.getElementById('masterType').value;
       var editIdx = parseInt(document.getElementById('masterEditIndex').value);
       var name = document.getElementById('masterName').value.trim();
       if (!name) return;
 
+      // ── Area: simpan ke DB via API ──
+      if (type === 'area') {
+        var areaDbId = document.getElementById('masterAreaDbId').value;
+        var pt = document.getElementById('masterPtParent').value;
+        var isHo = document.getElementById('masterAreaIsHo') ? document.getElementById('masterAreaIsHo').checked : false;
+        var payload = { name: name, pt: pt || null, isHo: isHo };
+        try {
+          var res = areaDbId
+            ? await apiFetch('/api/admin/areas/' + areaDbId, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+            : await apiFetch('/api/admin/areas', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+          var d = await res.json();
+          if (res.ok) {
+            closeModal('masterModal');
+            await loadDbAreas();
+          } else {
+            alert(d.error || 'Gagal menyimpan area.');
+          }
+        } catch(err) { alert('Error: ' + err.message); }
+        return;
+      }
+
+      // ── Tipe lain: simpan ke localStorage ──
       var data = getMasterData();
       var item = { name: name };
       if (type === 'pt') item.head_office = document.getElementById('masterPtHo').value;
-      if (type === 'area') item.pt = document.getElementById('masterPtParent').value;
       if (type === 'jabatan') item.departemen = document.getElementById('masterJabatanDept').value;
 
       if (editIdx >= 0) {

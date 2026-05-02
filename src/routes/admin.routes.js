@@ -29,4 +29,10 @@ router.get('/password-reset-requests', requireRole('SUPERADMIN'), adminControlle
 router.post('/password-reset-requests/:id/approve', requireRole('SUPERADMIN'), adminController.approvePasswordReset);
 router.post('/password-reset-requests/:id/reject', requireRole('SUPERADMIN'), adminController.rejectPasswordReset);
 
+// Areas
+router.get('/areas', adminController.getAreas);
+router.post('/areas', requireRole('SUPERADMIN'), adminController.createArea);
+router.put('/areas/:id', requireRole('SUPERADMIN'), adminController.updateArea);
+router.delete('/areas/:id', requireRole('SUPERADMIN'), adminController.deleteArea);
+
 module.exports = router;
