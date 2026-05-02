@@ -692,14 +692,11 @@
                 
                 { type: 'header', name: 'Two-Way Validation' },
                 { id: 'buat-dokumen', name: 'Buat Dokumen', icon: 'bi-file-earmark-plus', type: 'link' },
-                { id: 'validasi-ho', name: 'Validasi Dokumen HO', icon: 'bi-building-check', type: 'link' },
-                { id: 'validasi-dc', name: 'Validasi Dokumen DC', icon: 'bi-house-check', type: 'link' },
-                { id: 'riwayat', name: 'Riwayat Pengiriman', icon: 'bi-clock-history', type: 'link' },
+                { id: 'validasi-berkas', name: 'Validasi Berkas', icon: 'bi-clipboard2-check', type: 'link' },
+                { id: 'riwayat', name: 'Riwayat', icon: 'bi-clock-history', type: 'link' },
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
 
                 { type: 'header', name: 'One-Way Document' },
-                { id: 'validasi-penerimaan', name: 'Validasi Penerimaan', icon: 'bi-check-circle', type: 'link' },
-                { id: 'riwayat-satu-arah', name: 'Riwayat Pengiriman', icon: 'bi-clock', type: 'link' },
                 { id: 'laporan-satu-arah', name: 'Laporan Berkas', icon: 'bi-file-earmark-text', type: 'link' },
 
                 { type: 'accordion', name: 'Lain-lain', icon: 'bi-three-dots', id: 'lain-lain', items: [
@@ -711,14 +708,12 @@
                 { id: 'dashboard', name: 'Dashboard', icon: 'bi-speedometer2', type: 'link' },
                 
                 { type: 'header', name: 'Two-Way Validation' },
-                { id: 'validasi-ho', name: 'Validasi Dokumen HO', icon: 'bi-building-check', type: 'link' },
-                { id: 'riwayat', name: 'Riwayat Pengiriman', icon: 'bi-clock-history', type: 'link' },
+                { id: 'validasi-berkas', name: 'Validasi Berkas', icon: 'bi-clipboard2-check', type: 'link' },
+                { id: 'riwayat', name: 'Riwayat', icon: 'bi-clock-history', type: 'link' },
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
 
                 { type: 'header', name: 'One-Way Document' },
                 { id: 'buat-dokumen', name: 'Kirim Berkas', icon: 'bi-send', type: 'link' },
-                { id: 'validasi-penerimaan', name: 'Validasi Penerimaan', icon: 'bi-check-circle', type: 'link' },
-                { id: 'riwayat-satu-arah', name: 'Riwayat Pengiriman', icon: 'bi-clock', type: 'link' },
                 { id: 'laporan-satu-arah', name: 'Laporan Berkas', icon: 'bi-file-earmark-text', type: 'link' },
 
                 { type: 'accordion', name: 'Lain-lain', icon: 'bi-three-dots', id: 'lain-lain', items: [
@@ -731,13 +726,11 @@
                 
                 { type: 'header', name: 'Two-Way Validation' },
                 { id: 'buat-dokumen', name: 'Buat Dokumen', icon: 'bi-file-earmark-plus', type: 'link' },
-                { id: 'validasi-dc', name: 'Validasi Dokumen DC', icon: 'bi-house-check', type: 'link' },
-                { id: 'riwayat', name: 'Riwayat Pengiriman', icon: 'bi-clock-history', type: 'link' },
+                { id: 'validasi-berkas', name: 'Validasi Berkas', icon: 'bi-clipboard2-check', type: 'link' },
+                { id: 'riwayat', name: 'Riwayat', icon: 'bi-clock-history', type: 'link' },
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
 
                 { type: 'header', name: 'One-Way Document' },
-                { id: 'validasi-penerimaan', name: 'Validasi Penerimaan', icon: 'bi-check-circle', type: 'link' },
-                { id: 'riwayat-satu-arah', name: 'Riwayat Pengiriman', icon: 'bi-clock', type: 'link' },
                 { id: 'laporan-satu-arah', name: 'Laporan Berkas', icon: 'bi-file-earmark-text', type: 'link' },
 
                 { type: 'accordion', name: 'Lain-lain', icon: 'bi-three-dots', id: 'lain-lain', items: [
@@ -1015,6 +1008,160 @@
                     </div>
                 </div>
             `,
+            'validasi-berkas': `
+                <h2 class="h2 fw-bold text-dark mb-3">Validasi Berkas</h2>
+                <ul class="nav nav-pills mb-4" id="validasi-type-switcher">
+                    <li class="nav-item me-2">
+                        <button type="button" class="nav-link active" id="btn-tab-validasi-two-way">
+                            <i class="bi bi-arrow-left-right me-2"></i>Two-Way Validation
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" id="btn-tab-validasi-one-way">
+                            <i class="bi bi-send me-2"></i>One-Way Document
+                        </button>
+                    </li>
+                </ul>
+
+                <div id="section-validasi-two-way">
+                    <div id="validasi-ho-section">
+                        <div class="row g-4">
+                            <div class="col-lg-4">
+                                <div class="card shadow-sm border-0 h-100">
+                                    <div class="card-body p-4 p-md-5 d-flex flex-column">
+                                        <h3 class="h5 card-title fw-semibold text-dark mb-3 text-center">1. Penerimaan Berkas dari DC</h3>
+                                        <form id="form-terima-ho" class="d-flex flex-column flex-grow-1">
+                                            <div>
+                                                <div id="terima-ho-alert"></div>
+                                                <div class="mb-3">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="bi bi-box-arrow-in-down"></i></span>
+                                                        <input type="text" id="barcode-terima-ho" class="form-control form-control-lg" placeholder="Scan barcode penerimaan" minlength="10" maxlength="10" pattern="[0-9]{10}" required>
+                                                    </div>
+                                                    <div class="form-text">Scan barcode untuk menandai berkas telah diterima.</div>
+                                                </div>
+                                            </div>
+                                            <div class="d-grid mt-auto">
+                                                <button class="btn btn-success btn-lg fw-semibold" type="submit">
+                                                    <i class="bi bi-check-circle me-2"></i>Terima Berkas
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card shadow-sm border-0 h-100">
+                                    <div class="card-body p-4 p-md-5 d-flex flex-column">
+                                        <h3 class="h5 card-title fw-semibold text-dark mb-3 text-center">2. Cek Dokumen</h3>
+                                        <form id="form-cek-dokumen" class="d-flex flex-column flex-grow-1">
+                                            <div>
+                                                <div id="cek-dokumen-alert"></div>
+                                                <div class="mb-3">
+                                                    <label for="cek-dokumen-catatan" class="form-label">Catatan Pengecekan (Wajib Diisi)</label>
+                                                    <textarea id="cek-dokumen-catatan" rows="2" class="form-control" placeholder="Masukkan hasil pengecekan..." required></textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                                                        <input type="text" id="barcode-cek-dokumen" class="form-control form-control-lg" placeholder="Scan barcode" minlength="10" maxlength="10" pattern="[0-9]{10}" required disabled>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="d-grid mt-auto">
+                                                <button id="btn-cek-dokumen" class="btn btn-info btn-lg fw-semibold text-white" type="submit" disabled>
+                                                    <i class="bi bi-search me-2"></i>Validasi Pengecekan
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card shadow-sm border-0 h-100">
+                                    <div class="card-body p-4 p-md-5 d-flex flex-column">
+                                        <h3 class="h5 card-title fw-semibold text-dark mb-3 text-center">3. Pengembalian Berkas ke DC</h3>
+                                        <form id="form-kembali-ho" class="d-flex flex-column flex-grow-1">
+                                            <div>
+                                                <div id="kembali-ho-alert"></div>
+                                                <div class="mb-3">
+                                                    <label for="kembali-ho-catatan" class="form-label">Catatan Pengembalian (Wajib Diisi)</label>
+                                                    <textarea id="kembali-ho-catatan" rows="2" class="form-control" placeholder="Masukkan alasan pengembalian..." required></textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                                                        <input type="text" id="barcode-kembali-ho" class="form-control form-control-lg" placeholder="Scan barcode pengembalian" minlength="10" maxlength="10" pattern="[0-9]{10}" required disabled>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="d-grid mt-auto">
+                                                <button id="btn-kembalikan-ho" class="btn btn-primary btn-lg fw-semibold" type="submit" disabled>
+                                                    <i class="bi bi-send-check me-2"></i>Validasi &amp; Kembalikan
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="validasi-dc-section">
+                        <div class="card shadow-sm border-0 mt-4">
+                            <div class="card-body p-4 p-md-5">
+                                <h3 class="h5 card-title fw-semibold text-dark mb-3 text-center">Scan Barcode Pengembalian dari HO</h3>
+                                <div class="row justify-content-center">
+                                    <div class="col-lg-8">
+                                        <form id="form-terima-dc">
+                                            <div id="terima-dc-alert"></div>
+                                            <div class="mb-3">
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                                                    <input type="text" id="barcode-terima-dc" class="form-control form-control-lg" placeholder="Masukkan 10 digit kode" aria-label="Kode Barcode" minlength="10" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" required>
+                                                </div>
+                                                <div class="form-text">Wajib diisi dengan 10 digit angka.</div>
+                                            </div>
+                                            <div class="d-grid">
+                                                <button class="btn btn-success btn-lg fw-semibold" type="submit">
+                                                    <i class="bi bi-check-circle me-2"></i>Terima Berkas
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <p class="text-muted mt-3 text-center">Scan barcode pada dokumen yang dikembalikan dari HO untuk menyelesaikan alur.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-validasi-one-way" class="d-none">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4 p-md-5">
+                            <h3 class="h5 card-title fw-semibold text-dark mb-3 text-center">Scan Barcode Penerimaan Berkas</h3>
+                            <div class="row justify-content-center">
+                                <div class="col-lg-8">
+                                    <form id="form-validasi-penerimaan">
+                                        <div id="validasi-penerimaan-alert"></div>
+                                        <div class="mb-3">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                                                <input type="text" id="barcode-validasi-penerimaan" class="form-control form-control-lg" placeholder="Masukkan 10 digit kode" aria-label="Kode Barcode" minlength="10" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" required>
+                                            </div>
+                                        </div>
+                                        <div class="d-grid">
+                                            <button class="btn btn-success btn-lg fw-semibold" type="submit">
+                                                <i class="bi bi-check-circle me-2"></i>Validasi Terima Berkas
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <p class="text-muted mt-3 text-center">Scan barcode pada dokumen untuk menandai bahwa dokumen telah diterima di area tujuan.</p>
+                        </div>
+                    </div>
+                </div>
+            `,
             'validasi-ho': `
                 <h2 class="h2 fw-bold text-dark mb-4">Validasi Dokumen HO</h2>
                 <div class="row g-4">
@@ -1127,127 +1274,132 @@
                 </div>
             `,
             'riwayat': `
-                <h2 class="h2 fw-bold text-dark mb-4">Riwayat Pengiriman</h2>
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-4">
-                        <form id="riwayat-filter-form" class="row g-3 align-items-end mb-4">
-                            <div class="col-md-3">
-                                <label for="filter-start-date" class="form-label">Dari Tanggal</label>
-                                <input type="date" class="form-control" id="filter-start-date">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="filter-end-date" class="form-label">Sampai Tanggal</label>
-                                <input type="date" class="form-control" id="filter-end-date">
-                                 <div class="invalid-feedback">
-                                    Tanggal akhir tidak boleh kurang dari tanggal awal.
+                <h2 class="h2 fw-bold text-dark mb-3">Riwayat</h2>
+                <ul class="nav nav-pills mb-4" id="riwayat-type-switcher">
+                    <li class="nav-item me-2">
+                        <button type="button" class="nav-link active" id="btn-tab-riwayat-two-way">
+                            <i class="bi bi-arrow-left-right me-2"></i>Two-Way Validation
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" id="btn-tab-riwayat-one-way">
+                            <i class="bi bi-send me-2"></i>One-Way Document
+                        </button>
+                    </li>
+                </ul>
+
+                <div id="section-riwayat-two-way">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <form id="riwayat-filter-form" class="row g-3 align-items-end mb-4">
+                                <div class="col-md-3">
+                                    <label for="filter-start-date" class="form-label">Dari Tanggal</label>
+                                    <input type="date" class="form-control" id="filter-start-date">
                                 </div>
+                                <div class="col-md-3">
+                                    <label for="filter-end-date" class="form-label">Sampai Tanggal</label>
+                                    <input type="date" class="form-control" id="filter-end-date">
+                                    <div class="invalid-feedback">
+                                        Tanggal akhir tidak boleh kurang dari tanggal awal.
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="filter-doc-type" class="form-label">Jenis Berkas</label>
+                                    <select id="filter-doc-type" class="form-select">
+                                        <option value="">Semua</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="filter-doc-status" class="form-label">Status</label>
+                                    <select id="filter-doc-status" class="form-select">
+                                        <option value="">Semua</option>
+                                        <option value="Dikirim ke HO">Dikirim ke HO</option>
+                                        <option value="Diterima HO">Diterima HO</option>
+                                        <option value="Dokumen Cek">Dokumen Cek</option>
+                                        <option value="Dikembalikan ke DC">Dikembalikan ke DC</option>
+                                        <option value="Selesai">Selesai</option>
+                                        <option value="Ditolak">Ditolak</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary w-100">Cari</button>
+                                    <button type="reset" class="btn btn-secondary w-100">Reset</button>
+                                </div>
+                            </form>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID Dokumen</th>
+                                            <th>Jenis Berkas</th>
+                                            <th>Pengirim</th>
+                                            <th>Area Pengirim</th>
+                                            <th>Area Penerima</th>
+                                            <th>Penerima HO</th>
+                                            <th>Tgl Kirim</th>
+                                            <th>Status</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="riwayat-table-body"></tbody>
+                                </table>
                             </div>
-                            <div class="col-md-2">
-                                <label for="filter-doc-type" class="form-label">Jenis Berkas</label>
-                                <select id="filter-doc-type" class="form-select">
-                                    <option value="">Semua</option>
-                                    <!-- Opsi dimuat oleh JS -->
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label for="filter-doc-status" class="form-label">Status</label>
-                                <select id="filter-doc-status" class="form-select">
-                                    <option value="">Semua</option>
-                                    <option value="Dikirim ke HO">Dikirim ke HO</option>
-                                    <option value="Diterima HO">Diterima HO</option>
-                                    <option value="Dokumen Cek">Dokumen Cek</option>
-                                    <option value="Dikembalikan ke DC">Dikembalikan ke DC</option>
-                                    <option value="Selesai">Selesai</option>
-                                    <option value="Ditolak">Ditolak</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2 d-flex gap-2">
-                                <button type="submit" class="btn btn-primary w-100">Cari</button>
-                                <button type="reset" class="btn btn-secondary w-100">Reset</button>
-                            </div>
-                        </form>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ID Dokumen</th>
-                                        <th>Jenis Berkas</th>
-                                        <th>Pengirim</th>
-                                        <th>Area Pengirim</th>
-                                        <th>Area Penerima</th>
-                                        <th>Penerima HO</th>
-                                        <th>Tgl Kirim</th>
-                                        <th>Status</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="riwayat-table-body">
-                                    <!-- Riwayat akan di-render di sini oleh JavaScript -->
-                                </tbody>
-                            </table>
                         </div>
                     </div>
                 </div>
-            `,
-            'riwayat': `
-                <h2 class="h2 fw-bold text-dark mb-4">Riwayat Pengiriman</h2>
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-4">
-                        <form id="riwayat-filter-form" class="row g-3 align-items-end mb-4">
-                            <div class="col-md-3">
-                                <label for="filter-start-date" class="form-label">Dari Tanggal</label>
-                                <input type="date" class="form-control" id="filter-start-date">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="filter-end-date" class="form-label">Sampai Tanggal</label>
-                                <input type="date" class="form-control" id="filter-end-date">
-                                 <div class="invalid-feedback">
-                                    Tanggal akhir tidak boleh kurang dari tanggal awal.
+
+                <div id="section-riwayat-one-way" class="d-none">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <form id="riwayat-satu-arah-filter-form" class="row g-3 align-items-end mb-4">
+                                <div class="col-md-3">
+                                    <label for="riwayat-satu-arah-start-date" class="form-label">Dari Tanggal</label>
+                                    <input type="date" class="form-control" id="riwayat-satu-arah-start-date">
                                 </div>
+                                <div class="col-md-3">
+                                    <label for="riwayat-satu-arah-end-date" class="form-label">Sampai Tanggal</label>
+                                    <input type="date" class="form-control" id="riwayat-satu-arah-end-date">
+                                    <div class="invalid-feedback">
+                                        Tanggal akhir tidak boleh kurang dari tanggal awal.
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="riwayat-satu-arah-doc-type" class="form-label">Jenis Berkas</label>
+                                    <select id="riwayat-satu-arah-doc-type" class="form-select">
+                                        <option value="">Semua</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="riwayat-satu-arah-status" class="form-label">Status</label>
+                                    <select id="riwayat-satu-arah-status" class="form-select">
+                                        <option value="">Semua</option>
+                                        <option value="Dikirim">Dikirim</option>
+                                        <option value="Diterima">Diterima</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary w-100">Cari</button>
+                                    <button type="reset" class="btn btn-secondary w-100">Reset</button>
+                                </div>
+                            </form>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID Dokumen</th>
+                                            <th>Jenis Berkas</th>
+                                            <th>Pengirim</th>
+                                            <th>Area Pengirim</th>
+                                            <th>Area Penerima</th>
+                                            <th>Penerima</th>
+                                            <th>Tgl Kirim</th>
+                                            <th>Status</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="riwayat-satu-arah-table-body"></tbody>
+                                </table>
                             </div>
-                            <div class="col-md-2">
-                                <label for="filter-doc-type" class="form-label">Jenis Berkas</label>
-                                <select id="filter-doc-type" class="form-select">
-                                    <option value="">Semua</option>
-                                    <!-- Opsi dimuat oleh JS -->
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label for="filter-doc-status" class="form-label">Status</label>
-                                <select id="filter-doc-status" class="form-select">
-                                    <option value="">Semua</option>
-                                    <option value="Dikirim ke HO">Dikirim ke HO</option>
-                                    <option value="Diterima HO">Diterima HO</option>
-                                    <option value="Dokumen Cek">Dokumen Cek</option>
-                                    <option value="Dikembalikan ke DC">Dikembalikan ke DC</option>
-                                    <option value="Selesai">Selesai</option>
-                                    <option value="Ditolak">Ditolak</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2 d-flex gap-2">
-                                <button type="submit" class="btn btn-primary w-100">Cari</button>
-                                <button type="reset" class="btn btn-secondary w-100">Reset</button>
-                            </div>
-                        </form>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ID Dokumen</th>
-                                        <th>Jenis Berkas</th>
-                                        <th>Pengirim</th>
-                                        <th>Area Pengirim</th>
-                                        <th>Area Penerima</th>
-                                        <th>Penerima HO</th>
-                                        <th>Tgl Kirim</th>
-                                        <th>Status</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="riwayat-table-body">
-                                    <!-- Riwayat akan di-render di sini oleh JavaScript -->
-                                </tbody>
-                            </table>
                         </div>
                     </div>
                 </div>
@@ -2164,6 +2316,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 if (pageId === 'riwayat') {
+                    // Tab switcher
+                    const switchRiwayatTab = (type) => {
+                        const isTwoWay = (type === 'two-way');
+                        document.getElementById('btn-tab-riwayat-two-way').classList.toggle('active', isTwoWay);
+                        document.getElementById('btn-tab-riwayat-one-way').classList.toggle('active', !isTwoWay);
+                        document.getElementById('section-riwayat-two-way').classList.toggle('d-none', !isTwoWay);
+                        document.getElementById('section-riwayat-one-way').classList.toggle('d-none', isTwoWay);
+                    };
+                    document.getElementById('btn-tab-riwayat-two-way').addEventListener('click', () => switchRiwayatTab('two-way'));
+                    document.getElementById('btn-tab-riwayat-one-way').addEventListener('click', () => switchRiwayatTab('one-way'));
+
+                    // Init Two-Way riwayat
                     const riwayatForm = document.getElementById('riwayat-filter-form');
                     const startDateInput = document.getElementById('filter-start-date');
                     const endDateInput = document.getElementById('filter-end-date');
@@ -2184,7 +2348,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     startDateInput.addEventListener('input', validateRiwayatDates);
                     endDateInput.addEventListener('input', validateRiwayatDates);
 
-                    await handleRiwayatSearch({ preventDefault: () => {} }); // Initial load
+                    await handleRiwayatSearch({ preventDefault: () => {} });
                     riwayatForm.addEventListener('submit', handleRiwayatSearch);
                     riwayatForm.addEventListener('reset', () => {
                          riwayatForm.reset();
@@ -2192,41 +2356,39 @@ document.addEventListener('DOMContentLoaded', function() {
                          searchBtn.disabled = false;
                          handleRiwayatSearch({ preventDefault: () => {} });
                     });
-                }
 
-                // (BARU) Logika untuk Halaman Riwayat 1 Arah
-                if (pageId === 'riwayat-satu-arah') {
-                    const riwayatForm = document.getElementById('riwayat-satu-arah-filter-form');
-                    const startDateInput = document.getElementById('riwayat-satu-arah-start-date');
-                    const endDateInput = document.getElementById('riwayat-satu-arah-end-date');
-                    const searchBtn = riwayatForm.querySelector('button[type="submit"]');
-                    
+                    // Init One-Way riwayat
+                    const riwayatSatuArahForm = document.getElementById('riwayat-satu-arah-filter-form');
+                    const startDateInputSA = document.getElementById('riwayat-satu-arah-start-date');
+                    const endDateInputSA = document.getElementById('riwayat-satu-arah-end-date');
+                    const searchBtnSA = riwayatSatuArahForm.querySelector('button[type="submit"]');
+
                     await loadJenisBerkasOptions(document.getElementById('riwayat-satu-arah-doc-type'), 'Semua Jenis');
 
-                    const validateRiwayatDates = () => {
-                        if (startDateInput.value && endDateInput.value && new Date(startDateInput.value) > new Date(endDateInput.value)) {
-                            endDateInput.classList.add('is-invalid');
-                            searchBtn.disabled = true;
+                    const validateRiwayatSADates = () => {
+                        if (startDateInputSA.value && endDateInputSA.value && new Date(startDateInputSA.value) > new Date(endDateInputSA.value)) {
+                            endDateInputSA.classList.add('is-invalid');
+                            searchBtnSA.disabled = true;
                         } else {
-                            endDateInput.classList.remove('is-invalid');
-                            searchBtn.disabled = false;
+                            endDateInputSA.classList.remove('is-invalid');
+                            searchBtnSA.disabled = false;
                         }
                     };
-                    
-                    startDateInput.addEventListener('input', validateRiwayatDates);
-                    endDateInput.addEventListener('input', validateRiwayatDates);
 
-                    await handleRiwayatSatuArahSearch({ preventDefault: () => {} }); // Initial load
-                    riwayatForm.addEventListener('submit', handleRiwayatSatuArahSearch);
-                    riwayatForm.addEventListener('reset', (e) => {
+                    startDateInputSA.addEventListener('input', validateRiwayatSADates);
+                    endDateInputSA.addEventListener('input', validateRiwayatSADates);
+
+                    await handleRiwayatSatuArahSearch({ preventDefault: () => {} });
+                    riwayatSatuArahForm.addEventListener('submit', handleRiwayatSatuArahSearch);
+                    riwayatSatuArahForm.addEventListener('reset', (e) => {
                          e.preventDefault();
-                         riwayatForm.reset();
-                         endDateInput.classList.remove('is-invalid');
-                         searchBtn.disabled = false;
+                         riwayatSatuArahForm.reset();
+                         endDateInputSA.classList.remove('is-invalid');
+                         searchBtnSA.disabled = false;
                          handleRiwayatSatuArahSearch({ preventDefault: () => {} });
                     });
                 }
-                
+
                 if (pageId === 'log-audit') {
                     await loadInitialLogAudit(); 
                     const logFilterForm = document.getElementById('log-filter-form');
@@ -2438,50 +2600,69 @@ document.addEventListener('DOMContentLoaded', function() {
                     switchTab(defaultTab);
                 }
 
-                if (pageId === 'validasi-ho') {
-                    document.getElementById('form-terima-ho').addEventListener('submit', handlePenerimaanHO);
+                if (pageId === 'validasi-berkas') {
+                    const isAdminHo = currentUser && currentUser.role_id === 'admin_ho';
+                    const isAdminDc = currentUser && currentUser.role_id && currentUser.role_id.startsWith('admin_dc');
 
-                    const cekDokumenForm = document.getElementById('form-cek-dokumen');
-                    const catatanCekInput = document.getElementById('cek-dokumen-catatan');
-                    const barcodeCekInput = document.getElementById('barcode-cek-dokumen');
-                    const btnCekDokumen = document.getElementById('btn-cek-dokumen');
+                    // Role-based section visibility
+                    if (isAdminDc) document.getElementById('validasi-ho-section').classList.add('d-none');
+                    if (isAdminHo) document.getElementById('validasi-dc-section').classList.add('d-none');
 
-                    const kembaliHoForm = document.getElementById('form-kembali-ho');
-                    const catatanKembaliInput = document.getElementById('kembali-ho-catatan');
-                    const barcodeKembaliInput = document.getElementById('barcode-kembali-ho');
-                    const btnKembalikanHo = document.getElementById('btn-kembalikan-ho');
+                    // Init HO forms (admin_ho + superadmin)
+                    if (!isAdminDc) {
+                        document.getElementById('form-terima-ho').addEventListener('submit', handlePenerimaanHO);
 
-                    const validateCekForm = () => {
-                        const catatanValid = catatanCekInput.value.trim() !== '';
-                        const barcodeValid = barcodeCekInput.value.trim().length === 10;
-                        barcodeCekInput.disabled = !catatanValid;
-                        btnCekDokumen.disabled = !(catatanValid && barcodeValid);
-                    };
+                        const cekDokumenForm = document.getElementById('form-cek-dokumen');
+                        const catatanCekInput = document.getElementById('cek-dokumen-catatan');
+                        const barcodeCekInput = document.getElementById('barcode-cek-dokumen');
+                        const btnCekDokumen = document.getElementById('btn-cek-dokumen');
+                        const kembaliHoForm = document.getElementById('form-kembali-ho');
+                        const catatanKembaliInput = document.getElementById('kembali-ho-catatan');
+                        const barcodeKembaliInput = document.getElementById('barcode-kembali-ho');
+                        const btnKembalikanHo = document.getElementById('btn-kembalikan-ho');
 
-                    const validatePengembalianForm = () => {
-                        const catatanValid = catatanKembaliInput.value.trim() !== '';
-                        const barcodeValid = barcodeKembaliInput.value.trim().length === 10;
-                        barcodeKembaliInput.disabled = !catatanValid;
-                        btnKembalikanHo.disabled = !(catatanValid && barcodeValid);
-                    };
+                        const validateCekForm = () => {
+                            const catatanValid = catatanCekInput.value.trim() !== '';
+                            const barcodeValid = barcodeCekInput.value.trim().length === 10;
+                            barcodeCekInput.disabled = !catatanValid;
+                            btnCekDokumen.disabled = !(catatanValid && barcodeValid);
+                        };
+                        const validatePengembalianForm = () => {
+                            const catatanValid = catatanKembaliInput.value.trim() !== '';
+                            const barcodeValid = barcodeKembaliInput.value.trim().length === 10;
+                            barcodeKembaliInput.disabled = !catatanValid;
+                            btnKembalikanHo.disabled = !(catatanValid && barcodeValid);
+                        };
 
-                    catatanCekInput.addEventListener('input', validateCekForm);
-                    barcodeCekInput.addEventListener('input', validateCekForm);
-                    cekDokumenForm.addEventListener('submit', handleCekDokumen);
-                    
-                    catatanKembaliInput.addEventListener('input', validatePengembalianForm);
-                    barcodeKembaliInput.addEventListener('input', validatePengembalianForm);
-                    kembaliHoForm.addEventListener('submit', handlePengembalianHO);
-                }
+                        catatanCekInput.addEventListener('input', validateCekForm);
+                        barcodeCekInput.addEventListener('input', validateCekForm);
+                        cekDokumenForm.addEventListener('submit', handleCekDokumen);
+                        catatanKembaliInput.addEventListener('input', validatePengembalianForm);
+                        barcodeKembaliInput.addEventListener('input', validatePengembalianForm);
+                        kembaliHoForm.addEventListener('submit', handlePengembalianHO);
+                    }
 
-                if (pageId === 'validasi-dc') {
-                    document.getElementById('form-terima-dc').addEventListener('submit', handlePenerimaanDC);
-                }
-                
-                if (pageId === 'validasi-penerimaan') {
+                    // Init DC form (admin_dc + superadmin)
+                    if (!isAdminHo) {
+                        document.getElementById('form-terima-dc').addEventListener('submit', handlePenerimaanDC);
+                    }
+
+                    // Init One-Way penerimaan form
                     document.getElementById('form-validasi-penerimaan').addEventListener('submit', handleValidasiPenerimaan);
+
+                    // Tab switcher
+                    const switchValidasiTab = (type) => {
+                        const isTwoWay = (type === 'two-way');
+                        document.getElementById('btn-tab-validasi-two-way').classList.toggle('active', isTwoWay);
+                        document.getElementById('btn-tab-validasi-one-way').classList.toggle('active', !isTwoWay);
+                        document.getElementById('section-validasi-two-way').classList.toggle('d-none', !isTwoWay);
+                        document.getElementById('section-validasi-one-way').classList.toggle('d-none', isTwoWay);
+                    };
+                    document.getElementById('btn-tab-validasi-two-way').addEventListener('click', () => switchValidasiTab('two-way'));
+                    document.getElementById('btn-tab-validasi-one-way').addEventListener('click', () => switchValidasiTab('one-way'));
+                    switchValidasiTab('two-way');
                 }
-                
+
                 if (pageId === 'laporan-satu-arah') {
                     const laporanForm = document.getElementById('laporan-satu-arah-form');
                     const isAdminDc = currentUser && currentUser.role_id.startsWith('admin_dc');
