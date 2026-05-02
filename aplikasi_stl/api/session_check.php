@@ -57,6 +57,20 @@ if ($user) {
         } catch (PDOException $e) { /* non-critical */ }
     }
 
+    // Step 4: Refresh area_name dari DB + set is_ho flag
+    $user['is_ho'] = false;
+    if (!empty($user['area_id'])) {
+        try {
+            $stmtArea = $pdo->prepare("SELECT name, is_ho FROM areas WHERE id = ? LIMIT 1");
+            $stmtArea->execute([$user['area_id']]);
+            $rowArea = $stmtArea->fetch();
+            if ($rowArea) {
+                $user['area_name'] = $rowArea['name'];
+                $user['is_ho']     = (bool)$rowArea['is_ho'];
+            }
+        } catch (PDOException $e) { /* non-critical */ }
+    }
+
     json_response([
         'status'         => 'success',
         'user'           => $user,

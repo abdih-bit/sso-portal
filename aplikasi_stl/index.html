@@ -1613,159 +1613,153 @@
             `,
             'cek-resi-ekspedisi': `
                 <h2 class="h2 fw-bold text-dark mb-4">Input Resi Ekspedisi</h2>
-                <div class="row g-4">
-                    <!-- Card for DC Shipment -->
-                    <div class="col-lg-6" id="dc-to-ho-card">
-                        <div class="card shadow-sm border-0 h-100">
-                            <div class="card-header bg-white">
+                <div class="d-flex flex-column gap-4">
+
+                    <!-- Card: Pengiriman DC ke HO -->
+                    <div id="dc-to-ho-card">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
+                                <span class="badge bg-primary rounded-2 p-2"><i class="bi bi-arrow-up-right-circle-fill fs-6"></i></span>
                                 <h3 class="h5 mb-0 fw-semibold">Pengiriman dari DC ke HO</h3>
                             </div>
                             <div class="card-body p-4">
+                                <div id="resi-dc-alert"></div>
+                                <div id="doc-details-container-dc" class="d-none mb-3">
+                                    <div class="alert alert-info border-0 p-2 small mb-0 d-flex align-items-center gap-2">
+                                        <i class="bi bi-file-earmark-check-fill"></i>
+                                        <span>Dokumen <strong id="detail-doc-id-dc"></strong> &mdash; <span id="detail-doc-sender-dc"></span></span>
+                                    </div>
+                                </div>
                                 <form id="form-input-resi-dc">
-                                    <div id="resi-dc-alert"></div>
-                                    <div class="row g-3">
-                                        <div class="col-md-12">
-                                            <label for="search-doc-id-dc" class="form-label fw-medium">1. Cari ID Dokumen</label>
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-lg-3 col-md-6">
+                                            <label class="form-label fw-semibold"><span class="badge rounded-pill bg-primary me-1">1</span> ID Dokumen</label>
                                             <div class="input-group">
-                                                <input type="text" class="form-control" id="search-doc-id-dc" placeholder="Klik tombol cari untuk memilih ID" required readonly>
-                                                <button class="btn btn-outline-primary" type="button" id="search-doc-btn-dc"><i class="bi bi-search"></i></button>
+                                                <input type="text" class="form-control" id="search-doc-id-dc" placeholder="Pilih ID..." required readonly>
+                                                <button class="btn btn-outline-primary" type="button" id="search-doc-btn-dc" title="Cari Dokumen"><i class="bi bi-search"></i></button>
                                             </div>
                                         </div>
-                                        <div id="doc-details-container-dc" class="col-md-12 d-none mt-3">
-                                            <div class="alert alert-secondary p-2 small">
-                                                <strong>ID:</strong> <span id="detail-doc-id-dc"></span><br>
-                                                <strong>Pengirim:</strong> <span id="detail-doc-sender-dc"></span>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label for="resi-dc" class="form-label fw-medium">2. Masukkan Barcode Resi</label>
+                                        <div class="col-lg-4 col-md-6">
+                                            <label class="form-label fw-semibold"><span class="badge rounded-pill bg-primary me-1">2</span> Nomor Resi</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
-                                                <input type="text" class="form-control" id="resi-dc" placeholder="Scan barcode resi" required>
+                                                <input type="text" class="form-control" id="resi-dc" placeholder="Scan / ketik nomor resi" required>
                                             </div>
                                         </div>
-                                        <div class="col-md-12">
-                                            <label for="ekspedisi-type-dc" class="form-label fw-medium">3. Pilih Jenis Ekspedisi</label>
+                                        <div class="col-lg-4 col-md-10">
+                                            <label class="form-label fw-semibold"><span class="badge rounded-pill bg-primary me-1">3</span> Jasa Ekspedisi</label>
                                             <select id="ekspedisi-type-dc" class="form-select" required>
-                                                <option value="" selected disabled>Pilih Jasa Ekspedisi...</option>
-                                                <!-- Opsi akan diisi oleh JS -->
+                                                <option value="" selected disabled>Pilih jasa ekspedisi...</option>
                                             </select>
                                         </div>
-                                    </div>
-                                    <div class="d-grid mt-4">
-                                        <button type="submit" id="save-resi-btn-dc" class="btn btn-primary fw-semibold" disabled>
-                                            <i class="bi bi-save me-2"></i>Simpan Resi DC
-                                        </button>
+                                        <div class="col-lg-1 col-md-2">
+                                            <button type="submit" id="save-resi-btn-dc" class="btn btn-primary w-100 fw-semibold" disabled title="Simpan Resi DC">
+                                                <i class="bi bi-save2-fill"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Card for HO Shipment -->
-                    <div class="col-lg-6" id="ho-to-dc-card">
-                        <div class="card shadow-sm border-0 h-100">
-                             <div class="card-header bg-white">
+                    <!-- Card: Pengiriman HO ke DC -->
+                    <div id="ho-to-dc-card">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
+                                <span class="badge bg-success rounded-2 p-2"><i class="bi bi-arrow-down-left-circle-fill fs-6"></i></span>
                                 <h3 class="h5 mb-0 fw-semibold">Pengiriman dari HO ke DC</h3>
                             </div>
                             <div class="card-body p-4">
+                                <div id="resi-ho-alert"></div>
+                                <div id="doc-details-container-ho" class="d-none mb-3">
+                                    <div class="alert alert-info border-0 p-2 small mb-0 d-flex align-items-center gap-2">
+                                        <i class="bi bi-file-earmark-check-fill"></i>
+                                        <span>Dokumen <strong id="detail-doc-id-ho"></strong> &mdash; <span id="detail-doc-sender-ho"></span></span>
+                                    </div>
+                                </div>
                                 <form id="form-input-resi-ho">
-                                     <div id="resi-ho-alert"></div>
-                                     <div class="row g-3">
-                                        <div class="col-md-12">
-                                            <label for="search-doc-id-ho" class="form-label fw-medium">1. Cari ID Dokumen</label>
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-lg-3 col-md-6">
+                                            <label class="form-label fw-semibold"><span class="badge rounded-pill bg-success me-1">1</span> ID Dokumen</label>
                                             <div class="input-group">
-                                                <input type="text" class="form-control" id="search-doc-id-ho" placeholder="Klik tombol cari untuk memilih ID" required readonly>
-                                                <button class="btn btn-outline-primary" type="button" id="search-doc-btn-ho"><i class="bi bi-search"></i></button>
+                                                <input type="text" class="form-control" id="search-doc-id-ho" placeholder="Pilih ID..." required readonly>
+                                                <button class="btn btn-outline-success" type="button" id="search-doc-btn-ho" title="Cari Dokumen"><i class="bi bi-search"></i></button>
                                             </div>
                                         </div>
-                                         <div id="doc-details-container-ho" class="col-md-12 d-none mt-3">
-                                            <div class="alert alert-secondary p-2 small">
-                                                <strong>ID:</strong> <span id="detail-doc-id-ho"></span><br>
-                                                <strong>Pengirim:</strong> <span id="detail-doc-sender-ho"></span>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label for="resi-ho" class="form-label fw-medium">2. Masukkan Barcode Resi</label>
+                                        <div class="col-lg-4 col-md-6">
+                                            <label class="form-label fw-semibold"><span class="badge rounded-pill bg-success me-1">2</span> Nomor Resi</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
-                                                <input type="text" class="form-control" id="resi-ho" placeholder="Scan barcode resi" required>
+                                                <input type="text" class="form-control" id="resi-ho" placeholder="Scan / ketik nomor resi" required>
                                             </div>
                                         </div>
-                                        <div class="col-md-12">
-                                            <label for="ekspedisi-type-ho" class="form-label fw-medium">3. Pilih Jenis Ekspedisi</label>
+                                        <div class="col-lg-4 col-md-10">
+                                            <label class="form-label fw-semibold"><span class="badge rounded-pill bg-success me-1">3</span> Jasa Ekspedisi</label>
                                             <select id="ekspedisi-type-ho" class="form-select" required>
-                                                <option value="" selected disabled>Pilih Jasa Ekspedisi...</option>
-                                                 <!-- Opsi akan diisi oleh JS -->
+                                                <option value="" selected disabled>Pilih jasa ekspedisi...</option>
                                             </select>
                                         </div>
-                                    </div>
-                                    <div class="d-grid mt-4">
-                                        <button type="submit" id="save-resi-btn-ho" class="btn btn-primary fw-semibold" disabled>
-                                            <i class="bi bi-save me-2"></i>Simpan Resi HO
-                                        </button>
+                                        <div class="col-lg-1 col-md-2">
+                                            <button type="submit" id="save-resi-btn-ho" class="btn btn-success w-100 fw-semibold" disabled title="Simpan Resi HO">
+                                                <i class="bi bi-save2-fill"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
+
                 </div>
-                <div class="row g-4 mt-4">
-                    <div class="col-lg-6" id="dc-results-card">
+                <div class="row g-4 mt-2">
+                    <div class="col-12" id="dc-results-card">
                         <div class="card shadow-sm border-0">
-                           <div class="card-header bg-white">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h3 class="h5 mb-0 fw-semibold">Data Resi Pengiriman dari DC</h3>
-                                    <div class="input-group" style="max-width: 250px;">
-                                        <span class="input-group-text" id="basic-addon1"><i class="bi bi-search"></i></span>
-                                        <input type="text" id="resi-dc-filter-input" class="form-control" placeholder="Cari ID Dokumen...">
-                                    </div>
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                <h3 class="h5 mb-0 fw-semibold"><i class="bi bi-list-check me-2 text-primary"></i>Data Resi — DC ke HO</h3>
+                                <div class="input-group" style="max-width: 260px;">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" id="resi-dc-filter-input" class="form-control" placeholder="Cari ID Dokumen...">
                                 </div>
                             </div>
-                            <div class="card-body p-4">
+                            <div class="card-body p-0">
                                 <div class="table-responsive">
-                                    <table class="table table-hover align-middle">
+                                    <table class="table table-hover align-middle mb-0">
                                         <thead class="table-light">
                                             <tr>
                                                 <th>ID Dokumen</th>
-                                                <th>Resi DC</th>
-                                                <th>Ekspedisi DC</th>
+                                                <th>Nomor Resi</th>
+                                                <th>Ekspedisi</th>
                                                 <th>Aksi</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="resi-dc-results-table-body">
-                                            <!-- Data akan diisi oleh JavaScript -->
-                                        </tbody>
+                                        <tbody id="resi-dc-results-table-body"></tbody>
                                     </table>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6" id="ho-results-card">
+                    <div class="col-12" id="ho-results-card">
                         <div class="card shadow-sm border-0">
-                            <div class="card-header bg-white">
-                                 <div class="d-flex justify-content-between align-items-center">
-                                    <h3 class="h5 mb-0 fw-semibold">Data Resi Pengiriman dari HO</h3>
-                                     <div class="input-group" style="max-width: 250px;">
-                                        <span class="input-group-text" id="basic-addon2"><i class="bi bi-search"></i></span>
-                                        <input type="text" id="resi-ho-filter-input" class="form-control" placeholder="Cari ID Dokumen...">
-                                    </div>
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                <h3 class="h5 mb-0 fw-semibold"><i class="bi bi-list-check me-2 text-success"></i>Data Resi — HO ke DC</h3>
+                                <div class="input-group" style="max-width: 260px;">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" id="resi-ho-filter-input" class="form-control" placeholder="Cari ID Dokumen...">
                                 </div>
                             </div>
-                            <div class="card-body p-4">
+                            <div class="card-body p-0">
                                 <div class="table-responsive">
-                                    <table class="table table-hover align-middle">
+                                    <table class="table table-hover align-middle mb-0">
                                         <thead class="table-light">
                                             <tr>
                                                 <th>ID Dokumen</th>
-                                                <th>Resi HO</th>
-                                                <th>Ekspedisi HO</th>
+                                                <th>Nomor Resi</th>
+                                                <th>Ekspedisi</th>
                                                 <th>Aksi</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="resi-ho-results-table-body">
-                                            <!-- Data akan diisi oleh JavaScript -->
-                                        </tbody>
+                                        <tbody id="resi-ho-results-table-body"></tbody>
                                     </table>
                                 </div>
                             </div>
@@ -2836,17 +2830,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     const dcToHoCard = document.getElementById('dc-to-ho-card');
                     const hoToDcCard = document.getElementById('ho-to-dc-card');
 
+                    // Visibilitas form berdasarkan is_ho (dari areas table, set oleh session_check.php)
+                    // Head AR (admin_ho) = DC user → lihat DC→HO. HO area user → lihat HO→DC.
                     if (currentUser.role_id !== 'superadmin') {
-                        if (currentUser.area_name && currentUser.area_name.includes('Head Office')) { 
+                        if (currentUser.is_ho) {
+                            // User di area HO: tampilkan form HO→DC saja
                             dcToHoCard.classList.add('d-none');
-                            hoToDcCard.classList.remove('d-none');
-                            hoToDcCard.classList.remove('col-lg-6');
-                            hoToDcCard.classList.add('col-lg-12');
-                        } else { 
+                        } else {
+                            // User di area DC (termasuk Head AR): tampilkan form DC→HO saja
                             hoToDcCard.classList.add('d-none');
-                            dcToHoCard.classList.remove('d-none');
-                            dcToHoCard.classList.remove('col-lg-6');
-                            dcToHoCard.classList.add('col-lg-12');
                         }
                     }
 
@@ -2877,7 +2869,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         tableBodyDc.innerHTML = '';
                         tableBodyHo.innerHTML = '';
 
-                        const isHoUser = currentUser.area_name && currentUser.area_name.includes('Head Office');
+                        // is_ho tersedia dari session_check.php (query areas table)
+                        const isHoUser = currentUser.is_ho === true;
                         const isDcUser = !isHoUser && currentUser.role_id !== 'superadmin';
 
                         const resiDcDocuments = fullResiData.filter(doc =>
