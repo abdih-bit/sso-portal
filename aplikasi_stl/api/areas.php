@@ -12,6 +12,18 @@ switch ($method) {
         $type        = $_GET['type']        ?? 'all';
         $parent_ho_id = isset($_GET['parent_ho_id']) ? (int)$_GET['parent_ho_id'] : null;
 
+        // Auto-sync: tambahkan area dari tabel users SSO yang belum ada di stl_areas
+        $pdo->exec("
+            INSERT INTO stl_areas (area_name, is_ho)
+            SELECT DISTINCT u.area, FALSE
+            FROM users u
+            WHERE u.area IS NOT NULL
+              AND u.area <> ''
+              AND NOT EXISTS (
+                  SELECT 1 FROM stl_areas a WHERE a.area_name = u.area
+              )
+        ");
+
         $sql    = "SELECT a.*, ho.area_name AS parent_ho_name
                    FROM stl_areas a
                    LEFT JOIN stl_areas ho ON a.parent_ho_id = ho.area_id";
