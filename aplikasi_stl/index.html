@@ -571,13 +571,6 @@
                 { type: 'accordion', name: 'Lain-lain', icon: 'bi-three-dots', id: 'lain-lain', items: [
                     { id: 'cek-resi-ekspedisi', name: 'Cek Resi Ekspedisi', icon: 'bi-truck' },
                     { id: 'log-audit', name: 'Log Audit', icon: 'bi-clipboard2-data' }
-                ]},
-                
-                { type: 'accordion', name: 'Management', icon: 'bi-gear-fill', id: 'management', items: [
-                    { id: 'management-ho', name: 'Management HO', icon: 'bi-building-gear' },
-                    { id: 'management-area', name: 'Management Area', icon: 'bi-geo-alt' },
-                    { id: 'management-user', name: 'Management User', icon: 'bi-people' },
-                    { id: 'management-berkas', name: 'Management Berkas', icon: 'bi-file-text' }
                 ]}
             ],
             admin_ho: [
@@ -597,10 +590,6 @@
                 { type: 'accordion', name: 'Lain-lain', icon: 'bi-three-dots', id: 'lain-lain', items: [
                     { id: 'cek-resi-ekspedisi', name: 'Cek Resi Ekspedisi', icon: 'bi-truck' },
                     { id: 'log-audit', name: 'Log Audit', icon: 'bi-clipboard2-data' }
-                ]},
-                
-                { type: 'accordion', name: 'Management', icon: 'bi-gear-fill', id: 'management', items: [
-                    { id: 'management-user', name: 'Management User', icon: 'bi-people' }
                 ]}
             ],
             admin_dc: [
@@ -1207,124 +1196,7 @@
                     </div>
                 </div>
             `,
-            'management-user': `
-                <h2 class="h2 fw-bold text-dark mb-4">Management User</h2>
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white p-3">
-                        <div class="d-flex justify-content-end gap-2">
-                            <button id="add-user-btn" class="btn btn-success fw-semibold">
-                                <i class="bi bi-plus-lg me-2"></i>Tambah Pengguna
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Nama</th>
-                                        <th>Area</th>
-                                        <th>Peran</th>
-                                        <th>Status</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="user-table-body">
-                                    <!-- User data will be populated here by JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            `,
-            'management-area': `
-                <h2 class="h2 fw-bold text-dark mb-4">Management Area</h2>
-                <div class="row g-4">
-                    <div class="col-lg-6">
-                        <div class="card shadow-sm border-0 h-100">
-                            <div class="card-body p-4">
-                                <h3 class="h5 card-title fw-semibold text-dark mb-3">Daftar Area (DC)</h3>
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Nama Area DC</th>
-                                                <th>Induk HO</th>
-                                                <th>Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="area-list-table-body">
-                                            <!-- Area list will be populated here -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-white">
-                                 <form id="add-area-form">
-                                    <div class="row g-2">
-                                        <div class="col-sm-6">
-                                            <label for="new-area-name" class="visually-hidden">Nama Area Baru</label>
-                                            <input type="text" class="form-control" id="new-area-name" placeholder="Nama Area DC Baru" required>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <label for="new-area-parent-ho" class="visually-hidden">Induk HO</label>
-                                            <select class="form-select" id="new-area-parent-ho" required>
-                                                <option value="" selected disabled>Pilih Induk HO...</option>
-                                                <!-- Opsi HO dimuat oleh JS -->
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-2 d-grid">
-                                            <button class="btn btn-primary" type="submit">Tambah</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card shadow-sm border-0 h-100">
-                            <div class="card-body p-4">
-                                <h3 class="h5 card-title fw-semibold text-dark mb-3">Daftar Sales Office</h3>
-                                 <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Nama Sales Office</th>
-                                                <th>Induk HO</th>
-                                                <th>Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="sales-office-list-table-body">
-                                            <!-- Sales Office list will be populated here -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-white">
-                                <form id="add-sales-office-form">
-                                    <div class="row g-2">
-                                        <div class="col-sm-6">
-                                            <label for="new-sales-office-name" class="visually-hidden">Nama Sales Office Baru</label>
-                                            <input type="text" class="form-control" id="new-sales-office-name" placeholder="Nama Sales Office Baru" required>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <label for="new-so-parent-ho" class="visually-hidden">Induk HO</label>
-                                            <select class="form-select" id="new-so-parent-ho" required>
-                                                <option value="" selected disabled>Pilih Induk HO...</option>
-                                                 <!-- Opsi HO dimuat oleh JS -->
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-2 d-grid">
-                                            <button class="btn btn-primary" type="submit">Tambah</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `,
-             'cek-resi-ekspedisi': `
+            'cek-resi-ekspedisi': `
                 <h2 class="h2 fw-bold text-dark mb-4">Input Resi Ekspedisi</h2>
                 <div class="row g-4">
                     <!-- Card for DC Shipment -->
@@ -1483,64 +1355,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            `,
-            'management-ho': `
-                <h2 class="h2 fw-bold text-dark mb-4">Management Head Office</h2>
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-4">
-                        <h3 class="h5 card-title fw-semibold text-dark mb-3">Daftar Area Head Office (HO)</h3>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Nama Area HO</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="ho-list-table-body">
-                                    <!-- Daftar HO akan dimuat di sini -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-white">
-                         <form id="add-ho-form">
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="new-ho-name" placeholder="Nama Area HO Baru (cth: Head Office MDR 5)" required>
-                                <button class="btn btn-primary" type="submit">Tambah Area HO</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            `,
-            'management-berkas': `
-                <h2 class="h2 fw-bold text-dark mb-4">Management Jenis Berkas</h2>
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-4">
-                        <h3 class="h5 card-title fw-semibold text-dark mb-3">Daftar Jenis Berkas</h3>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Nama Jenis Berkas</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="jenis-berkas-list-table-body">
-                                    <!-- Daftar jenis berkas akan dimuat di sini -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-white">
-                         <form id="add-jenis-berkas-form">
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="new-jenis-berkas-name" placeholder="Nama Jenis Berkas Baru" required>
-                                <button class="btn btn-primary" type="submit">Tambah Jenis Berkas</button>
-                            </div>
-                        </form>
                     </div>
                 </div>
             `,
@@ -2160,33 +1974,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
 
-                if (pageId === 'management-user') {
-                    renderUserTable();
-                    document.getElementById('add-user-btn').addEventListener('click', handleAddUserClick);
-                }
-                
-                if (pageId === 'management-area') {
-                    await loadAreaOptions(document.getElementById('new-area-parent-ho'), 'ho', 'Pilih Induk HO...');
-                    await loadAreaOptions(document.getElementById('new-so-parent-ho'), 'ho', 'Pilih Induk HO...');
-                    renderAreaList(); 
-                    renderSalesOfficeList(); 
-                    document.getElementById('add-area-form').addEventListener('submit', handleAddAreaSubmit);
-                    document.getElementById('add-sales-office-form').addEventListener('submit', handleAddSalesOfficeSubmit);
-                    document.getElementById('edit-item-form').addEventListener('submit', handleEditItemSubmit);
-                }
-                
-                if (pageId === 'management-ho') {
-                    renderHoList();
-                    document.getElementById('add-ho-form').addEventListener('submit', handleAddHoSubmit);
-                    document.getElementById('edit-item-form').addEventListener('submit', handleEditItemSubmit);
-                }
-
-                if (pageId === 'management-berkas') {
-                    renderJenisBerkasList();
-                    document.getElementById('add-jenis-berkas-form').addEventListener('submit', handleAddJenisBerkasSubmit);
-                    document.getElementById('edit-item-form').addEventListener('submit', handleEditItemSubmit);
-                }
-                
                 if (pageId === 'riwayat') {
                     const riwayatForm = document.getElementById('riwayat-filter-form');
                     const startDateInput = document.getElementById('filter-start-date');
