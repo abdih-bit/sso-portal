@@ -16,10 +16,15 @@ router.get('/', authenticate, async (req, res) => {
     const userPt      = userRecord?.pt      || null;
     const userJabatan = userRecord?.jabatan || null;
 
+    // Gunakan jabatan efektif (sama seperti sso.controller.js)
+    const effectiveJabatan = userJabatan && userJabatan.startsWith('Admin FAT - ')
+      ? userJabatan.replace('Admin FAT - ', '')
+      : userJabatan;
+
     // Scope berdasarkan jabatan ADMIN
-    const isHeadACC = userRole === 'ADMIN' && userJabatan === 'Head ACC';
-    const isHeadAR  = userRole === 'ADMIN' && userJabatan === 'Head AR';
-    const isKaAdmin = userJabatan === 'KA Admin';
+    const isHeadACC = userRole === 'ADMIN' && effectiveJabatan === 'Head ACC';
+    const isHeadAR  = userRole === 'ADMIN' && effectiveJabatan === 'Head AR';
+    const isKaAdmin = effectiveJabatan === 'KA Admin';
 
     const apps = await prisma.application.findMany({
       where: { isActive: true },
@@ -106,8 +111,8 @@ router.get('/', authenticate, async (req, res) => {
         // Jika tidak ada sub-jabatan FAT yang dipilih → tidak tampil ke siapapun
         if (fatSubs.length === 0) return false;
         // Ekstrak sub-jabatan user dari jabatan lengkap ("Admin FAT - Admin Kasir" → "Admin Kasir")
-        const subJabatan = userJabatan && userJabatan.startsWith('Admin FAT - ')
-          ? userJabatan.replace('Admin FAT - ', '')
+        const subJabatan = effectiveJabatan !== userJabatan
+          ? effectiveJabatan
           : null;
         if (!subJabatan) return false;
         if (!fatSubs.includes('FAT:' + subJabatan)) return false;
