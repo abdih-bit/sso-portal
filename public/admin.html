@@ -473,6 +473,14 @@
             <option value="">— Pilih PT —</option>
           </select>
         </div>
+        <!-- Untuk PT: pilih Head Office area -->
+        <div id="masterPtHoField" class="hidden">
+          <label class="block text-xs font-medium text-gray-500 mb-1">Head Office (Area/DC)</label>
+          <p class="text-[11px] text-gray-400 mb-1.5">Pilih area yang menjadi tempat Head AR untuk PT ini.</p>
+          <select id="masterPtHo" class="input-field">
+            <option value="">— Pilih Area sebagai Head Office —</option>
+          </select>
+        </div>
         <!-- Untuk Jabatan: pilih Departemen -->
         <div id="masterJabatanDeptField" class="hidden">
           <label class="block text-xs font-medium text-gray-500 mb-1">Departemen</label>
@@ -1461,7 +1469,7 @@
     function getMasterData() {
       const defaults = {
         pt: [
-          { name: 'MDR 1' }, { name: 'MDR 2' }, { name: 'MDR 3' }, { name: 'MDR 4' }
+          { name: 'MDR 1', head_office: '' }, { name: 'MDR 2', head_office: '' }, { name: 'MDR 3', head_office: '' }, { name: 'MDR 4', head_office: '' }
         ],
         area: [
           { name: 'DC Medan', pt: 'MDR 1' }, { name: 'DC Stabat', pt: 'MDR 1' },
@@ -1548,7 +1556,11 @@
       rebuildDropdownsFromMaster(data);
 
       var typeMap = {
-        pt: { listId: 'masterPtList', color: 'blue', icon: 'fa-building', badge: function(item) { return ''; } },
+        pt: { listId: 'masterPtList', color: 'blue', icon: 'fa-building', badge: function(item) {
+          return item.head_office
+            ? `<span class="tag bg-amber-50 text-amber-600 text-[10px]"><i class="fa-solid fa-crown text-[9px] mr-0.5"></i>${item.head_office}</span>`
+            : '<span class="tag bg-gray-100 text-gray-400 text-[10px]">HO belum diatur</span>';
+        } },
         jabatan: { listId: 'masterJabatanList', color: 'purple', icon: 'fa-id-badge', badge: function(item) { return item.departemen ? `<span class="tag bg-orange-50 text-orange-600 text-[10px]">${item.departemen}</span>` : ''; } },
         departemen: { listId: 'masterDepartemenList', color: 'orange', icon: 'fa-sitemap', badge: function(item) { return ''; } }
       };
@@ -1642,9 +1654,27 @@
 
       // Reset sub-fields
       document.getElementById('masterPtParentField').classList.add('hidden');
+      document.getElementById('masterPtHoField').classList.add('hidden');
       document.getElementById('masterJabatanDeptField').classList.add('hidden');
 
       var data = getMasterData();
+      if (type === 'pt') {
+        // Populate HO area dropdown — tampilkan semua area milik PT ini
+        var ptName = editIdx >= 0 ? data.pt[editIdx].name : null;
+        var hoSel = document.getElementById('masterPtHo');
+        hoSel.innerHTML = '<option value="">— Pilih Area sebagai Head Office —</option>';
+        var ptAreas = (data.area || []).filter(function(a) { return !ptName || a.pt === ptName; });
+        if (!ptAreas.length) {
+          // Jika belum ada area, tampilkan semua
+          ptAreas = data.area || [];
+        }
+        ptAreas.forEach(function(a) {
+          var o = document.createElement('option'); o.value = a.name; o.textContent = a.name;
+          hoSel.appendChild(o);
+        });
+        document.getElementById('masterPtHoField').classList.remove('hidden');
+        if (editIdx >= 0) hoSel.value = data.pt[editIdx].head_office || '';
+      }
       if (type === 'area') {
         // Populate PT select
         var ptSel = document.getElementById('masterPtParent');
@@ -1748,6 +1778,7 @@
 
       var data = getMasterData();
       var item = { name: name };
+      if (type === 'pt') item.head_office = document.getElementById('masterPtHo').value;
       if (type === 'area') item.pt = document.getElementById('masterPtParent').value;
       if (type === 'jabatan') item.departemen = document.getElementById('masterJabatanDept').value;
 
