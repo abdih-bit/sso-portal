@@ -259,9 +259,117 @@
 
         /* (DIUBAH) Perbaikan Tampilan Login */
         .login-form-side {
-            /* (DIUBAH) Gradien disesuaikan agar lebih halus */
             background: linear-gradient(to bottom, #ade8f4, #f8f9fa 60%);
         }
+
+        /* ── Topbar ── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            padding: 0.5rem 0 1rem 0;
+        }
+        .topbar-user-card {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: #fff;
+            border-radius: 0.75rem;
+            padding: 0.45rem 0.9rem;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+        }
+        .topbar-user-card .user-name {
+            font-weight: 700;
+            font-size: 0.92rem;
+            line-height: 1.2;
+            color: #1a1a2e;
+        }
+        .topbar-user-card .user-role {
+            font-size: 0.78rem;
+            color: #6c757d;
+            line-height: 1.2;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #28a745;
+            flex-shrink: 0;
+        }
+        /* Dark Mode Toggle */
+        .dark-toggle {
+            background: #e9ecef;
+            border: none;
+            border-radius: 20px;
+            width: 44px;
+            height: 24px;
+            position: relative;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.3s;
+        }
+        .dark-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            transition: transform 0.3s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        body.dark-mode .dark-toggle {
+            background: #0077b6;
+        }
+        body.dark-mode .dark-toggle::after {
+            transform: translateX(20px);
+        }
+        /* Logout Button */
+        .btn-logout {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 0.5rem;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+        .btn-logout:hover { background: #b02a37; color: #fff; }
+
+        /* ── Dark Mode ── */
+        body.dark-mode {
+            background-color: #121212 !important;
+            color: #e0e0e0;
+        }
+        body.dark-mode .main-content { background-color: #121212; }
+        body.dark-mode .card { background-color: #1e1e2e !important; border-color: #2e2e3e !important; color: #e0e0e0; }
+        body.dark-mode .card-header { background-color: #1e1e2e !important; border-color: #2e2e3e !important; }
+        body.dark-mode .card-footer { background-color: #1e1e2e !important; border-color: #2e2e3e !important; }
+        body.dark-mode .table { color: #e0e0e0; --bs-table-bg: transparent; }
+        body.dark-mode .table-light { --bs-table-bg: #2a2a3e; color: #e0e0e0; }
+        body.dark-mode .table-hover tbody tr:hover { background-color: rgba(255,255,255,0.05); }
+        body.dark-mode .form-control,
+        body.dark-mode .form-select { background-color: #2a2a3e; border-color: #3e3e5e; color: #e0e0e0; }
+        body.dark-mode .form-control:focus,
+        body.dark-mode .form-select:focus { background-color: #2a2a3e; color: #e0e0e0; }
+        body.dark-mode .topbar-user-card { background: #1e1e2e; box-shadow: 0 1px 6px rgba(0,0,0,0.3); }
+        body.dark-mode .topbar-user-card .user-name { color: #e0e0e0; }
+        body.dark-mode .input-group-text { background-color: #2a2a3e; border-color: #3e3e5e; color: #e0e0e0; }
+        body.dark-mode .modal-content { background-color: #1e1e2e; color: #e0e0e0; }
+        body.dark-mode .modal-header, body.dark-mode .modal-footer { border-color: #3e3e5e; }
+        body.dark-mode .btn-close { filter: invert(1); }
+        body.dark-mode .text-dark { color: #e0e0e0 !important; }
+        body.dark-mode .text-muted { color: #9e9e9e !important; }
+        body.dark-mode .bg-white { background-color: #1e1e2e !important; }
+        body.dark-mode .alert-secondary { background-color: #2a2a3e; border-color: #3e3e5e; color: #e0e0e0; }
     </style>
 </head>
 <!-- (Bersambung ke Bagian 2) -->
@@ -359,16 +467,28 @@
 
             <!-- Main Content -->
             <main class="main-content p-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <!-- Topbar -->
+                <div class="topbar">
                     <!-- Mobile Menu Button -->
-                    <button class="btn btn-dark d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobile-sidebar" aria-controls="mobile-sidebar">
+                    <button class="btn btn-dark d-md-none me-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobile-sidebar" aria-controls="mobile-sidebar">
                         <i class="bi bi-list"></i>
                     </button>
-                    <!-- User Info Display -->
-                    <div id="user-info" class="text-end ms-auto bg-white p-2 rounded-3 shadow-sm">
-                        <!-- User info will be populated here -->
+
+                    <!-- Dark Mode Toggle + Moon Icon -->
+                    <button class="dark-toggle" id="dark-mode-toggle" title="Toggle Dark Mode"></button>
+                    <i class="bi bi-moon-stars-fill text-secondary" style="font-size:1rem;"></i>
+
+                    <!-- User Info Card -->
+                    <div class="topbar-user-card" id="user-info">
+                        <!-- Diisi oleh JS -->
                     </div>
+
+                    <!-- Logout Button -->
+                    <button class="btn-logout" id="topbar-logout-btn" title="Logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
                 </div>
+
                 <div id="content">
                     <!-- Content for each page will be loaded here -->
                 </div>
@@ -2494,9 +2614,13 @@ document.addEventListener('DOMContentLoaded', function() {
         currentUser = user;
         const userInfoDiv = document.getElementById('user-info');
         if (userInfoDiv) {
+            const roleName = currentUser.role_name || currentUser.role_id || '';
             userInfoDiv.innerHTML = `
-                <div class="fw-bold">${currentUser.full_name}</div>
-                <div class="text-muted small">${currentUser.area_name || ''}</div>
+                <div class="status-dot"></div>
+                <div>
+                    <div class="user-name">${currentUser.full_name}</div>
+                    <div class="user-role">${roleName}${currentUser.area_name ? ' &bull; ' + currentUser.area_name : ''}</div>
+                </div>
             `;
         }
         populateMenus(currentUser.role_id);
@@ -2582,6 +2706,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     logoutButton.addEventListener('click', handleLogout);
     mobileLogoutButton.addEventListener('click', handleLogout);
+
+    // Topbar logout button
+    document.getElementById('topbar-logout-btn').addEventListener('click', handleLogout);
+
+    // Dark mode toggle
+    const darkToggleBtn = document.getElementById('dark-mode-toggle');
+    const applyDarkMode = (enabled) => {
+        document.body.classList.toggle('dark-mode', enabled);
+        localStorage.setItem('stl-dark-mode', enabled ? '1' : '0');
+    };
+    darkToggleBtn.addEventListener('click', () => {
+        applyDarkMode(!document.body.classList.contains('dark-mode'));
+    });
+    // Restore preference on load
+    if (localStorage.getItem('stl-dark-mode') === '1') applyDarkMode(true);
 
     // Jalankan pengecekan session saat halaman load
     checkSession();
