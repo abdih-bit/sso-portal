@@ -13,7 +13,7 @@
     <!-- Custom Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Pustaka JavaScript (dimuat di head agar script.js bisa menemukannya) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -23,7 +23,7 @@
 
     <style>
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            font-family: 'Poppins', sans-serif;
         }
         #main-wrapper {
             position: relative;
@@ -2618,8 +2618,8 @@ document.addEventListener('DOMContentLoaded', function() {
             userInfoDiv.innerHTML = `
                 <div class="status-dot"></div>
                 <div>
-                    <div class="user-name">${currentUser.full_name}</div>
-                    <div class="user-role">${roleName}${currentUser.area_name ? ' &bull; ' + currentUser.area_name : ''}</div>
+                    <div class="user-name">${currentUser.full_name}${roleName ? ' (' + roleName + ')' : ''}</div>
+                    <div class="user-role">Status: Online</div>
                 </div>
             `;
         }
