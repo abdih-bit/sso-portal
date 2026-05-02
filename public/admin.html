@@ -651,6 +651,18 @@
           </div>
           <p id="deptHint" class="text-xs text-red-500 mt-1.5 hidden"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Tidak ada departemen dipilih — aplikasi <strong>tidak akan tampil</strong> di dashboard manapun.</p>
         </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Hak Akses Jabatan</label>
+          <div class="flex flex-wrap gap-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
+            <label class="flex items-center gap-1.5 text-sm font-medium cursor-pointer">
+              <input type="checkbox" id="jabatanHeadAR" class="jabatanCheck w-4 h-4 accent-amber-600" value="Head AR"> Head AR
+            </label>
+            <label class="flex items-center gap-1.5 text-sm font-medium cursor-pointer">
+              <input type="checkbox" id="jabatanKAAdmin" class="jabatanCheck w-4 h-4 accent-amber-600" value="KA Admin"> KA Admin
+            </label>
+          </div>
+          <p class="text-xs text-gray-400 mt-1.5"><i class="fa-solid fa-circle-info mr-1"></i>Kosongkan jika semua jabatan dapat akses.</p>
+        </div>
         <div class="flex gap-3 pt-1">
           <button type="button" onclick="closeModal('appModal')" class="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-all">Cancel</button>
           <button type="submit" class="flex-1 btn-primary justify-center">
@@ -1283,6 +1295,7 @@
       document.getElementById('appId').value = '';
       document.getElementById('clientCredentials').classList.add('hidden');
       renderDeptCheckboxes([], 'deptCheckboxes', 'deptHint');
+      document.querySelectorAll('#appForm .jabatanCheck').forEach(function(cb) { cb.checked = false; });
       document.getElementById('appModal').classList.add('show');
     }
 
@@ -1295,6 +1308,8 @@
       document.getElementById('appUrl').value         = a.url;
       document.getElementById('appCallbackUrl').value = a.callbackUrl;
       renderDeptCheckboxes(a.allowedDepartemen || [], 'deptCheckboxes', 'deptHint');
+      const allowedJab = a.allowedJabatan || [];
+      document.querySelectorAll('#appForm .jabatanCheck').forEach(function(cb) { cb.checked = allowedJab.includes(cb.value); });
       document.getElementById('displayClientId').textContent     = a.clientId;
       document.getElementById('displayClientSecret').textContent = a.clientSecret;
       document.getElementById('clientCredentials').classList.remove('hidden');
@@ -1307,6 +1322,7 @@
       const deptChecked = [...document.getElementById('deptCheckboxes').querySelectorAll('.deptCheck:checked')].map(c => c.value);
       const fatSubChecked = [...document.querySelectorAll('#fatSubCheckboxes .fatSubCheck:checked')].map(c => 'FAT:' + c.value);
       const allowedDepartemen = deptChecked.concat(fatSubChecked);
+      const allowedJabatan = [...document.querySelectorAll('#appForm .jabatanCheck:checked')].map(c => c.value);
       const body = {
         name: document.getElementById('appName').value,
         slug: document.getElementById('appSlug').value,
@@ -1314,6 +1330,7 @@
         url: document.getElementById('appUrl').value,
         callbackUrl: document.getElementById('appCallbackUrl').value,
         allowedDepartemen,
+        allowedJabatan,
         areaLinks: null,
         appType: 'SSO',
       };

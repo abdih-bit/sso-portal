@@ -315,7 +315,7 @@ async function getApplications(req, res) {
  */
 async function createApplication(req, res) {
   try {
-    const { name, slug, description, url, callbackUrl, logoUrl, allowedRoles, allowedDepartemen, areaLinks, appType, sortOrder } = req.body;
+    const { name, slug, description, url, callbackUrl, logoUrl, allowedRoles, allowedDepartemen, allowedJabatan, areaLinks, appType, sortOrder } = req.body;
 
     // Link App hanya butuh name & slug; SSO App butuh url & callbackUrl juga
     if (appType === 'LINK') {
@@ -340,6 +340,7 @@ async function createApplication(req, res) {
         clientSecret: uuidv4(),
         allowedRoles: allowedRoles || ['USER'],
         allowedDepartemen: allowedDepartemen || [],
+        allowedJabatan: allowedJabatan || [],
         areaLinks: areaLinks || null,
         sortOrder: sortOrder || 0,
       }
@@ -367,7 +368,7 @@ async function createApplication(req, res) {
 async function updateApplication(req, res) {
   try {
     const { id } = req.params;
-    const { name, description, url, callbackUrl, logoUrl, isActive, allowedRoles, allowedDepartemen, areaLinks, sortOrder } = req.body;
+    const { name, description, url, callbackUrl, logoUrl, isActive, allowedRoles, allowedDepartemen, allowedJabatan, areaLinks, sortOrder } = req.body;
 
     const app = await prisma.application.update({
       where: { id },
@@ -380,6 +381,7 @@ async function updateApplication(req, res) {
         ...(isActive !== undefined && { isActive }),
         ...(allowedRoles && { allowedRoles }),
         ...(allowedDepartemen !== undefined && { allowedDepartemen }),
+        ...(allowedJabatan !== undefined && { allowedJabatan }),
         ...(areaLinks !== undefined && { areaLinks: areaLinks || null }),
         ...(sortOrder !== undefined && { sortOrder }),
       }

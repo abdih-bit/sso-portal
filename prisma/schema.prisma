@@ -82,6 +82,7 @@ model Application {
   isActive      Boolean   @default(true) @map("is_active")
   allowedRoles  String[]  @default(["USER"]) @map("allowed_roles")
   allowedDepartemen String[] @default([]) @map("allowed_departemen")
+  allowedJabatan String[] @default([]) @map("allowed_jabatan")
   areaLinks     Json?     @map("area_links")   // {"DC Medan": "https://...", "DC Stabat": "https://..."}
   sortOrder     Int       @default(0) @map("sort_order")
   createdAt     DateTime  @default(now()) @map("created_at")
