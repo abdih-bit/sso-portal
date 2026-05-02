@@ -698,9 +698,8 @@
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
 
                 { type: 'header', name: 'One-Way Document' },
-                { id: 'kirim-berkas', name: 'Kirim Berkas', icon: 'bi-send', type: 'link' },
                 { id: 'validasi-penerimaan', name: 'Validasi Penerimaan', icon: 'bi-check-circle', type: 'link' },
-                { id: 'riwayat-satu-arah', name: 'Riwayat Pengiriman', icon: 'bi-clock', type: 'link' }, // <-- MENU BARU
+                { id: 'riwayat-satu-arah', name: 'Riwayat Pengiriman', icon: 'bi-clock', type: 'link' },
                 { id: 'laporan-satu-arah', name: 'Laporan Berkas', icon: 'bi-file-earmark-text', type: 'link' },
 
                 { type: 'accordion', name: 'Lain-lain', icon: 'bi-three-dots', id: 'lain-lain', items: [
@@ -717,9 +716,9 @@
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
 
                 { type: 'header', name: 'One-Way Document' },
-                { id: 'kirim-berkas', name: 'Kirim Berkas', icon: 'bi-send', type: 'link' },
+                { id: 'buat-dokumen', name: 'Kirim Berkas', icon: 'bi-send', type: 'link' },
                 { id: 'validasi-penerimaan', name: 'Validasi Penerimaan', icon: 'bi-check-circle', type: 'link' },
-                { id: 'riwayat-satu-arah', name: 'Riwayat Pengiriman', icon: 'bi-clock', type: 'link' }, // <-- MENU BARU
+                { id: 'riwayat-satu-arah', name: 'Riwayat Pengiriman', icon: 'bi-clock', type: 'link' },
                 { id: 'laporan-satu-arah', name: 'Laporan Berkas', icon: 'bi-file-earmark-text', type: 'link' },
 
                 { type: 'accordion', name: 'Lain-lain', icon: 'bi-three-dots', id: 'lain-lain', items: [
@@ -737,9 +736,8 @@
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
 
                 { type: 'header', name: 'One-Way Document' },
-                { id: 'kirim-berkas', name: 'Kirim Berkas', icon: 'bi-send', type: 'link' },
                 { id: 'validasi-penerimaan', name: 'Validasi Penerimaan', icon: 'bi-check-circle', type: 'link' },
-                { id: 'riwayat-satu-arah', name: 'Riwayat Pengiriman', icon: 'bi-clock', type: 'link' }, // <-- MENU BARU
+                { id: 'riwayat-satu-arah', name: 'Riwayat Pengiriman', icon: 'bi-clock', type: 'link' },
                 { id: 'laporan-satu-arah', name: 'Laporan Berkas', icon: 'bi-file-earmark-text', type: 'link' },
 
                 { type: 'accordion', name: 'Lain-lain', icon: 'bi-three-dots', id: 'lain-lain', items: [
@@ -875,89 +873,145 @@
                 </div>
             `,
             'buat-dokumen': `
-                <h2 class="h2 fw-bold text-dark mb-4">Buat Dokumen</h2>
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-4 p-md-5">
-                        <form id="create-doc-form">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="nama-pengirim" class="form-label">Nama Pengirim</label>
-                                    <input type="text" id="nama-pengirim" class="form-control" value="" readonly>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="area-tujuan" class="form-label">Area Tujuan</label>
-                                    <input type="text" id="area-tujuan" class="form-control" value="Memuat..." readonly>
-                                    <input type="hidden" id="area-tujuan-id">
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="distribution-center" class="form-label">Distribution Center</label>
-                                    <input type="text" id="distribution-center" class="form-control" value="" readonly>
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="jenis-berkas-dc" class="form-label">Jenis Berkas DC</label>
-                                    <select id="jenis-berkas-dc" class="form-select" required>
-                                        <option value="" selected disabled>Memuat...</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="periode-awal-dc" class="form-label">Periode Awal Berkas DC</label>
-                                    <input type="date" id="periode-awal-dc" class="form-control" required>
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="periode-akhir-dc" class="form-label">Periode Akhir Berkas DC</label>
-                                    <input type="date" id="periode-akhir-dc" class="form-control" required>
-                                    <div class="invalid-feedback">
-                                        Tanggal akhir tidak boleh kurang dari tanggal awal.
+                <h2 class="h2 fw-bold text-dark mb-3">Buat Dokumen</h2>
+                <ul class="nav nav-pills mb-4" id="doc-type-switcher">
+                    <li class="nav-item me-2">
+                        <button type="button" class="nav-link active" id="btn-tab-two-way">
+                            <i class="bi bi-arrow-left-right me-2"></i>Two-Way Validation
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" id="btn-tab-one-way">
+                            <i class="bi bi-send me-2"></i>One-Way Document
+                        </button>
+                    </li>
+                </ul>
+
+                <div id="section-two-way">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4 p-md-5">
+                            <form id="create-doc-form">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="nama-pengirim" class="form-label">Nama Pengirim</label>
+                                        <input type="text" id="nama-pengirim" class="form-control" value="" readonly>
                                     </div>
-                                </div>
+                                    <div class="col-md-6">
+                                        <label for="area-tujuan" class="form-label">Area Tujuan</label>
+                                        <input type="text" id="area-tujuan" class="form-control" value="Memuat..." readonly>
+                                        <input type="hidden" id="area-tujuan-id">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="distribution-center" class="form-label">Distribution Center</label>
+                                        <input type="text" id="distribution-center" class="form-control" value="" readonly>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="jenis-berkas-dc" class="form-label">Jenis Berkas DC</label>
+                                        <select id="jenis-berkas-dc" class="form-select" required>
+                                            <option value="" selected disabled>Memuat...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="periode-awal-dc" class="form-label">Periode Awal Berkas DC</label>
+                                        <input type="date" id="periode-awal-dc" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="periode-akhir-dc" class="form-label">Periode Akhir Berkas DC</label>
+                                        <input type="date" id="periode-akhir-dc" class="form-control" required>
+                                        <div class="invalid-feedback">
+                                            Tanggal akhir tidak boleh kurang dari tanggal awal.
+                                        </div>
+                                    </div>
 
-                                <div class="col-12 mt-3">
-                                    <label for="has-so-docs" class="form-label fw-medium">Ada Dokumen SO?</label>
-                                    <select id="has-so-docs" class="form-select">
-                                        <option value="tidak" selected>Tidak</option>
-                                        <option value="ya">Ya</option>
-                                    </select>
-                                </div>
+                                    <div class="col-12 mt-3">
+                                        <label for="has-so-docs" class="form-label fw-medium">Ada Dokumen SO?</label>
+                                        <select id="has-so-docs" class="form-select">
+                                            <option value="tidak" selected>Tidak</option>
+                                            <option value="ya">Ya</option>
+                                        </select>
+                                    </div>
 
-                                <div id="so-fields-container" class="d-none">
-                                    <div class="row g-3 mt-1">
-                                        <div class="col-md-3">
-                                            <label for="sales-office" class="form-label">Sales Office</label>
-                                            <select id="sales-office" class="form-select">
-                                                <!-- Options populated by JS -->
-                                            </select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label for="jenis-berkas-so" class="form-label">Jenis Berkas SO</label>
-                                            <select id="jenis-berkas-so" class="form-select">
-                                                <option value="" selected disabled>Memuat...</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label for="periode-awal-so" class="form-label">Periode Awal Berkas SO</label>
-                                            <input type="date" id="periode-awal-so" class="form-control">
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label for="periode-akhir-so" class="form-label">Periode Akhir Berkas SO</label>
-                                            <input type="date" id="periode-akhir-so" class="form-control">
-                                            <div class="invalid-feedback">
-                                                Tanggal akhir tidak boleh kurang dari tanggal awal.
+                                    <div id="so-fields-container" class="d-none">
+                                        <div class="row g-3 mt-1">
+                                            <div class="col-md-3">
+                                                <label for="sales-office" class="form-label">Sales Office</label>
+                                                <select id="sales-office" class="form-select">
+                                                    <!-- Options populated by JS -->
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="jenis-berkas-so" class="form-label">Jenis Berkas SO</label>
+                                                <select id="jenis-berkas-so" class="form-select">
+                                                    <option value="" selected disabled>Memuat...</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="periode-awal-so" class="form-label">Periode Awal Berkas SO</label>
+                                                <input type="date" id="periode-awal-so" class="form-control">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="periode-akhir-so" class="form-label">Periode Akhir Berkas SO</label>
+                                                <input type="date" id="periode-akhir-so" class="form-control">
+                                                <div class="invalid-feedback">
+                                                    Tanggal akhir tidak boleh kurang dari tanggal awal.
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                    
+                                    <div class="col-12 mt-3">
+                                        <label for="catatan" class="form-label">Catatan</label>
+                                        <textarea id="catatan" rows="4" class="form-control" placeholder="Tambahkan catatan jika perlu..." required></textarea>
+                                    </div>
                                 </div>
-                                
-                                <div class="col-12 mt-3">
-                                    <label for="catatan" class="form-label">Catatan</label>
-                                    <textarea id="catatan" rows="4" class="form-control" placeholder="Tambahkan catatan jika perlu..." required></textarea>
+                                <div class="d-flex justify-content-end mt-4">
+                                    <button id="send-doc-btn" class="btn btn-primary fw-semibold px-4" type="submit" disabled>
+                                        <i class="bi bi-send me-2"></i>Kirim Dokumen
+                                    </button>
                                 </div>
-                            </div>
-                            <div class="d-flex justify-content-end mt-4">
-                                <button id="send-doc-btn" class="btn btn-primary fw-semibold px-4" type="submit" disabled>
-                                    <i class="bi bi-send me-2"></i>Kirim Dokumen
-                                </button>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-one-way" class="d-none">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4 p-md-5">
+                            <form id="kirim-berkas-form">
+                                <div id="kirim-berkas-alert"></div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="kirim-nama-pengirim" class="form-label">Nama Pengirim</label>
+                                        <input type="text" id="kirim-nama-pengirim" class="form-control" value="" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="kirim-distribution-center" class="form-label">Distribution Center</label>
+                                        <input type="text" id="kirim-distribution-center" class="form-control" value="" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="kirim-jenis-berkas" class="form-label">Jenis Berkas</label>
+                                        <select id="kirim-jenis-berkas" class="form-select" required>
+                                            <option value="" selected disabled>Memuat...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="kirim-area-tujuan" class="form-label">Area Tujuan</label>
+                                        <select id="kirim-area-tujuan" class="form-select" required>
+                                            <option value="" selected disabled>Memuat...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 mt-3">
+                                        <label for="kirim-catatan" class="form-label">Catatan</label>
+                                        <textarea id="kirim-catatan" rows="4" class="form-control" placeholder="Tambahkan catatan jika perlu..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end mt-4">
+                                    <button id="send-berkas-btn" class="btn btn-primary fw-semibold px-4" type="submit">
+                                        <i class="bi bi-send me-2"></i>Kirim Berkas
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             `,
@@ -2360,6 +2414,28 @@ document.addEventListener('DOMContentLoaded', function() {
                         validateForm(); 
                     });
                      validateForm();
+
+                    // Init One-Way Document form
+                    document.getElementById('kirim-nama-pengirim').value = currentUser.full_name;
+                    document.getElementById('kirim-distribution-center').value = currentUser.area_name;
+                    await loadJenisBerkasOptions(document.getElementById('kirim-jenis-berkas'), 'Pilih Jenis Berkas...');
+                    await loadAreaOptions(document.getElementById('kirim-area-tujuan'), 'dc', 'Pilih Area Tujuan (DC)...');
+                    document.getElementById('kirim-berkas-form').addEventListener('submit', handleKirimBerkas);
+
+                    // Tab switcher logic
+                    const switchTab = (type) => {
+                        const isTwoWay = (type === 'two-way');
+                        document.getElementById('btn-tab-two-way').classList.toggle('active', isTwoWay);
+                        document.getElementById('btn-tab-one-way').classList.toggle('active', !isTwoWay);
+                        document.getElementById('section-two-way').classList.toggle('d-none', !isTwoWay);
+                        document.getElementById('section-one-way').classList.toggle('d-none', isTwoWay);
+                    };
+                    document.getElementById('btn-tab-two-way').addEventListener('click', () => switchTab('two-way'));
+                    document.getElementById('btn-tab-one-way').addEventListener('click', () => switchTab('one-way'));
+
+                    // Default tab: HO users start on One-Way, DC/superadmin on Two-Way
+                    const defaultTab = (currentUser.role_id && currentUser.role_id.startsWith('admin_ho')) ? 'one-way' : 'two-way';
+                    switchTab(defaultTab);
                 }
 
                 if (pageId === 'validasi-ho') {
@@ -2402,15 +2478,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('form-terima-dc').addEventListener('submit', handlePenerimaanDC);
                 }
                 
-                if (pageId === 'kirim-berkas') {
-                    document.getElementById('kirim-nama-pengirim').value = currentUser.full_name;
-                    document.getElementById('kirim-distribution-center').value = currentUser.area_name;
-                    await loadJenisBerkasOptions(document.getElementById('kirim-jenis-berkas'), 'Pilih Jenis Berkas...');
-                    await loadAreaOptions(document.getElementById('kirim-area-tujuan'), 'dc', 'Pilih Area Tujuan (DC)...');
-                    
-                    document.getElementById('kirim-berkas-form').addEventListener('submit', handleKirimBerkas);
-                }
-
                 if (pageId === 'validasi-penerimaan') {
                     document.getElementById('form-validasi-penerimaan').addEventListener('submit', handleValidasiPenerimaan);
                 }
@@ -4099,7 +4166,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 barcodeModal.show();
                 
                 barcodeModalEl.addEventListener('hidden.bs.modal', () => {
-                    changePage('kirim-berkas'); 
+                    changePage('buat-dokumen'); 
                 }, { once: true }); 
                 
             } else {
