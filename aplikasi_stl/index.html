@@ -2697,11 +2697,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const handleLogout = async (e) => {
         e.preventDefault();
+        let portalUrl = 'https://portal.hqmedan.com';
         try {
-            await fetch(`${API_BASE_URL}logout.php`, { credentials: 'same-origin' });
+            const res = await fetch(`${API_BASE_URL}logout.php`, { credentials: 'same-origin' });
+            const data = await res.json().catch(() => ({}));
+            if (data.sso_public_url) portalUrl = data.sso_public_url;
         } catch (_) {}
         currentUser = null;
-        window.location.reload();
+        window.location.href = portalUrl;
     };
 
     logoutButton.addEventListener('click', handleLogout);
