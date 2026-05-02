@@ -448,12 +448,6 @@
                     <!-- Menu items are generated here by JavaScript -->
                 </nav>
                 
-                <div class="mt-auto">
-                    <a href="#" id="logout-button" class="nav-link p-3">
-                        <i class="bi bi-box-arrow-left"></i>
-                        Logout
-                    </a>
-                </div>
             </aside>
 
             <!-- Sidebar Toggle Button -->
@@ -476,12 +470,6 @@
                      <nav class="nav flex-column flex-grow-1" id="mobile-nav">
                         <!-- Mobile menu items are generated here -->
                      </nav>
-                     <div class="mt-auto">
-                        <a href="#" id="mobile-logout-button" class="nav-link p-3">
-                            <i class="bi bi-box-arrow-left"></i>
-                            Logout
-                        </a>
-                    </div>
                 </div>
             </div>
 
@@ -2042,8 +2030,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const loginLoading = document.getElementById('login-loading');
             const ssoBtnWrap = document.getElementById('sso-btn-wrap');
             const ssoLoginBtn = document.getElementById('sso-login-btn');
-            const logoutButton = document.getElementById('logout-button');
-            const mobileLogoutButton = document.getElementById('mobile-logout-button');
             const desktopNav = document.getElementById('desktop-nav');
             const mobileNav = document.getElementById('mobile-nav');
             let contentDiv = document.getElementById('content'); // (DIUBAH) Dideklarasikan dengan let
@@ -3092,9 +3078,6 @@ document.addEventListener('DOMContentLoaded', function() {
         currentUser = null;
         window.location.href = portalUrl;
     };
-
-    logoutButton.addEventListener('click', handleLogout);
-    mobileLogoutButton.addEventListener('click', handleLogout);
 
     // Topbar logout button
     document.getElementById('topbar-logout-btn').addEventListener('click', handleLogout);
