@@ -7,7 +7,7 @@ $id     = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
 switch ($method) {
     case 'GET':
-        // Auto-sync: tambahkan SO dari tabel SSO `sales_offices` (master data resmi)
+        // Auto-sync: tambahkan SO baru + update ho_area_id yang berubah dari master SSO
         try {
             $pdo->exec("
                 INSERT INTO stl_sales_offices (so_name, ho_area_id)
@@ -16,6 +16,14 @@ switch ($method) {
                 WHERE NOT EXISTS (
                     SELECT 1 FROM stl_sales_offices sso WHERE sso.so_name = so.name
                 )
+            ");
+            // Update ho_area_id jika berbeda dari master
+            $pdo->exec("
+                UPDATE stl_sales_offices s
+                SET ho_area_id = so.area_id
+                FROM sales_offices so
+                WHERE s.so_name = so.name
+                  AND (s.ho_area_id IS DISTINCT FROM so.area_id)
             ");
         } catch (PDOException $e) { /* non-critical */ }
 
