@@ -689,16 +689,10 @@
         const menuConfig = {
             superadmin: [
                 { id: 'dashboard', name: 'Dashboard', icon: 'bi-speedometer2', type: 'link' },
-                
-                { type: 'header', name: 'Two-Way Validation' },
                 { id: 'buat-dokumen', name: 'Buat Dokumen', icon: 'bi-file-earmark-plus', type: 'link' },
                 { id: 'validasi-berkas', name: 'Validasi Berkas', icon: 'bi-clipboard2-check', type: 'link' },
                 { id: 'riwayat', name: 'Riwayat', icon: 'bi-clock-history', type: 'link' },
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
-
-                { type: 'header', name: 'One-Way Document' },
-                { id: 'laporan-satu-arah', name: 'Laporan Berkas', icon: 'bi-file-earmark-text', type: 'link' },
-
                 { type: 'accordion', name: 'Lain-lain', icon: 'bi-three-dots', id: 'lain-lain', items: [
                     { id: 'cek-resi-ekspedisi', name: 'Cek Resi Ekspedisi', icon: 'bi-truck' },
                     { id: 'log-audit', name: 'Log Audit', icon: 'bi-clipboard2-data' }
@@ -706,16 +700,10 @@
             ],
             admin_ho: [
                 { id: 'dashboard', name: 'Dashboard', icon: 'bi-speedometer2', type: 'link' },
-                
-                { type: 'header', name: 'Two-Way Validation' },
+                { id: 'buat-dokumen', name: 'Kirim Berkas', icon: 'bi-send', type: 'link' },
                 { id: 'validasi-berkas', name: 'Validasi Berkas', icon: 'bi-clipboard2-check', type: 'link' },
                 { id: 'riwayat', name: 'Riwayat', icon: 'bi-clock-history', type: 'link' },
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
-
-                { type: 'header', name: 'One-Way Document' },
-                { id: 'buat-dokumen', name: 'Kirim Berkas', icon: 'bi-send', type: 'link' },
-                { id: 'laporan-satu-arah', name: 'Laporan Berkas', icon: 'bi-file-earmark-text', type: 'link' },
-
                 { type: 'accordion', name: 'Lain-lain', icon: 'bi-three-dots', id: 'lain-lain', items: [
                     { id: 'cek-resi-ekspedisi', name: 'Cek Resi Ekspedisi', icon: 'bi-truck' },
                     { id: 'log-audit', name: 'Log Audit', icon: 'bi-clipboard2-data' }
@@ -723,16 +711,10 @@
             ],
             admin_dc: [
                 { id: 'dashboard', name: 'Dashboard', icon: 'bi-speedometer2', type: 'link' },
-                
-                { type: 'header', name: 'Two-Way Validation' },
                 { id: 'buat-dokumen', name: 'Buat Dokumen', icon: 'bi-file-earmark-plus', type: 'link' },
                 { id: 'validasi-berkas', name: 'Validasi Berkas', icon: 'bi-clipboard2-check', type: 'link' },
                 { id: 'riwayat', name: 'Riwayat', icon: 'bi-clock-history', type: 'link' },
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
-
-                { type: 'header', name: 'One-Way Document' },
-                { id: 'laporan-satu-arah', name: 'Laporan Berkas', icon: 'bi-file-earmark-text', type: 'link' },
-
                 { type: 'accordion', name: 'Lain-lain', icon: 'bi-three-dots', id: 'lain-lain', items: [
                     { id: 'cek-resi-ekspedisi', name: 'Cek Resi Ekspedisi', icon: 'bi-truck' }
                 ]}
@@ -1442,96 +1424,182 @@
                 </div>
             `,
             'laporan': `
-                <h2 class="h2 fw-bold text-dark mb-4">Laporan</h2>
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-4 p-md-5">
-                        <h3 class="h5 card-title fw-semibold text-dark mb-4">Filter Laporan</h3>
-                        <form id="laporan-form" class="row g-3 align-items-end">
-                            <div class="col-md-2">
-                                <label for="report-type" class="form-label">Jenis Berkas</label>
-                                <select id="report-type" class="form-select">
-                                    <option value="">Semua</option>
-                                    <!-- Opsi dimuat oleh JS -->
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label for="report-status" class="form-label">Status Dokumen</label>
-                                <select id="report-status" class="form-select">
-                                    <option value="">Semua</option>
-                                    <option value="Dikirim ke HO">Dikirim ke HO</option>
-                                    <option value="Diterima HO">Diterima HO</option>
-                                    <option value="Dokumen Cek">Dokumen Cek</option>
-                                    <option value="Dikembalikan ke DC">Dikembalikan ke DC</option>
-                                    <option value="Selesai">Selesai</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2" id="report-area-filter-wrapper">
-                                <label for="report-area" class="form-label">Area Pengirim</label>
-                                <select id="report-area" class="form-select">
-                                    <!-- Options will be populated by JS -->
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label for="start-date" class="form-label">Dari Tanggal</label>
-                                <input type="date" id="start-date" class="form-control">
-                            </div>
-                            <div class="col-md-2">
-                                <label for="end-date" class="form-label">Sampai Tanggal</label>
-                                <input type="date" id="end-date" class="form-control">
-                                <div class="invalid-feedback">
-                                    Tanggal akhir tidak boleh kurang dari tanggal awal.
+                <h2 class="h2 fw-bold text-dark mb-3">Laporan</h2>
+                <ul class="nav nav-pills mb-4" id="laporan-type-switcher">
+                    <li class="nav-item me-2">
+                        <button type="button" class="nav-link active" id="btn-tab-laporan-two-way">
+                            <i class="bi bi-arrow-left-right me-2"></i>Two-Way Validation
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" id="btn-tab-laporan-one-way">
+                            <i class="bi bi-send me-2"></i>One-Way Document
+                        </button>
+                    </li>
+                </ul>
+
+                <div id="section-laporan-two-way">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4 p-md-5">
+                            <form id="laporan-form" class="row g-3 align-items-end">
+                                <div class="col-md-2">
+                                    <label for="report-type" class="form-label">Jenis Berkas</label>
+                                    <select id="report-type" class="form-select">
+                                        <option value="">Semua</option>
+                                    </select>
                                 </div>
-                            </div>
-                            <div class="col-md-2 d-flex gap-2 align-items-end">
-                                <button class="btn btn-primary fw-semibold w-100" type="submit">
-                                    <i class="bi bi-search"></i> Filter
-                                </button>
-                                <button class="btn btn-secondary" type="reset">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                </button>
-                            </div>
-                        </form>
-                        
-                        <div id="report-table-container" class="mt-4">
-                            <hr>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h4 class="h5 mb-0">Hasil Laporan</h4>
-                                <div class="d-flex gap-2">
-                                    <button id="export-report-excel" class="btn btn-outline-success btn-sm">
-                                        <i class="bi bi-file-earmark-excel me-2"></i>Ekspor ke Excel
+                                <div class="col-md-2">
+                                    <label for="report-status" class="form-label">Status Dokumen</label>
+                                    <select id="report-status" class="form-select">
+                                        <option value="">Semua</option>
+                                        <option value="Dikirim ke HO">Dikirim ke HO</option>
+                                        <option value="Diterima HO">Diterima HO</option>
+                                        <option value="Dokumen Cek">Dokumen Cek</option>
+                                        <option value="Dikembalikan ke DC">Dikembalikan ke DC</option>
+                                        <option value="Selesai">Selesai</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2" id="report-area-filter-wrapper">
+                                    <label for="report-area" class="form-label">Area Pengirim</label>
+                                    <select id="report-area" class="form-select"></select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="start-date" class="form-label">Dari Tanggal</label>
+                                    <input type="date" id="start-date" class="form-control">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="end-date" class="form-label">Sampai Tanggal</label>
+                                    <input type="date" id="end-date" class="form-control">
+                                    <div class="invalid-feedback">Tanggal akhir tidak boleh kurang dari tanggal awal.</div>
+                                </div>
+                                <div class="col-md-2 d-flex gap-2 align-items-end">
+                                    <button class="btn btn-primary fw-semibold w-100" type="submit">
+                                        <i class="bi bi-search"></i> Filter
                                     </button>
-                                    <button id="export-report-pdf" class="btn btn-outline-danger btn-sm">
-                                        <i class="bi bi-file-earmark-pdf me-2"></i>Ekspor ke PDF
+                                    <button class="btn btn-secondary" type="reset">
+                                        <i class="bi bi-arrow-clockwise"></i>
                                     </button>
                                 </div>
+                            </form>
+                            <div id="report-table-container" class="mt-4">
+                                <hr>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="h5 mb-0">Hasil Laporan</h4>
+                                    <div class="d-flex gap-2">
+                                        <button id="export-report-excel" class="btn btn-outline-success btn-sm">
+                                            <i class="bi bi-file-earmark-excel me-2"></i>Ekspor ke Excel
+                                        </button>
+                                        <button id="export-report-pdf" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-file-earmark-pdf me-2"></i>Ekspor ke PDF
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" id="report-table">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>ID Dokumen</th>
+                                                <th>Jenis Berkas DC</th>
+                                                <th>Periode DC</th>
+                                                <th>Jenis Berkas SO</th>
+                                                <th>Periode SO</th>
+                                                <th>Pengirim</th>
+                                                <th>Area Pengirim</th>
+                                                <th>Tgl Kirim DC</th>
+                                                <th>Note DC</th>
+                                                <th>Penerima di HO</th>
+                                                <th>Tgl Terima HO</th>
+                                                <th>Note Cek Dokumen</th>
+                                                <th>Tgl Kembali dari HO</th>
+                                                <th>Note HO</th>
+                                                <th>Penerima di DC</th>
+                                                <th>Tgl Terima di DC</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="report-table-body"></tbody>
+                                    </table>
+                                </div>
                             </div>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-hover" id="report-table">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>ID Dokumen</th>
-                                            <th>Jenis Berkas DC</th>
-                                            <th>Periode DC</th>
-                                            <th>Jenis Berkas SO</th>
-                                            <th>Periode SO</th>
-                                            <th>Pengirim</th>
-                                            <th>Area Pengirim</th>
-                                            <th>Tgl Kirim DC</th>
-                                            <th>Note DC</th>
-                                            <th>Penerima di HO</th>
-                                            <th>Tgl Terima HO</th>
-                                            <th>Note Cek Dokumen</th>
-                                            <th>Tgl Kembali dari HO</th>
-                                            <th>Note HO</th>
-                                            <th>Penerima di DC</th>
-                                            <th>Tgl Terima di DC</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="report-table-body">
-                                        <!-- Report data will be populated here -->
-                                    </tbody>
-                                </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-laporan-one-way" class="d-none">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4 p-md-5">
+                            <form id="laporan-satu-arah-form" class="row g-3 align-items-end">
+                                <div class="col-md-2">
+                                    <label for="report-satu-arah-type" class="form-label">Jenis Berkas</label>
+                                    <select id="report-satu-arah-type" class="form-select">
+                                        <option value="">Semua</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="report-satu-arah-status" class="form-label">Status</label>
+                                    <select id="report-satu-arah-status" class="form-select">
+                                        <option value="">Semua</option>
+                                        <option value="Dikirim">Dikirim</option>
+                                        <option value="Diterima">Diterima</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2" id="report-satu-arah-area-sender-wrapper">
+                                    <label for="report-satu-arah-area-sender" class="form-label">Area Pengirim</label>
+                                    <select id="report-satu-arah-area-sender" class="form-select"></select>
+                                </div>
+                                <div class="col-md-2" id="report-satu-arah-area-receiver-wrapper">
+                                    <label for="report-satu-arah-area-receiver" class="form-label">Area Penerima</label>
+                                    <select id="report-satu-arah-area-receiver" class="form-select"></select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="report-satu-arah-start-date" class="form-label">Dari Tgl Kirim</label>
+                                    <input type="date" id="report-satu-arah-start-date" class="form-control">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="report-satu-arah-end-date" class="form-label">Sampai Tgl Kirim</label>
+                                    <input type="date" id="report-satu-arah-end-date" class="form-control">
+                                </div>
+                                <div class="col-12 d-flex justify-content-end gap-2 mt-3">
+                                    <button class="btn btn-primary fw-semibold w-auto" type="submit">
+                                        <i class="bi bi-search"></i> Filter
+                                    </button>
+                                    <button class="btn btn-secondary" type="reset">
+                                        <i class="bi bi-arrow-clockwise"></i> Reset
+                                    </button>
+                                </div>
+                            </form>
+                            <div id="report-satu-arah-table-container" class="mt-4">
+                                <hr>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="h5 mb-0">Hasil Laporan</h4>
+                                    <div class="d-flex gap-2">
+                                        <button id="export-report-satu-arah-excel" class="btn btn-outline-success btn-sm">
+                                            <i class="bi bi-file-earmark-excel me-2"></i>Ekspor ke Excel
+                                        </button>
+                                        <button id="export-report-satu-arah-pdf" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-file-earmark-pdf me-2"></i>Ekspor ke PDF
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" id="report-satu-arah-table">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>ID Dokumen</th>
+                                                <th>Nama Pengirim</th>
+                                                <th>Area Pengirim</th>
+                                                <th>Area Penerima</th>
+                                                <th>Jenis Berkas</th>
+                                                <th>Tgl Dikirim</th>
+                                                <th>Note</th>
+                                                <th>Nama Penerima</th>
+                                                <th>Tgl Diterima</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="report-satu-arah-table-body"></tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2402,6 +2470,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 if (pageId === 'laporan') {
+                    // Tab switcher
+                    const switchLaporanTab = (type) => {
+                        const isTwoWay = (type === 'two-way');
+                        document.getElementById('btn-tab-laporan-two-way').classList.toggle('active', isTwoWay);
+                        document.getElementById('btn-tab-laporan-one-way').classList.toggle('active', !isTwoWay);
+                        document.getElementById('section-laporan-two-way').classList.toggle('d-none', !isTwoWay);
+                        document.getElementById('section-laporan-one-way').classList.toggle('d-none', isTwoWay);
+                    };
+                    document.getElementById('btn-tab-laporan-two-way').addEventListener('click', () => switchLaporanTab('two-way'));
+                    document.getElementById('btn-tab-laporan-one-way').addEventListener('click', () => switchLaporanTab('one-way'));
+
+                    // --- Init Two-Way laporan ---
                     const laporanForm = document.getElementById('laporan-form');
                     const startDateInput = document.getElementById('start-date');
                     const endDateInput = document.getElementById('end-date');
@@ -2410,21 +2490,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     await loadJenisBerkasOptions(document.getElementById('report-type'), 'Semua Jenis');
 
                     const areaFilterWrapper = document.getElementById('report-area-filter-wrapper');
-                    // (DIUBAH) Logika filter area untuk HO
                     const isAdminDc = currentUser && currentUser.role_id.startsWith('admin_dc');
                     const isHoUser = currentUser && (currentUser.role_id === 'admin_ho' || (currentUser.area_name && currentUser.area_name.includes('Head Office')));
-                    
+
                     if (isAdminDc) {
                         if (areaFilterWrapper) areaFilterWrapper.style.display = 'none';
                     } else if (isHoUser) {
-                        await loadReportFilters(); // Load filter DC
-                        document.getElementById('report-area').value = ''; // Default "Semua Area" (dari grup HO-nya)
-                    } else { // Superadmin
+                        await loadReportFilters();
+                        document.getElementById('report-area').value = '';
+                    } else {
                         await loadReportFilters();
                     }
 
                     const validateLaporanDates = () => {
-                         if (startDateInput.value && endDateInput.value && new Date(startDateInput.value) > new Date(endDateInput.value)) {
+                        if (startDateInput.value && endDateInput.value && new Date(startDateInput.value) > new Date(endDateInput.value)) {
                             endDateInput.classList.add('is-invalid');
                             searchBtn.disabled = true;
                         } else {
@@ -2432,11 +2511,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             searchBtn.disabled = false;
                         }
                     };
-                    
+
                     startDateInput.addEventListener('input', validateLaporanDates);
                     endDateInput.addEventListener('input', validateLaporanDates);
-                    
-                    await handleReportSearch({ preventDefault: () => {} }); // Initial load
+
+                    await handleReportSearch({ preventDefault: () => {} });
                     laporanForm.addEventListener('submit', handleReportSearch);
                     laporanForm.addEventListener('reset', () => {
                         laporanForm.reset();
@@ -2446,8 +2525,41 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     document.getElementById('export-report-pdf').addEventListener('click', handleExportReportToPDF);
                     document.getElementById('export-report-excel').addEventListener('click', handleExportReportToExcel);
+
+                    // --- Init One-Way laporan ---
+                    const laporanSatuArahForm = document.getElementById('laporan-satu-arah-form');
+                    const isAdminDcSA = currentUser && currentUser.role_id.startsWith('admin_dc');
+                    const isHoUserSA = currentUser && (currentUser.role_id === 'admin_ho' || (currentUser.area_name && currentUser.area_name.includes('Head Office')));
+
+                    await loadJenisBerkasOptions(document.getElementById('report-satu-arah-type'), 'Semua Jenis');
+                    const areaSenderSelect = document.getElementById('report-satu-arah-area-sender');
+                    const areaReceiverSelect = document.getElementById('report-satu-arah-area-receiver');
+
+                    await loadAreaOptions(areaSenderSelect, 'dc', 'Semua Pengirim');
+                    await loadAreaOptions(areaReceiverSelect, 'dc', 'Semua Penerima');
+
+                    if (isAdminDcSA) {
+                        areaSenderSelect.value = currentUser.area_id;
+                        areaSenderSelect.disabled = true;
+                    } else if (isHoUserSA) {
+                        areaReceiverSelect.value = '';
+                    }
+
+                    await handleReportSatuArahSearch({ preventDefault: () => {} });
+                    laporanSatuArahForm.addEventListener('submit', handleReportSatuArahSearch);
+                    laporanSatuArahForm.addEventListener('reset', (e) => {
+                        e.preventDefault();
+                        laporanSatuArahForm.reset();
+                        if (isAdminDcSA) areaSenderSelect.value = currentUser.area_id;
+                        handleReportSatuArahSearch({ preventDefault: () => {} });
+                    });
+                    document.getElementById('export-report-satu-arah-pdf').addEventListener('click', handleExportReportSatuArahToPDF);
+                    document.getElementById('export-report-satu-arah-excel').addEventListener('click', handleExportReportSatuArahToExcel);
+
+                    // Default: HO users start on One-Way, others on Two-Way
+                    switchLaporanTab(isHoUser ? 'one-way' : 'two-way');
                 }
-                
+
                 if (pageId === 'buat-dokumen' && currentUser) {
                     const namaPengirimInput = document.getElementById('nama-pengirim');
                     const areaPengirimInput = document.getElementById('distribution-center');
@@ -2662,43 +2774,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('btn-tab-validasi-one-way').addEventListener('click', () => switchValidasiTab('one-way'));
                     switchValidasiTab('two-way');
                 }
-
-                if (pageId === 'laporan-satu-arah') {
-                    const laporanForm = document.getElementById('laporan-satu-arah-form');
-                    const isAdminDc = currentUser && currentUser.role_id.startsWith('admin_dc');
-                    const isHoUser = currentUser && (currentUser.role_id === 'admin_ho' || (currentUser.area_name && currentUser.area_name.includes('Head Office')));
-
-                    await loadJenisBerkasOptions(document.getElementById('report-satu-arah-type'), 'Semua Jenis');
-                    const areaSenderSelect = document.getElementById('report-satu-arah-area-sender');
-                    const areaReceiverSelect = document.getElementById('report-satu-arah-area-receiver');
-                    
-                    await loadAreaOptions(areaSenderSelect, 'dc', 'Semua Pengirim');
-                    await loadAreaOptions(areaReceiverSelect, 'dc', 'Semua Penerima'); 
-
-                    // (DIUBAH) Logika filter untuk HO
-                    if (isAdminDc) {
-                        areaSenderSelect.value = currentUser.area_id;
-                        areaSenderSelect.disabled = true; 
-                    } else if (isHoUser) {
-                        // HO bisa melihat semua pengirim, tapi filter penerima di-default ke area DC yg terkait dgn HO-nya
-                        // Karena kita tidak menyimpan "grup DC" di `currentUser`, kita set default ke "Semua Penerima"
-                        // API akan menangani filter berdasarkan grup HO
-                        areaReceiverSelect.value = '';
-                    }
-
-                    await handleReportSatuArahSearch({ preventDefault: () => {} }); // Initial load
-                    laporanForm.addEventListener('submit', handleReportSatuArahSearch);
-                    laporanForm.addEventListener('reset', (e) => {
-                        e.preventDefault();
-                        laporanForm.reset();
-                        if (isAdminDc) areaSenderSelect.value = currentUser.area_id;
-                        handleReportSatuArahSearch({ preventDefault: () => {} });
-                    });
-                    
-                    document.getElementById('export-report-satu-arah-pdf').addEventListener('click', handleExportReportSatuArahToPDF);
-                    document.getElementById('export-report-satu-arah-excel').addEventListener('click', handleExportReportSatuArahToExcel);
-                }
-
 
                 if (pageId === 'cek-resi-ekspedisi') {
                     loadJasaEkspedisi();
