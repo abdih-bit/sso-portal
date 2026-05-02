@@ -873,8 +873,9 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label for="area-tujuan" class="form-label">Area Tujuan</label>
-                                        <input type="text" id="area-tujuan" class="form-control" value="Memuat..." readonly>
-                                        <input type="hidden" id="area-tujuan-id">
+                                        <select id="area-tujuan" class="form-select" required>
+                                            <option value="" disabled selected>Memuat...</option>
+                                        </select>
                                     </div>
                                     <div class="col-md-3">
                                         <label for="distribution-center" class="form-label">Distribution Center</label>
@@ -2185,8 +2186,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     areas.forEach(area => {
                         // (DIUBAH) Jangan tampilkan 'All Access' di dropdown filter
                         if (area.area_name !== 'All Access') { 
-                            // (DIUBAH) Jangan tampilkan area user saat ini di dropdown tujuan 1-Arah
-                             if (selectElement.id === 'kirim-area-tujuan' && area.area_id == currentUser.area_id) {
+                            // Jangan tampilkan area user saat ini di dropdown area tujuan
+                             if ((selectElement.id === 'kirim-area-tujuan' || selectElement.id === 'area-tujuan') && area.area_id == currentUser.area_id) {
                                  return; // Lewati area sendiri
                              }
                             
@@ -2564,19 +2565,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     const namaPengirimInput = document.getElementById('nama-pengirim');
                     const areaPengirimInput = document.getElementById('distribution-center');
                     const areaTujuanInput = document.getElementById('area-tujuan');
-                    const areaTujuanIdInput = document.getElementById('area-tujuan-id');
                     
                     if(namaPengirimInput) namaPengirimInput.value = `${currentUser.full_name}`;
                     if(areaPengirimInput) areaPengirimInput.value = currentUser.area_name;
 
-                    if (currentUser.head_ar_area_name && currentUser.head_ar_area_id) {
-                        areaTujuanInput.value = currentUser.head_ar_area_name;
-                        areaTujuanIdInput.value = currentUser.head_ar_area_id;
-                    } else {
-                        areaTujuanInput.value = "Area Head AR Belum Diatur";
-                        areaTujuanIdInput.value = "";
-                        console.warn("Area Head AR tidak ditemukan untuk pengguna ini.");
-                    }
+                    await loadAreaOptions(areaTujuanInput, 'all', 'Pilih Area Tujuan...');
+                    areaTujuanInput.addEventListener('change', validateForm);
                     
                     await loadJenisBerkasOptions(document.getElementById('jenis-berkas-dc'), 'Pilih jenis berkas...');
                     await loadJenisBerkasOptions(document.getElementById('jenis-berkas-so'), 'Pilih jenis berkas...');
@@ -2608,7 +2602,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         let baseInputs = [
                             document.getElementById('jenis-berkas-dc'),
                             document.getElementById('catatan'),
-                            document.getElementById('area-tujuan-id') 
+                            document.getElementById('area-tujuan')
                         ];
                         
                         if (!isSTNK) {
@@ -2693,7 +2687,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('kirim-nama-pengirim').value = currentUser.full_name;
                     document.getElementById('kirim-distribution-center').value = currentUser.area_name;
                     await loadJenisBerkasOptions(document.getElementById('kirim-jenis-berkas'), 'Pilih Jenis Berkas...');
-                    await loadAreaOptions(document.getElementById('kirim-area-tujuan'), 'dc', 'Pilih Area Tujuan (DC)...');
+                    await loadAreaOptions(document.getElementById('kirim-area-tujuan'), 'all', 'Pilih Area Tujuan...');
                     document.getElementById('kirim-berkas-form').addEventListener('submit', handleKirimBerkas);
 
                     // Tab switcher logic
@@ -3097,7 +3091,7 @@ document.addEventListener('DOMContentLoaded', function() {
             barcode_id: docId,
             doc_type: document.getElementById('jenis-berkas-dc').value,
             sender_user_id: currentUser.user_id,
-            receiver_ho_area_id: document.getElementById('area-tujuan-id').value, 
+            receiver_ho_area_id: document.getElementById('area-tujuan').value,
             start_period: document.getElementById('periode-awal-dc').value || null,
             end_period: document.getElementById('periode-akhir-dc').value || null,
             notes: document.getElementById('catatan').value,
