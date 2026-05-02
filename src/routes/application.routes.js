@@ -83,21 +83,21 @@ router.get('/', authenticate, async (req, res) => {
       }
 
       if (isHeadAR) {
-        // Head AR: Link App filter by PT; SSO App semua aplikasi (tidak difilter)
+        // Head AR: SSO App hanya jika FAT checked; Link App filter by area dalam PT-nya
         if (isLinkApp(app)) {
           const ptAreas = getAreasInUserPt(app.areaLinks);
           return ptAreas.length > 0;
         }
-        return true;
+        return app.allowedDepartemen && app.allowedDepartemen.includes(HEAD_ACC_DEPT);
       }
 
       if (isKaAdmin) {
-        // KA Admin: Link App hanya DC-nya; SSO App semua aplikasi (tidak difilter)
+        // KA Admin: SSO App hanya jika FAT checked; Link App hanya DC-nya sendiri
         if (isLinkApp(app)) {
           if (!userArea) return false;
           return !!app.areaLinks[userArea];
         }
-        return true;
+        return app.allowedDepartemen && app.allowedDepartemen.includes(HEAD_ACC_DEPT);
       }
 
       // Regular ADMIN & USER: filter by departemen
