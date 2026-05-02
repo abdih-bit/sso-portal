@@ -685,19 +685,19 @@
         // --- DATA ---
         
         // (DIUBAH) Struktur menu diperbarui untuk accordion dan header
-        // (TERMASUK) Penambahan 'Riwayat Pengiriman' di Laporan Satu Arah
+        // (TERMASUK) Penambahan 'Riwayat Pengiriman' di One-Way Document
         const menuConfig = {
             superadmin: [
                 { id: 'dashboard', name: 'Dashboard', icon: 'bi-speedometer2', type: 'link' },
                 
-                { type: 'header', name: 'Laporan Dua Arah' },
+                { type: 'header', name: 'Two-Way Validation' },
                 { id: 'buat-dokumen', name: 'Buat Dokumen', icon: 'bi-file-earmark-plus', type: 'link' },
                 { id: 'validasi-ho', name: 'Validasi Dokumen HO', icon: 'bi-building-check', type: 'link' },
                 { id: 'validasi-dc', name: 'Validasi Dokumen DC', icon: 'bi-house-check', type: 'link' },
                 { id: 'riwayat', name: 'Riwayat Pengiriman', icon: 'bi-clock-history', type: 'link' },
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
 
-                { type: 'header', name: 'Laporan Satu Arah' },
+                { type: 'header', name: 'One-Way Document' },
                 { id: 'kirim-berkas', name: 'Kirim Berkas', icon: 'bi-send', type: 'link' },
                 { id: 'validasi-penerimaan', name: 'Validasi Penerimaan', icon: 'bi-check-circle', type: 'link' },
                 { id: 'riwayat-satu-arah', name: 'Riwayat Pengiriman', icon: 'bi-clock', type: 'link' }, // <-- MENU BARU
@@ -711,12 +711,12 @@
             admin_ho: [
                 { id: 'dashboard', name: 'Dashboard', icon: 'bi-speedometer2', type: 'link' },
                 
-                { type: 'header', name: 'Laporan Dua Arah' },
+                { type: 'header', name: 'Two-Way Validation' },
                 { id: 'validasi-ho', name: 'Validasi Dokumen HO', icon: 'bi-building-check', type: 'link' },
                 { id: 'riwayat', name: 'Riwayat Pengiriman', icon: 'bi-clock-history', type: 'link' },
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
 
-                { type: 'header', name: 'Laporan Satu Arah' },
+                { type: 'header', name: 'One-Way Document' },
                 { id: 'kirim-berkas', name: 'Kirim Berkas', icon: 'bi-send', type: 'link' },
                 { id: 'validasi-penerimaan', name: 'Validasi Penerimaan', icon: 'bi-check-circle', type: 'link' },
                 { id: 'riwayat-satu-arah', name: 'Riwayat Pengiriman', icon: 'bi-clock', type: 'link' }, // <-- MENU BARU
@@ -730,13 +730,13 @@
             admin_dc: [
                 { id: 'dashboard', name: 'Dashboard', icon: 'bi-speedometer2', type: 'link' },
                 
-                { type: 'header', name: 'Laporan Dua Arah' },
+                { type: 'header', name: 'Two-Way Validation' },
                 { id: 'buat-dokumen', name: 'Buat Dokumen', icon: 'bi-file-earmark-plus', type: 'link' },
                 { id: 'validasi-dc', name: 'Validasi Dokumen DC', icon: 'bi-house-check', type: 'link' },
                 { id: 'riwayat', name: 'Riwayat Pengiriman', icon: 'bi-clock-history', type: 'link' },
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
 
-                { type: 'header', name: 'Laporan Satu Arah' },
+                { type: 'header', name: 'One-Way Document' },
                 { id: 'kirim-berkas', name: 'Kirim Berkas', icon: 'bi-send', type: 'link' },
                 { id: 'validasi-penerimaan', name: 'Validasi Penerimaan', icon: 'bi-check-circle', type: 'link' },
                 { id: 'riwayat-satu-arah', name: 'Riwayat Pengiriman', icon: 'bi-clock', type: 'link' }, // <-- MENU BARU
@@ -1654,7 +1654,7 @@
             `,
     // (BARU) Halaman Riwayat Pengiriman 1 Arah
     'riwayat-satu-arah': `
-        <h2 class="h2 fw-bold text-dark mb-4">Riwayat Pengiriman (Satu Arah)</h2>
+        <h2 class="h2 fw-bold text-dark mb-4">Riwayat Pengiriman (One-Way Document)</h2>
         <div class="card shadow-sm border-0">
             <div class="card-body p-4">
                 <form id="riwayat-satu-arah-filter-form" class="row g-3 align-items-end mb-4">
@@ -4282,7 +4282,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const handleExportReportSatuArahToPDF = () => {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'landscape' });
-        doc.text("Laporan Berkas Satu Arah", 14, 16);
+        doc.text("Laporan Berkas One-Way Document", 14, 16);
 
         const head = [['ID', 'Pengirim', 'Area Pengirim', 'Area Penerima', 'Jenis Berkas', 'Tgl Kirim', 'Note', 'Penerima', 'Tgl Diterima', 'Status']]; 
         const body = oneWayReportData.map(doc => [
