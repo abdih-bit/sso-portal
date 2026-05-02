@@ -4247,25 +4247,26 @@ document.addEventListener('DOMContentLoaded', function() {
             if (salesOfficeSelect) {
                 salesOfficeSelect.innerHTML = '<option value="" selected disabled>Pilih Sales Office...</option>';
 
-                // Kelompokkan berdasarkan DC/Area (ho_area_name)
-                const grouped = {};
-                offices.forEach(office => {
-                    const areaName = office.ho_area_name || 'Tanpa Area';
-                    if (!grouped[areaName]) grouped[areaName] = [];
-                    grouped[areaName].push(office);
-                });
+                // Tampilkan hanya SO yang dinaungi DC/Area user saat ini
+                const userAreaId = currentUser ? parseInt(currentUser.area_id) : null;
+                const filtered = userAreaId
+                    ? offices.filter(o => parseInt(o.ho_area_id) === userAreaId)
+                    : offices;
 
-                Object.keys(grouped).sort().forEach(areaName => {
-                    const optgroup = document.createElement('optgroup');
-                    optgroup.label = areaName;
-                    grouped[areaName].forEach(office => {
+                if (filtered.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.value = '';
+                    opt.disabled = true;
+                    opt.textContent = 'Tidak ada Sales Office untuk area ini';
+                    salesOfficeSelect.appendChild(opt);
+                } else {
+                    filtered.forEach(office => {
                         const option = document.createElement('option');
                         option.value = office.so_id;
                         option.textContent = office.so_name;
-                        optgroup.appendChild(option);
+                        salesOfficeSelect.appendChild(option);
                     });
-                    salesOfficeSelect.appendChild(optgroup);
-                });
+                }
             }
         } catch (error) {
             console.error("Gagal memuat data Sales Office:", error);
