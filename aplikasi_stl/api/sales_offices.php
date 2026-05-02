@@ -11,10 +11,8 @@ switch ($method) {
         try {
             $pdo->exec("
                 INSERT INTO stl_sales_offices (so_name, ho_area_id)
-                SELECT so.name, sa.area_id
+                SELECT so.name, so.area_id
                 FROM sales_offices so
-                JOIN areas a ON so.area_id = a.id
-                JOIN stl_areas sa ON sa.area_name = a.name
                 WHERE NOT EXISTS (
                     SELECT 1 FROM stl_sales_offices sso WHERE sso.so_name = so.name
                 )
@@ -22,9 +20,9 @@ switch ($method) {
         } catch (PDOException $e) { /* non-critical */ }
 
         $stmt = $pdo->query(
-            "SELECT s.*, a.area_name AS ho_area_name
+            "SELECT s.*, a.name AS ho_area_name
              FROM stl_sales_offices s
-             LEFT JOIN stl_areas a ON s.ho_area_id = a.area_id
+             LEFT JOIN areas a ON s.ho_area_id = a.id
              ORDER BY s.so_name ASC"
         );
         json_response($stmt->fetchAll());

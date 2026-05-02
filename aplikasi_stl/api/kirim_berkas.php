@@ -12,32 +12,32 @@ switch ($method) {
 
         $sql = "SELECT b.barcode_id,
                        u_sender.full_name AS sender_name,
-                       a_sender.area_name AS sender_area_name,
+                       a_sender.name AS sender_area_name,
                        b.jenis_berkas,
                        b.created_at,
                        b.notes,
                        b.received_at,
                        u_receiver.full_name AS receiver_name,
-                       a_receiver.area_name AS receiver_area_name,
+                       a_receiver.name AS receiver_area_name,
                        b.status,
-                       a_sender.parent_ho_id AS sender_parent_ho_id,
-                       a_receiver.parent_ho_id AS receiver_parent_ho_id
+                       a_sender.pt AS sender_pt,
+                       a_receiver.pt AS receiver_pt
                 FROM stl_berkas_satu_arah b
                 JOIN stl_users u_sender ON b.sender_user_id = u_sender.user_id
-                JOIN stl_areas a_sender ON u_sender.area_id = a_sender.area_id
+                JOIN areas a_sender ON u_sender.area_id = a_sender.id
                 LEFT JOIN stl_users u_receiver ON b.receiver_user_id = u_receiver.user_id
-                LEFT JOIN stl_areas a_receiver ON b.receiver_area_id = a_receiver.area_id";
+                LEFT JOIN areas a_receiver ON b.receiver_area_id = a_receiver.id";
 
         if (!empty($_GET['start_date']))     { $where[] = 'DATE(b.created_at) >= ?'; $params[] = $_GET['start_date']; }
         if (!empty($_GET['end_date']))       { $where[] = 'DATE(b.created_at) <= ?'; $params[] = $_GET['end_date']; }
         if (!empty($_GET['doc_type']))       { $where[] = 'b.jenis_berkas = ?';       $params[] = $_GET['doc_type']; }
         if (!empty($_GET['status']))         { $where[] = 'b.status = ?';             $params[] = $_GET['status']; }
-        if (!empty($_GET['area_id_sender'])) { $where[] = 'a_sender.area_id = ?';    $params[] = (int)$_GET['area_id_sender']; }
-        if (!empty($_GET['area_id_receiver'])){ $where[] = 'b.receiver_area_id = ?'; $params[] = (int)$_GET['area_id_receiver']; }
+        if (!empty($_GET['area_id_sender'])) { $where[] = 'a_sender.id = ?';          $params[] = (int)$_GET['area_id_sender']; }
+        if (!empty($_GET['area_id_receiver'])){ $where[] = 'b.receiver_area_id = ?';   $params[] = (int)$_GET['area_id_receiver']; }
 
         if (!empty($_GET['ho_area_id'])) {
             $ho = (int)$_GET['ho_area_id'];
-            $where[]  = '(a_sender.parent_ho_id = ? OR a_receiver.parent_ho_id = ?)';
+            $where[]  = '(a_sender.pt = (SELECT pt FROM areas WHERE id = ?) OR a_receiver.pt = (SELECT pt FROM areas WHERE id = ?))';
             $params[] = $ho;
             $params[] = $ho;
         }

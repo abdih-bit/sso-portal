@@ -8,9 +8,9 @@ $id     = isset($_GET['id']) ? (int)$_GET['id'] : null;
 switch ($method) {
     case 'GET':
         $sql    = "SELECT u.user_id, u.full_name, u.username, u.status,
-                          a.area_id, a.area_name, r.role_id, r.role_name
+                          a.id AS area_id, a.name AS area_name, r.role_id, r.role_name
                    FROM stl_users u
-                   JOIN stl_areas a ON u.area_id = a.area_id
+                   JOIN areas a ON u.area_id = a.id
                    JOIN stl_roles r ON u.role_id = r.role_id";
         $params = [];
         if ($id) {

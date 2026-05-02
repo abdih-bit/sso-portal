@@ -12,17 +12,18 @@ $where  = [];
 // Base JOIN
 $join = " FROM stl_documents d
           LEFT JOIN stl_users sender ON d.sender_user_id = sender.user_id
-          LEFT JOIN stl_areas sender_area ON sender.area_id = sender_area.area_id";
+          LEFT JOIN areas sender_area ON sender.area_id = sender_area.id";
 
 // Filter berdasarkan area HO vs DC
 if ($area_id) {
-    $stmtArea = $pdo->prepare("SELECT is_ho FROM stl_areas WHERE area_id = ?");
+    $stmtArea = $pdo->prepare("SELECT is_ho FROM areas WHERE id = ?");
     $stmtArea->execute([$area_id]);
     $areaData = $stmtArea->fetch();
 
     if ($areaData) {
         if ($areaData['is_ho']) {
-            $where[]  = 'sender_area.parent_ho_id = ?';
+            // HO: tampilkan semua dokumen DC yang satu PT
+            $where[]  = 'sender_area.pt = (SELECT pt FROM areas WHERE id = ?)';
             $params[] = $area_id;
         } else {
             $where[]  = 'sender.area_id = ?';
@@ -67,7 +68,7 @@ while ($row = $stmtStatus->fetch()) {
 $stmtRecent = $pdo->prepare(
     "SELECT d.barcode_id, d.status, d.created_at,
             sender.full_name AS sender_name,
-            sender_area.area_name AS sender_area_name
+            sender_area.name AS sender_area_name
      $join $whereSql
      ORDER BY d.created_at DESC LIMIT 10"
 );

@@ -25,8 +25,8 @@ if ($user) {
     if (!empty($pt_for_ho)) {
         try {
             $stmtHo = $pdo->prepare(
-                "SELECT area_id, area_name FROM stl_areas
-                 WHERE is_ho = TRUE AND area_name ILIKE ?
+                "SELECT id AS area_id, name AS area_name FROM areas
+                 WHERE is_ho = TRUE AND name ILIKE ?
                  LIMIT 1"
             );
             $stmtHo->execute(['%' . $pt_for_ho . '%']);
@@ -38,14 +38,14 @@ if ($user) {
         } catch (PDOException $e) { /* non-critical */ }
     }
 
-    // Step 3: Fallback — cari HO via parent_ho_id di stl_areas
+    // Step 3: Fallback — cari HO area via PT yang sama
     if (empty($user['ho_area_id']) && !empty($user['area_id'])) {
         try {
             $stmtHo2 = $pdo->prepare(
-                "SELECT ho.area_id, ho.area_name
-                 FROM stl_areas my_area
-                 JOIN stl_areas ho ON ho.area_id = my_area.parent_ho_id
-                 WHERE my_area.area_id = ? AND ho.is_ho = TRUE
+                "SELECT ho.id AS area_id, ho.name AS area_name
+                 FROM areas my_area
+                 JOIN areas ho ON ho.pt = my_area.pt AND ho.is_ho = TRUE
+                 WHERE my_area.id = ?
                  LIMIT 1"
             );
             $stmtHo2->execute([$user['area_id']]);

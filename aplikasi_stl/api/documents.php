@@ -12,15 +12,15 @@ switch ($method) {
 
         $sql = "SELECT d.*,
                        sender.full_name AS sender_name,
-                       sender_area.area_name AS sender_area_name,
+                       sender_area.name AS sender_area_name,
                        receiver_ho.full_name AS receiver_name,
-                       receiver_area.area_name AS receiver_area_name,
+                       receiver_area.name AS receiver_area_name,
                        receiver_dc.full_name AS receiver_dc_name
                 FROM stl_documents d
                 LEFT JOIN stl_users sender      ON d.sender_user_id = sender.user_id
-                LEFT JOIN stl_areas sender_area ON sender.area_id = sender_area.area_id
+                LEFT JOIN areas sender_area ON sender.area_id = sender_area.id
                 LEFT JOIN stl_users receiver_ho ON d.receiver_ho_user_id = receiver_ho.user_id
-                LEFT JOIN stl_areas receiver_area ON d.receiver_ho_area_id = receiver_area.area_id
+                LEFT JOIN areas receiver_area ON d.receiver_ho_area_id = receiver_area.id
                 LEFT JOIN stl_users receiver_dc ON d.receiver_dc_user_id = receiver_dc.user_id";
 
         if ($barcode_id)                   { $where[] = 'd.barcode_id = ?';        $params[] = $barcode_id; }
@@ -34,7 +34,7 @@ switch ($method) {
             $where[]  = 'sender.area_id = ?';
             $params[] = (int)$_GET['area_id'];
         } elseif (!empty($_GET['ho_area_id'])) {
-            $where[]  = 'sender_area.parent_ho_id = ?';
+            $where[]  = 'sender_area.pt = (SELECT pt FROM areas WHERE id = ?)';
             $params[] = (int)$_GET['ho_area_id'];
         }
 

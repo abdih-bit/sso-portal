@@ -78,7 +78,7 @@ try {
     // Cari area_id berdasarkan nama area dari SSO
     $areaId = null;
     if (!empty($ssoUser['area'])) {
-        $stmtArea = $pdo->prepare("SELECT area_id FROM stl_areas WHERE area_name = ?");
+        $stmtArea = $pdo->prepare("SELECT id AS area_id FROM areas WHERE name = ?");
         $stmtArea->execute([$ssoUser['area']]);
         $areaRow = $stmtArea->fetch();
         $areaId  = $areaRow ? $areaRow['area_id'] : null;

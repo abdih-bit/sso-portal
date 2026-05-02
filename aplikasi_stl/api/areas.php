@@ -12,33 +12,9 @@ switch ($method) {
         $type         = $_GET['type']         ?? 'all';
         $parent_ho_id = isset($_GET['parent_ho_id']) ? (int)$_GET['parent_ho_id'] : null;
 
-        // Auto-sync: tambahkan area dari tabel SSO `areas` ke stl_areas jika belum ada
-        try {
-            $pdo->exec("
-                INSERT INTO stl_areas (area_name, is_ho)
-                SELECT a.name, a.is_ho
-                FROM areas a
-                WHERE NOT EXISTS (
-                    SELECT 1 FROM stl_areas sa WHERE sa.area_name = a.name
-                )
-            ");
-        } catch (PDOException $e) { /* non-critical */ }
-
-        // Auto-sync fallback: dari users.area
-        try {
-            $pdo->exec("
-                INSERT INTO stl_areas (area_name, is_ho)
-                SELECT DISTINCT u.area, FALSE
-                FROM users u
-                WHERE u.area IS NOT NULL AND u.area <> ''
-                  AND NOT EXISTS (SELECT 1 FROM stl_areas a WHERE a.area_name = u.area)
-            ");
-        } catch (PDOException $e) { /* non-critical */ }
-
-        // Query dari stl_areas (sudah ter-sync dari SSO areas master)
-        $sql    = "SELECT a.*, ho.area_name AS parent_ho_name
-                   FROM stl_areas a
-                   LEFT JOIN stl_areas ho ON a.parent_ho_id = ho.area_id";
+        // Query langsung dari tabel areas (SSO Portal master data)
+        $sql    = "SELECT a.id AS area_id, a.name AS area_name, a.is_ho, a.pt
+                   FROM areas a";
         $params = [];
         $where  = [];
 
@@ -49,7 +25,8 @@ switch ($method) {
         }
 
         if ($parent_ho_id) {
-            $where[]  = 'a.parent_ho_id = ?';
+            // Filter DC yang satu PT dengan HO parent
+            $where[]  = 'a.pt = (SELECT pt FROM areas WHERE id = ?)';
             $params[] = $parent_ho_id;
         }
 
@@ -58,141 +35,17 @@ switch ($method) {
         }
 
         $sql .= " ORDER BY
-                    CASE
-                        WHEN a.is_ho = TRUE THEN 1
-                        ELSE 2
-                    END, a.area_name ASC";
+                    CASE WHEN a.is_ho = TRUE THEN 1 ELSE 2 END,
+                    a.pt ASC, a.name ASC";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         json_response($stmt->fetchAll());
         break;
 
-    case 'POST':
-        if ($currentUser['role_id'] !== 'superadmin') {
-            json_response(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
-        }
-        $data       = json_decode(file_get_contents('php://input'), true) ?? [];
-        $area_name  = trim($data['area_name'] ?? '');
-        $is_ho      = !empty($data['is_ho']) ? 'TRUE' : 'FALSE';
-        $parent_id  = !empty($data['parent_ho_id']) ? (int)$data['parent_ho_id'] : null;
-
-        if (!$area_name) {
-            json_response(['status' => 'error', 'message' => 'Nama area tidak boleh kosong.'], 400);
-        }
-
-        $stmt = $pdo->prepare(
-            "INSERT INTO stl_areas (area_name, is_ho, parent_ho_id) VALUES (?, ?, ?) RETURNING area_id"
-        );
-        $stmt->execute([$area_name, $is_ho === 'TRUE', $parent_id]);
-        json_response(['status' => 'success', 'message' => 'Area berhasil ditambahkan.']);
-        break;
-
-    case 'PUT':
-        if ($currentUser['role_id'] !== 'superadmin') {
-            json_response(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
-        }
-        if (!$id) {
-            json_response(['status' => 'error', 'message' => 'ID area wajib ada.'], 400);
-        }
-
-        // Cek apakah area dilindungi
-        $chk = $pdo->prepare("SELECT area_name FROM stl_areas WHERE area_id = ?");
-        $chk->execute([$id]);
-        $row = $chk->fetch();
-        if ($row && in_array($row['area_name'], $protected_areas, true)) {
-            json_response(['status' => 'error', 'message' => 'Area default tidak dapat diubah.'], 403);
-        }
-
-        $data      = json_decode(file_get_contents('php://input'), true) ?? [];
-        $area_name = trim($data['area_name'] ?? '');
-        $is_ho     = !empty($data['is_ho']);
-        $parent_id = !empty($data['parent_ho_id']) ? (int)$data['parent_ho_id'] : null;
-
-        if (!$area_name) {
-            json_response(['status' => 'error', 'message' => 'Nama area tidak boleh kosong.'], 400);
-        }
-
-        $stmt = $pdo->prepare(
-            "UPDATE stl_areas SET area_name = ?, is_ho = ?, parent_ho_id = ? WHERE area_id = ?"
-        );
-        $stmt->execute([$area_name, $is_ho, $parent_id, $id]);
-        json_response(['status' => 'success', 'message' => 'Area berhasil diperbarui.']);
-        break;
-
-    case 'DELETE':
-        if ($currentUser['role_id'] !== 'superadmin') {
-            json_response(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
-        }
-        if (!$id) {
-            json_response(['status' => 'error', 'message' => 'ID area wajib ada.'], 400);
-        }
-
-        $chk = $pdo->prepare("SELECT area_name FROM stl_areas WHERE area_id = ?");
-        $chk->execute([$id]);
-        $row = $chk->fetch();
-        if ($row && in_array($row['area_name'], $protected_areas, true)) {
-            json_response(['status' => 'error', 'message' => 'Area default tidak dapat dihapus.'], 403);
-        }
-
-        $pdo->prepare("DELETE FROM stl_areas WHERE area_id = ?")->execute([$id]);
-        json_response(['status' => 'success', 'message' => 'Area berhasil dihapus.']);
-        break;
-
     default:
         json_response(['message' => 'Metode tidak diizinkan.'], 405);
 }
-
-
-// Menangani preflight request (OPTIONS) untuk CORS
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    header("Access-Control-Allow-Origin: *");
-    header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-    header("Access-Control-Allow-Headers: Content-Type, Authorization");
-    http_response_code(200);
-    exit();
-}
-
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Content-Type: application/json; charset=UTF-8");
-
-
-// --- (BARU) One-time rename untuk "Head Office (HO)" menjadi "Head Office MDR 3" ---
-$conn->query("UPDATE areas SET area_name = 'Head Office MDR 3' WHERE area_name = 'Head Office (HO)'");
-// --- End One-time rename ---
-
-// Fungsi untuk memastikan area default ada di database
-function ensure_default_areas($conn) {
-    // (BARU) Daftar area default yang diperbarui
-    $default_areas = ['Head Office MDR 1', 'Head Office MDR 2', 'Head Office MDR 3', 'Head Office MDR 4', 'All Access'];
-    
-    foreach ($default_areas as $area_name) {
-        // Cek apakah area sudah ada
-        $check_sql = "SELECT area_id FROM areas WHERE area_name = ?";
-        $stmt_check = $conn->prepare($check_sql);
-        $stmt_check->bind_param("s", $area_name);
-        $stmt_check->execute();
-        $result = $stmt_check->get_result();
-        
-        // Jika tidak ada, baru tambahkan
-        if ($result->num_rows == 0) {
-            // (BARU) Tentukan apakah ini area HO atau bukan
-            $is_ho = (strpos($area_name, 'Head Office') !== false || $area_name === 'All Access') ? 1 : 0;
-            
-            $insert_sql = "INSERT INTO areas (area_name, is_ho) VALUES (?, ?)";
-            $stmt_insert = $conn->prepare($insert_sql);
-            $stmt_insert->bind_param("si", $area_name, $is_ho);
-            $stmt_insert->execute();
-            $stmt_insert->close();
-        }
-        $stmt_check->close();
-    }
-}
-
-
-ensure_default_areas($conn);
 
 $method = $_SERVER['REQUEST_METHOD'];
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
