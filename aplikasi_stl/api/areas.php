@@ -9,10 +9,10 @@ $protected_areas = ['Head Office MDR 1', 'Head Office MDR 2', 'Head Office MDR 3
 
 switch ($method) {
     case 'GET':
-        $type        = $_GET['type']        ?? 'all';
+        $type         = $_GET['type']         ?? 'all';
         $parent_ho_id = isset($_GET['parent_ho_id']) ? (int)$_GET['parent_ho_id'] : null;
 
-        // Auto-sync 1: tambahkan area dari tabel SSO `areas` (master data resmi)
+        // Auto-sync: tambahkan area dari tabel SSO `areas` ke stl_areas jika belum ada
         try {
             $pdo->exec("
                 INSERT INTO stl_areas (area_name, is_ho)
@@ -24,20 +24,18 @@ switch ($method) {
             ");
         } catch (PDOException $e) { /* non-critical */ }
 
-        // Auto-sync 2: tambahkan area dari users.area sebagai fallback
+        // Auto-sync fallback: dari users.area
         try {
             $pdo->exec("
                 INSERT INTO stl_areas (area_name, is_ho)
                 SELECT DISTINCT u.area, FALSE
                 FROM users u
-                WHERE u.area IS NOT NULL
-                  AND u.area <> ''
-                  AND NOT EXISTS (
-                      SELECT 1 FROM stl_areas a WHERE a.area_name = u.area
-                  )
+                WHERE u.area IS NOT NULL AND u.area <> ''
+                  AND NOT EXISTS (SELECT 1 FROM stl_areas a WHERE a.area_name = u.area)
             ");
-        } catch (PDOException $e) { /* non-critical — lanjutkan meski sync gagal */ }
+        } catch (PDOException $e) { /* non-critical */ }
 
+        // Query dari stl_areas (sudah ter-sync dari SSO areas master)
         $sql    = "SELECT a.*, ho.area_name AS parent_ho_name
                    FROM stl_areas a
                    LEFT JOIN stl_areas ho ON a.parent_ho_id = ho.area_id";
@@ -61,13 +59,8 @@ switch ($method) {
 
         $sql .= " ORDER BY
                     CASE
-                        WHEN a.area_name = 'Head Office MDR 1' THEN 1
-                        WHEN a.area_name = 'Head Office MDR 2' THEN 2
-                        WHEN a.area_name = 'Head Office MDR 3' THEN 3
-                        WHEN a.area_name = 'Head Office MDR 4' THEN 4
-                        WHEN a.area_name LIKE 'Head Office%'   THEN 5
-                        WHEN a.area_name = 'All Access'        THEN 6
-                        ELSE 7
+                        WHEN a.is_ho = TRUE THEN 1
+                        ELSE 2
                     END, a.area_name ASC";
 
         $stmt = $pdo->prepare($sql);
