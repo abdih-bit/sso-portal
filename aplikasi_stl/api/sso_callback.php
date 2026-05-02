@@ -44,11 +44,16 @@ if (!$ssoData || !isset($ssoData['user'])) {
 
 $ssoUser = $ssoData['user'];
 
-// --- Map SSO role ke role STL ---
+// --- Map SSO jabatan ke role STL ---
 function mapSsoRoleToStl(array $ssoUser): string {
-    $ssoRole = $ssoUser['role'] ?? 'USER';
+    $ssoRole = $ssoUser['role']    ?? 'USER';
+    $jabatan = trim($ssoUser['jabatan'] ?? '');
     if ($ssoRole === 'SUPERADMIN') return 'superadmin';
-    if ($ssoRole === 'ADMIN')      return 'admin_ho';
+    // Mapping berdasarkan jabatan dari SSO Portal
+    if ($jabatan === 'Head AR')   return 'admin_ho';
+    if ($jabatan === 'KA Admin')  return 'admin_dc';
+    // Fallback ke SSO role
+    if ($ssoRole === 'ADMIN') return 'admin_ho';
     return 'admin_dc';
 }
 
@@ -60,6 +65,10 @@ $pt       = trim($ssoUser['pt'] ?? '');
 try {
     // Pastikan kolom jabatan tersedia (idempotent migration)
     $pdo->exec("ALTER TABLE stl_users ADD COLUMN IF NOT EXISTS jabatan TEXT DEFAULT ''");
+
+    // Update nama role agar sesuai jabatan SSO Portal
+    $pdo->exec("UPDATE stl_roles SET role_name = 'Head AR'  WHERE role_id = 'admin_ho' AND role_name != 'Head AR'");
+    $pdo->exec("UPDATE stl_roles SET role_name = 'KA Admin' WHERE role_id = 'admin_dc' AND role_name != 'KA Admin'");
 
     // Cari user berdasarkan sso_user_id
     $stmt = $pdo->prepare("SELECT user_id, role_id, area_id FROM stl_users WHERE sso_user_id = ?");
@@ -122,12 +131,14 @@ try {
 }
 
 // --- Simpan session ---
+$roleNameMap = ['superadmin' => 'Superadmin', 'admin_ho' => 'Head AR', 'admin_dc' => 'KA Admin'];
 $_SESSION['stl_user'] = [
     'user_id'    => $stlUser['user_id'],
     'sso_id'     => $ssoUser['id'],
     'username'   => $ssoUser['username'],
     'full_name'  => $ssoUser['fullName'] ?? $ssoUser['username'],
     'role_id'    => $stlUser['role_id'],
+    'role_name'  => $roleNameMap[$stlUser['role_id']] ?? $stlUser['role_id'],
     'area_id'    => $stlUser['area_id'],
     'area_name'  => $areaName,
     'jabatan'    => $jabatan,

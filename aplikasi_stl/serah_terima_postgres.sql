@@ -45,9 +45,9 @@ CREATE TABLE IF NOT EXISTS stl_roles (
 
 INSERT INTO stl_roles (role_id, role_name) VALUES
 ('superadmin', 'Superadmin'),
-('admin_ho',   'Admin HO'),
-('admin_dc',   'Admin DC')
-ON CONFLICT (role_id) DO NOTHING;
+('admin_ho',   'Head AR'),
+('admin_dc',   'KA Admin')
+ON CONFLICT (role_id) DO UPDATE SET role_name = EXCLUDED.role_name;
 
 -- ============================================================
 -- 3. USERS (terhubung ke SSO Portal via sso_user_id)
