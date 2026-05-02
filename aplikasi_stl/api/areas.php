@@ -13,16 +13,18 @@ switch ($method) {
         $parent_ho_id = isset($_GET['parent_ho_id']) ? (int)$_GET['parent_ho_id'] : null;
 
         // Auto-sync: tambahkan area dari tabel users SSO yang belum ada di stl_areas
-        $pdo->exec("
-            INSERT INTO stl_areas (area_name, is_ho)
-            SELECT DISTINCT u.area, FALSE
-            FROM users u
-            WHERE u.area IS NOT NULL
-              AND u.area <> ''
-              AND NOT EXISTS (
-                  SELECT 1 FROM stl_areas a WHERE a.area_name = u.area
-              )
-        ");
+        try {
+            $pdo->exec("
+                INSERT INTO stl_areas (area_name, is_ho)
+                SELECT DISTINCT u.area, FALSE
+                FROM users u
+                WHERE u.area IS NOT NULL
+                  AND u.area <> ''
+                  AND NOT EXISTS (
+                      SELECT 1 FROM stl_areas a WHERE a.area_name = u.area
+                  )
+            ");
+        } catch (PDOException $e) { /* non-critical — lanjutkan meski sync gagal */ }
 
         $sql    = "SELECT a.*, ho.area_name AS parent_ho_name
                    FROM stl_areas a

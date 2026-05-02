@@ -8,15 +8,28 @@ $user = get_session_user();
 
 if ($user) {
     // Cari HO area untuk PT user (untuk Two-Way area tujuan)
-    if (!empty($user['pt'])) {
+    // Step 1: Ambil PT dari tabel SSO users (lebih andal dari session yang mungkin sudah lama)
+    $pt_for_ho = $user['pt'] ?? '';
+    if (!empty($user['sso_id'])) {
         try {
-            // Cari HO area berdasarkan nama PT dalam area_name
+            $stmtSso = $pdo->prepare("SELECT pt FROM users WHERE id = ? LIMIT 1");
+            $stmtSso->execute([$user['sso_id']]);
+            $ssoRow = $stmtSso->fetch();
+            if ($ssoRow && !empty($ssoRow['pt'])) {
+                $pt_for_ho = $ssoRow['pt'];
+            }
+        } catch (PDOException $e) { /* non-critical */ }
+    }
+
+    // Step 2: Cari HO area berdasarkan nama PT
+    if (!empty($pt_for_ho)) {
+        try {
             $stmtHo = $pdo->prepare(
                 "SELECT area_id, area_name FROM stl_areas
                  WHERE is_ho = TRUE AND area_name ILIKE ?
                  LIMIT 1"
             );
-            $stmtHo->execute(['%' . $user['pt'] . '%']);
+            $stmtHo->execute(['%' . $pt_for_ho . '%']);
             $hoArea = $stmtHo->fetch();
             if ($hoArea) {
                 $user['ho_area_id']   = $hoArea['area_id'];
@@ -24,7 +37,8 @@ if ($user) {
             }
         } catch (PDOException $e) { /* non-critical */ }
     }
-    // Fallback: cari HO via parent_ho_id area user
+
+    // Step 3: Fallback — cari HO via parent_ho_id di stl_areas
     if (empty($user['ho_area_id']) && !empty($user['area_id'])) {
         try {
             $stmtHo2 = $pdo->prepare(
