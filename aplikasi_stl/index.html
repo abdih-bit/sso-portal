@@ -40,6 +40,11 @@
         .sidebar > * {
             transition: opacity 0.2s linear;
         }
+        /* Allow sidebar brand title to wrap */
+        .sidebar h1, .offcanvas-title {
+            white-space: normal;
+            line-height: 1.3;
+        }
         .sidebar.sidebar-hidden {
             width: 0;
             padding-left: 0 !important;
@@ -695,7 +700,8 @@
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
                 { type: 'accordion', name: 'Lain-lain', icon: 'bi-three-dots', id: 'lain-lain', items: [
                     { id: 'cek-resi-ekspedisi', name: 'Cek Resi Ekspedisi', icon: 'bi-truck' },
-                    { id: 'log-audit', name: 'Log Audit', icon: 'bi-clipboard2-data' }
+                    { id: 'log-audit', name: 'Log Audit', icon: 'bi-clipboard2-data' },
+                    { id: 'management-berkas', name: 'Jenis Berkas', icon: 'bi-tags' }
                 ]}
             ],
             admin_ho: [
@@ -1986,6 +1992,47 @@
             </div>
         </div>
     `,
+    'management-berkas': `
+        <h2 class="h2 fw-bold text-dark mb-4">Manajemen Jenis Berkas</h2>
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white">
+                <h3 class="h5 mb-0 fw-semibold">Tambah Jenis Berkas Baru</h3>
+            </div>
+            <div class="card-body p-4">
+                <form id="add-jenis-berkas-form" class="row g-3 align-items-end">
+                    <div class="col-md-8">
+                        <label for="new-jenis-berkas-name" class="form-label">Nama Jenis Berkas</label>
+                        <input type="text" id="new-jenis-berkas-name" class="form-control" placeholder="cth. SPMBN" required>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle me-2"></i>Tambah
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="management-berkas" class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h3 class="h5 mb-0 fw-semibold">Daftar Jenis Berkas</h3>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nama Berkas</th>
+                                <th style="width:120px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jenis-berkas-list-table-body">
+                            <tr><td colspan="2" class="text-center">Memuat...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `,
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -2911,6 +2958,11 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('resi-ho-filter-input').addEventListener('input', renderFilteredResiTables);
 
             loadAndRenderResiData();
+        }
+
+        if (pageId === 'management-berkas') {
+            renderJenisBerkasList();
+            document.getElementById('add-jenis-berkas-form').addEventListener('submit', handleAddJenisBerkasSubmit);
         }
     };
 
