@@ -54,6 +54,7 @@ function mapSsoRoleToStl(array $ssoUser): string {
 
 $stlRole  = mapSsoRoleToStl($ssoUser);
 $jabatan  = trim($ssoUser['jabatan'] ?? '');
+$pt       = trim($ssoUser['pt'] ?? '');
 
 // --- Auto-create atau update STL user berdasarkan SSO user ---
 try {
@@ -130,6 +131,7 @@ $_SESSION['stl_user'] = [
     'area_id'    => $stlUser['area_id'],
     'area_name'  => $areaName,
     'jabatan'    => $jabatan,
+    'pt'         => $pt,
     'sso_role'   => $ssoUser['role'],
 ];
 

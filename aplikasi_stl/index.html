@@ -872,10 +872,9 @@
                                         <input type="text" id="nama-pengirim" class="form-control" value="" readonly>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="area-tujuan" class="form-label">Area Tujuan</label>
-                                        <select id="area-tujuan" class="form-select" required>
-                                            <option value="" disabled selected>Memuat...</option>
-                                        </select>
+                                        <label for="area-tujuan" class="form-label">Area Tujuan (Head Office)</label>
+                                        <input type="text" id="area-tujuan" class="form-control" value="Memuat..." readonly>
+                                        <input type="hidden" id="area-tujuan-id">
                                     </div>
                                     <div class="col-md-3">
                                         <label for="distribution-center" class="form-label">Distribution Center</label>
@@ -2564,13 +2563,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (pageId === 'buat-dokumen' && currentUser) {
                     const namaPengirimInput = document.getElementById('nama-pengirim');
                     const areaPengirimInput = document.getElementById('distribution-center');
-                    const areaTujuanInput = document.getElementById('area-tujuan');
-                    
-                    if(namaPengirimInput) namaPengirimInput.value = `${currentUser.full_name}`;
+                    const areaTujuanInput   = document.getElementById('area-tujuan');
+                    const areaTujuanIdInput = document.getElementById('area-tujuan-id');
+
+                    if(namaPengirimInput) namaPengirimInput.value = currentUser.full_name;
                     if(areaPengirimInput) areaPengirimInput.value = currentUser.area_name;
 
-                    await loadAreaOptions(areaTujuanInput, 'ho', 'Pilih Head Office...');
-                    areaTujuanInput.addEventListener('change', validateForm);
+                    if (currentUser.ho_area_name && currentUser.ho_area_id) {
+                        areaTujuanInput.value   = currentUser.ho_area_name;
+                        areaTujuanIdInput.value = currentUser.ho_area_id;
+                    } else {
+                        areaTujuanInput.value   = 'Head Office Belum Diatur';
+                        areaTujuanIdInput.value = '';
+                    }
                     
                     await loadJenisBerkasOptions(document.getElementById('jenis-berkas-dc'), 'Pilih jenis berkas...');
                     await loadJenisBerkasOptions(document.getElementById('jenis-berkas-so'), 'Pilih jenis berkas...');
@@ -2602,7 +2607,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         let baseInputs = [
                             document.getElementById('jenis-berkas-dc'),
                             document.getElementById('catatan'),
-                            document.getElementById('area-tujuan')
+                            document.getElementById('area-tujuan-id')
                         ];
                         
                         if (!isSTNK) {
@@ -3091,7 +3096,7 @@ document.addEventListener('DOMContentLoaded', function() {
             barcode_id: docId,
             doc_type: document.getElementById('jenis-berkas-dc').value,
             sender_user_id: currentUser.user_id,
-            receiver_ho_area_id: document.getElementById('area-tujuan').value,
+            receiver_ho_area_id: document.getElementById('area-tujuan-id').value,
             start_period: document.getElementById('periode-awal-dc').value || null,
             end_period: document.getElementById('periode-akhir-dc').value || null,
             notes: document.getElementById('catatan').value,
