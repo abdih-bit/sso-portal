@@ -52,10 +52,14 @@ function mapSsoRoleToStl(array $ssoUser): string {
     return 'admin_dc';
 }
 
-$stlRole = mapSsoRoleToStl($ssoUser);
+$stlRole  = mapSsoRoleToStl($ssoUser);
+$jabatan  = trim($ssoUser['jabatan'] ?? '');
 
 // --- Auto-create atau update STL user berdasarkan SSO user ---
 try {
+    // Pastikan kolom jabatan tersedia (idempotent migration)
+    $pdo->exec("ALTER TABLE stl_users ADD COLUMN IF NOT EXISTS jabatan TEXT DEFAULT ''");
+
     // Cari user berdasarkan sso_user_id
     $stmt = $pdo->prepare("SELECT user_id, role_id, area_id FROM stl_users WHERE sso_user_id = ?");
     $stmt->execute([$ssoUser['id']]);
@@ -73,13 +77,14 @@ try {
     if (!$stlUser) {
         // Buat user baru
         $ins = $pdo->prepare(
-            "INSERT INTO stl_users (sso_user_id, username, full_name, role_id, area_id, status)
-             VALUES (?, ?, ?, ?, ?, 'Aktif')
+            "INSERT INTO stl_users (sso_user_id, username, full_name, role_id, area_id, jabatan, status)
+             VALUES (?, ?, ?, ?, ?, ?, 'Aktif')
              ON CONFLICT (sso_user_id) DO UPDATE
                SET username  = EXCLUDED.username,
                    full_name = EXCLUDED.full_name,
                    role_id   = EXCLUDED.role_id,
-                   area_id   = COALESCE(EXCLUDED.area_id, stl_users.area_id)"
+                   area_id   = COALESCE(EXCLUDED.area_id, stl_users.area_id),
+                   jabatan   = EXCLUDED.jabatan"
         );
         $ins->execute([
             $ssoUser['id'],
@@ -87,21 +92,23 @@ try {
             $ssoUser['fullName'] ?? $ssoUser['username'],
             $stlRole,
             $areaId,
+            $jabatan,
         ]);
 
         $stmt2   = $pdo->prepare("SELECT user_id, role_id, area_id FROM stl_users WHERE sso_user_id = ?");
         $stmt2->execute([$ssoUser['id']]);
         $stlUser = $stmt2->fetch();
     } else {
-        // Update nama/role jika berubah dari SSO
+        // Update nama/role/jabatan jika berubah dari SSO
         $upd = $pdo->prepare(
-            "UPDATE stl_users SET username = ?, full_name = ?, role_id = ?, area_id = COALESCE(?, area_id) WHERE sso_user_id = ?"
+            "UPDATE stl_users SET username = ?, full_name = ?, role_id = ?, area_id = COALESCE(?, area_id), jabatan = ? WHERE sso_user_id = ?"
         );
         $upd->execute([
             $ssoUser['username'],
             $ssoUser['fullName'] ?? $ssoUser['username'],
             $stlRole,
             $areaId,
+            $jabatan,
             $ssoUser['id'],
         ]);
     }
@@ -122,6 +129,7 @@ $_SESSION['stl_user'] = [
     'role_id'    => $stlUser['role_id'],
     'area_id'    => $stlUser['area_id'],
     'area_name'  => $areaName,
+    'jabatan'    => $jabatan,
     'sso_role'   => $ssoUser['role'],
 ];
 

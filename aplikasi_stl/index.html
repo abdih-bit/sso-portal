@@ -2569,13 +2569,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     if(namaPengirimInput) namaPengirimInput.value = `${currentUser.full_name}`;
                     if(areaPengirimInput) areaPengirimInput.value = currentUser.area_name;
 
-                    if (currentUser.parent_ho_name && currentUser.parent_ho_id) {
-                        areaTujuanInput.value = currentUser.parent_ho_name;
-                        areaTujuanIdInput.value = currentUser.parent_ho_id;
+                    if (currentUser.head_ar_area_name && currentUser.head_ar_area_id) {
+                        areaTujuanInput.value = currentUser.head_ar_area_name;
+                        areaTujuanIdInput.value = currentUser.head_ar_area_id;
                     } else {
-                        areaTujuanInput.value = "HO Tujuan Belum Diatur"; 
+                        areaTujuanInput.value = "Area Head AR Belum Diatur";
                         areaTujuanIdInput.value = "";
-                        console.warn("Pengguna ini tidak memiliki Induk HO (parent_ho_id) yang terdaftar.");
+                        console.warn("Area Head AR tidak ditemukan untuk pengguna ini.");
                     }
                     
                     await loadJenisBerkasOptions(document.getElementById('jenis-berkas-dc'), 'Pilih jenis berkas...');
