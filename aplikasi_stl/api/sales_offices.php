@@ -7,6 +7,20 @@ $id     = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
 switch ($method) {
     case 'GET':
+        // Auto-sync: tambahkan SO dari tabel SSO `sales_offices` (master data resmi)
+        try {
+            $pdo->exec("
+                INSERT INTO stl_sales_offices (so_name, ho_area_id)
+                SELECT so.name, sa.area_id
+                FROM sales_offices so
+                JOIN areas a ON so.area_id = a.id
+                JOIN stl_areas sa ON sa.area_name = a.name
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM stl_sales_offices sso WHERE sso.so_name = so.name
+                )
+            ");
+        } catch (PDOException $e) { /* non-critical */ }
+
         $stmt = $pdo->query(
             "SELECT s.*, a.area_name AS ho_area_name
              FROM stl_sales_offices s

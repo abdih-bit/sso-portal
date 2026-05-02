@@ -35,4 +35,10 @@ router.post('/areas', requireRole('SUPERADMIN'), adminController.createArea);
 router.put('/areas/:id', requireRole('SUPERADMIN'), adminController.updateArea);
 router.delete('/areas/:id', requireRole('SUPERADMIN'), adminController.deleteArea);
 
+// Sales Offices
+router.get('/sales-offices', adminController.getSalesOffices);
+router.post('/sales-offices', requireRole('SUPERADMIN'), adminController.createSalesOffice);
+router.put('/sales-offices/:id', requireRole('SUPERADMIN'), adminController.updateSalesOffice);
+router.delete('/sales-offices/:id', requireRole('SUPERADMIN'), adminController.deleteSalesOffice);
+
 module.exports = router;

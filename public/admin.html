@@ -545,19 +545,44 @@
     </div>
   </div>
 
-  <!-- DELETE LINK CONFIRM MODAL -->
-  <div id="deleteLinkModal" class="modal items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
-      <div class="bg-red-50 px-5 py-4 flex items-center gap-3 border-b border-red-100">
-        <div class="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
-          <i class="fa-solid fa-triangle-exclamation text-red-500 text-sm"></i>
+  <!-- SALES OFFICE MODAL -->
+  <div id="soModal" class="modal items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center">
+            <i class="fa-solid fa-store text-teal-600 text-sm"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-gray-900" id="soModalTitle">Tambah Sales Office</h3>
+            <p class="text-xs text-gray-400" id="soModalSub">Di bawah area ...</p>
+          </div>
+        </div>
+        <button onclick="closeModal('soModal')" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition-all">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+      <form id="soForm" onsubmit="submitSoForm(event)" class="p-6 space-y-4">
+        <input type="hidden" id="soDbId" value="">
+        <input type="hidden" id="soAreaId" value="">
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1">Nama Sales Office</label>
+          <input type="text" id="soName" required class="input-field" placeholder="Contoh: SO Petisah, SO Krakatau...">
         </div>
         <div>
-          <div class="text-sm font-bold text-gray-900">Konfirmasi Hapus Link</div>
-          <div class="text-xs text-gray-500 mt-0.5">Link ini akan dihapus permanen</div>
+          <label class="block text-xs font-medium text-gray-500 mb-1">Area / DC Induk</label>
+          <input type="text" id="soAreaName" class="input-field bg-gray-50 text-gray-400" readonly>
         </div>
-      </div>
-      <div class="px-5 py-4">
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="closeModal('soModal')" class="flex-1 border border-gray-200 bg-white text-gray-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-all">Batal</button>
+          <button type="submit" class="flex-1 btn-primary justify-center rounded-xl py-2.5"><i class="fa-solid fa-floppy-disk text-xs"></i> Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DELETE LINK CONFIRM MODAL -->
+  <div id="deleteLinkModal" class="modal items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
         <p class="text-xs text-gray-500 mb-2">Anda akan menghapus link:</p>
         <div class="bg-gray-50 rounded-lg px-3 py-2.5 border border-gray-100 mb-3 space-y-1.5">
           <div class="flex items-center gap-2">
@@ -1078,7 +1103,7 @@
       if (tab === 'links') loadLinks();
       if (tab === 'appnames') renderAppNamesList();
       if (tab === 'logs') loadLogs();
-      if (tab === 'master') { renderMasterLists(); loadDbAreas(); }
+      if (tab === 'master') { renderMasterLists(); loadDbAreas(); loadDbSalesOffices(); }
       if (tab === 'reset') loadResetRequests('PENDING');
     }
 
@@ -1474,6 +1499,7 @@
 
     // ── AREA DB CACHE (API-backed) ──────────────────────────
     var _dbAreasCache = [];
+    var _dbSalesOfficesCache = [];
 
     async function loadDbAreas() {
       try {
@@ -1483,6 +1509,17 @@
           _dbAreasCache = data.areas || [];
         }
       } catch(e) { _dbAreasCache = []; }
+      renderDbAreaList();
+    }
+
+    async function loadDbSalesOffices() {
+      try {
+        var res = await fetch('/api/admin/sales-offices', { credentials: 'include' });
+        if (res.ok) {
+          var data = await res.json();
+          _dbSalesOfficesCache = data.salesOffices || [];
+        }
+      } catch(e) { _dbSalesOfficesCache = []; }
       renderDbAreaList();
     }
 
@@ -1514,20 +1551,124 @@
           <span class="ml-auto text-[10px] text-gray-400">${list.length} DC</span>
         </div>`;
         list.forEach(function(area) {
+          var areaSos = _dbSalesOfficesCache.filter(function(s) { return s.areaId === area.id; });
+          var soCount = areaSos.length;
+          var safeAreaName = area.name.replace(/'/g, "\\'");
           html += `<div class="flex items-center justify-between pl-8 pr-4 py-2 hover:bg-gray-50 group">
-            <div class="flex items-center gap-2">
-              <i class="fa-solid ${area.isHo ? 'fa-crown text-amber-400' : 'fa-location-dot text-green-400'} text-xs w-4"></i>
-              <span class="text-sm text-gray-700 font-medium">${area.name}</span>
-              ${area.isHo ? '<span class="tag bg-amber-50 text-amber-600 text-[10px]">Head Office</span>' : ''}
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+              <i class="fa-solid ${area.isHo ? 'fa-crown text-amber-400' : 'fa-location-dot text-green-400'} text-xs w-4 flex-shrink-0"></i>
+              <span class="text-sm text-gray-700 font-medium truncate">${area.name}</span>
+              ${area.isHo ? '<span class="tag bg-amber-50 text-amber-600 text-[10px] flex-shrink-0">Head Office</span>' : ''}
             </div>
-            <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onclick="editDbArea(${area.id})" class="text-xs text-blue-500 hover:bg-blue-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-pen text-xs"></i></button>
-              <button onclick="deleteDbArea(${area.id}, '${area.name.replace(/'/g, "\\'")}}')" class="text-xs text-red-400 hover:bg-red-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-trash text-xs"></i></button>
+            <div class="flex items-center gap-1">
+              <button onclick="toggleSoList(${area.id})" title="Sales Office" class="flex items-center gap-1 text-[10px] text-teal-600 bg-teal-50 hover:bg-teal-100 px-2 py-1 rounded transition-all flex-shrink-0">
+                <i class="fa-solid fa-store text-[10px]"></i>
+                <span id="so-count-${area.id}">${soCount}</span>
+              </button>
+              <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onclick="openSoModal(${area.id}, '${safeAreaName}')" title="Tambah SO" class="text-xs text-teal-500 hover:bg-teal-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-plus text-xs"></i></button>
+                <button onclick="editDbArea(${area.id})" class="text-xs text-blue-500 hover:bg-blue-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-pen text-xs"></i></button>
+                <button onclick="deleteDbArea(${area.id}, '${safeAreaName}')" class="text-xs text-red-400 hover:bg-red-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-trash text-xs"></i></button>
+              </div>
             </div>
-          </div>`;
+          </div>
+          <div id="so-list-${area.id}" class="hidden bg-teal-50/50 border-l-2 border-teal-200 ml-12 mr-4 mb-1 rounded-r-lg">`;
+          if (areaSos.length === 0) {
+            html += `<div class="px-3 py-2 text-[11px] text-gray-400">Belum ada Sales Office — <button onclick="openSoModal(${area.id}, '${safeAreaName}')" class="text-teal-500 font-medium hover:underline">Tambah</button></div>`;
+          } else {
+            areaSos.forEach(function(so) {
+              var safeSoName = so.name.replace(/'/g, "\\'");
+              html += `<div class="flex items-center justify-between px-3 py-1.5 hover:bg-teal-100/50 group/so">
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-store text-teal-400 text-[10px]"></i>
+                  <span class="text-xs text-gray-700">${so.name}</span>
+                </div>
+                <div class="flex gap-1 opacity-0 group-hover/so:opacity-100 transition-opacity">
+                  <button onclick="editSalesOffice(${so.id})" class="text-[10px] text-blue-500 hover:bg-blue-50 px-1.5 py-0.5 rounded"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                  <button onclick="deleteSalesOfficeConfirm(${so.id}, '${safeSoName}')" class="text-[10px] text-red-400 hover:bg-red-50 px-1.5 py-0.5 rounded"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                </div>
+              </div>`;
+            });
+            html += `<div class="px-3 py-1.5 border-t border-teal-100">
+              <button onclick="openSoModal(${area.id}, '${safeAreaName}')" class="text-[11px] text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1">
+                <i class="fa-solid fa-plus text-[10px]"></i> Tambah Sales Office
+              </button>
+            </div>`;
+          }
+          html += `</div>`;
         });
       });
       areaListEl.innerHTML = html;
+    }
+
+    function toggleSoList(areaId) {
+      var el = document.getElementById('so-list-' + areaId);
+      if (el) el.classList.toggle('hidden');
+    }
+
+    function openSoModal(areaId, areaName) {
+      document.getElementById('soModalTitle').textContent = 'Tambah Sales Office';
+      document.getElementById('soModalSub').textContent = 'Di bawah ' + areaName;
+      document.getElementById('soDbId').value = '';
+      document.getElementById('soAreaId').value = areaId;
+      document.getElementById('soAreaName').value = areaName;
+      document.getElementById('soName').value = '';
+      document.getElementById('soModal').classList.add('show');
+    }
+
+    function editSalesOffice(soId) {
+      var so = _dbSalesOfficesCache.find(function(s) { return s.id === soId; });
+      if (!so) return;
+      var area = _dbAreasCache.find(function(a) { return a.id === so.areaId; });
+      document.getElementById('soModalTitle').textContent = 'Edit Sales Office';
+      document.getElementById('soModalSub').textContent = 'Di bawah ' + (area ? area.name : '');
+      document.getElementById('soDbId').value = soId;
+      document.getElementById('soAreaId').value = so.areaId;
+      document.getElementById('soAreaName').value = area ? area.name : '';
+      document.getElementById('soName').value = so.name;
+      document.getElementById('soModal').classList.add('show');
+    }
+
+    function deleteSalesOfficeConfirm(soId, soName) {
+      document.getElementById('deleteConfirmSub').textContent = 'Hapus Sales Office';
+      document.getElementById('deleteConfirmIcon').className = 'fa-solid fa-store text-gray-400 text-sm w-4';
+      document.getElementById('deleteConfirmName').textContent = soName;
+      document.getElementById('deleteConfirmBadge').classList.add('hidden');
+      document.getElementById('deleteConfirmWarning').classList.add('hidden');
+      document.getElementById('deleteConfirmBtn').onclick = async function() {
+        try {
+          var res = await fetch('/api/admin/sales-offices/' + soId, { method: 'DELETE', credentials: 'include' });
+          if (res.ok) {
+            closeModal('deleteConfirmModal');
+            await loadDbSalesOffices();
+          } else {
+            var d = await res.json();
+            alert(d.error || 'Gagal menghapus sales office.');
+          }
+        } catch(e) { alert('Error: ' + e.message); }
+      };
+      document.getElementById('deleteConfirmModal').classList.add('show');
+    }
+
+    async function submitSoForm(e) {
+      e.preventDefault();
+      var soId = document.getElementById('soDbId').value;
+      var areaId = document.getElementById('soAreaId').value;
+      var name = document.getElementById('soName').value.trim();
+      if (!name || !areaId) return;
+      var payload = { name: name, areaId: parseInt(areaId) };
+      try {
+        var res = soId
+          ? await fetch('/api/admin/sales-offices/' + soId, { method: 'PUT', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(payload) })
+          : await fetch('/api/admin/sales-offices', { method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(payload) });
+        var d = await res.json();
+        if (res.ok) {
+          closeModal('soModal');
+          await loadDbSalesOffices();
+        } else {
+          alert(d.error || 'Gagal menyimpan sales office.');
+        }
+      } catch(err) { alert('Error: ' + err.message); }
     }
 
     function editDbArea(areaId) {

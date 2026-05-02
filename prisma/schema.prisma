@@ -220,5 +220,23 @@ model Area {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
+  salesOffices SalesOffice[]
+
   @@map("areas")
+}
+
+// ===========================
+// SALES OFFICE MASTER DATA
+// Sales Office di bawah naungan Area/DC
+// ===========================
+model SalesOffice {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  areaId    Int      @map("area_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  area      Area     @relation(fields: [areaId], references: [id], onDelete: Cascade)
+
+  @@map("sales_offices")
 }

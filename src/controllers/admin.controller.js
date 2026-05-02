@@ -702,6 +702,84 @@ async function deleteArea(req, res) {
   }
 }
 
+/**
+ * GET /api/admin/sales-offices
+ */
+async function getSalesOffices(req, res) {
+  try {
+    const salesOffices = await prisma.salesOffice.findMany({
+      orderBy: [{ areaId: 'asc' }, { name: 'asc' }],
+      include: { area: { select: { id: true, name: true } } }
+    });
+    return res.json({ salesOffices });
+  } catch (error) {
+    console.error('Get sales offices error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * POST /api/admin/sales-offices
+ */
+async function createSalesOffice(req, res) {
+  try {
+    const { name, areaId } = req.body;
+    if (!name || !name.trim()) return res.status(400).json({ error: 'Nama sales office wajib diisi.' });
+    if (!areaId) return res.status(400).json({ error: 'Area induk wajib dipilih.' });
+    const so = await prisma.salesOffice.create({
+      data: { name: name.trim(), areaId: parseInt(areaId) }
+    });
+    await createAuditLog({ userId: req.user.id, action: 'SALES_OFFICE_CREATED', resource: so.name, req });
+    return res.status(201).json({ message: 'Sales Office berhasil ditambahkan.', salesOffice: so });
+  } catch (error) {
+    if (error.code === 'P2002') return res.status(400).json({ error: 'Nama sales office sudah ada.' });
+    if (error.code === 'P2003') return res.status(400).json({ error: 'Area induk tidak ditemukan.' });
+    console.error('Create sales office error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * PUT /api/admin/sales-offices/:id
+ */
+async function updateSalesOffice(req, res) {
+  try {
+    const { id } = req.params;
+    const { name, areaId } = req.body;
+    const so = await prisma.salesOffice.update({
+      where: { id: parseInt(id) },
+      data: {
+        ...(name && { name: name.trim() }),
+        ...(areaId !== undefined && { areaId: parseInt(areaId) }),
+      }
+    });
+    await createAuditLog({ userId: req.user.id, action: 'SALES_OFFICE_UPDATED', resource: so.name, req });
+    return res.json({ message: 'Sales Office berhasil diperbarui.', salesOffice: so });
+  } catch (error) {
+    if (error.code === 'P2025') return res.status(404).json({ error: 'Sales Office tidak ditemukan.' });
+    if (error.code === 'P2002') return res.status(400).json({ error: 'Nama sales office sudah ada.' });
+    console.error('Update sales office error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
+ * DELETE /api/admin/sales-offices/:id
+ */
+async function deleteSalesOffice(req, res) {
+  try {
+    const { id } = req.params;
+    const so = await prisma.salesOffice.findUnique({ where: { id: parseInt(id) } });
+    if (!so) return res.status(404).json({ error: 'Sales Office tidak ditemukan.' });
+    await prisma.salesOffice.delete({ where: { id: parseInt(id) } });
+    await createAuditLog({ userId: req.user.id, action: 'SALES_OFFICE_DELETED', resource: so.name, req });
+    return res.json({ message: 'Sales Office berhasil dihapus.' });
+  } catch (error) {
+    console.error('Delete sales office error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
 module.exports = {
   getUsers,
   createUser,
@@ -720,4 +798,8 @@ module.exports = {
   createArea,
   updateArea,
   deleteArea,
+  getSalesOffices,
+  createSalesOffice,
+  updateSalesOffice,
+  deleteSalesOffice,
 };
