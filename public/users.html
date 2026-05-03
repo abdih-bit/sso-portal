@@ -101,7 +101,15 @@
             <i class="fa-solid fa-magnifying-glass text-gray-400 text-xs absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
             <input type="text" id="searchUser" placeholder="Cari user..." class="input-field pl-9" style="width:240px" oninput="filterUsers(this.value)">
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- Filter PT -->
+            <select id="filterPt" class="input-field" style="width:auto;padding:8px 12px" onchange="onFilterPtChange()">
+              <option value="">Semua PT</option>
+            </select>
+            <!-- Filter Area -->
+            <select id="filterArea" class="input-field" style="width:auto;padding:8px 12px" onchange="filterUsers(document.getElementById('searchUser').value)">
+              <option value="">Semua Area</option>
+            </select>
             <!-- Filter role -->
             <select id="filterRole" class="input-field" style="width:auto;padding:8px 12px" onchange="filterUsers(document.getElementById('searchUser').value)">
               <option value="">Semua Role</option>
@@ -571,16 +579,55 @@
         if (!res.ok) return;
         const data = await res.json();
         allUsers = data.users || [];
+        populateFilterDropdowns(allUsers);
         renderUsers(allUsers);
       } catch(e) {}
+    }
+
+    function populateFilterDropdowns(users) {
+      const visible = users.filter(u => currentUserRole === 'SUPERADMIN' || u.role !== 'SUPERADMIN');
+      const pts = [...new Set(visible.map(u => u.pt).filter(Boolean))].sort();
+      const ptEl = document.getElementById('filterPt');
+      const curPt = ptEl.value;
+      ptEl.innerHTML = '<option value="">Semua PT</option>';
+      pts.forEach(pt => {
+        const o = document.createElement('option'); o.value = pt; o.textContent = 'PT ' + pt;
+        if (pt === curPt) o.selected = true;
+        ptEl.appendChild(o);
+      });
+      refreshFilterAreaOptions(ptEl.value, visible);
+    }
+
+    function refreshFilterAreaOptions(selectedPt, users) {
+      const src = users || allUsers.filter(u => currentUserRole === 'SUPERADMIN' || u.role !== 'SUPERADMIN');
+      const filtered = selectedPt ? src.filter(u => u.pt === selectedPt) : src;
+      const areas = [...new Set(filtered.map(u => u.area).filter(Boolean))].sort();
+      const areaEl = document.getElementById('filterArea');
+      const curArea = areaEl.value;
+      areaEl.innerHTML = '<option value="">Semua Area</option>';
+      areas.forEach(area => {
+        const o = document.createElement('option'); o.value = area; o.textContent = area;
+        if (area === curArea) o.selected = true;
+        areaEl.appendChild(o);
+      });
+    }
+
+    function onFilterPtChange() {
+      document.getElementById('filterArea').value = '';
+      refreshFilterAreaOptions(document.getElementById('filterPt').value);
+      filterUsers(document.getElementById('searchUser').value);
     }
 
     function filterUsers(q) {
       q = (q || '').toLowerCase();
       const role = document.getElementById('filterRole').value;
+      const pt   = document.getElementById('filterPt').value;
+      const area = document.getElementById('filterArea').value;
       const filtered = allUsers.filter(u =>
         (currentUserRole === 'SUPERADMIN' || u.role !== 'SUPERADMIN') &&
         (!role || u.role === role) &&
+        (!pt   || u.pt   === pt) &&
+        (!area || u.area === area) &&
         (!q || u.fullName.toLowerCase().includes(q) || u.username.toLowerCase().includes(q))
       );
       renderUsers(filtered);
@@ -588,31 +635,38 @@
 
     function renderUsers(users) {
       const tbody = document.getElementById('usersTable');
-      // Sembunyikan SUPERADMIN dari tampilan kecuali jika yang login adalah SUPERADMIN
       const visible = users.filter(u => currentUserRole === 'SUPERADMIN' || u.role !== 'SUPERADMIN');
       document.getElementById('userCount').textContent = visible.length + ' user ditampilkan';
       if (!visible.length) {
         tbody.innerHTML = '<tr><td colspan="8" class="text-center py-10 text-gray-400 text-sm">Tidak ada user ditemukan</td></tr>';
         return;
       }
-      tbody.innerHTML = visible.map(u => {
+
+      // Group: { pt -> { area -> [users] } }
+      const groups = {};
+      visible.forEach(u => {
+        const pt   = u.pt   || '—';
+        const area = u.area || '—';
+        if (!groups[pt]) groups[pt] = {};
+        if (!groups[pt][area]) groups[pt][area] = [];
+        groups[pt][area].push(u);
+      });
+      const pts = Object.keys(groups).sort((a, b) => a === '—' ? 1 : b === '—' ? -1 : a.localeCompare(b));
+
+      function buildUserRow(u) {
         const initials = u.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-        const roleColor = u.role === 'ADMIN' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600';
+        const roleColor = u.role === 'SUPERADMIN' ? 'bg-red-100 text-red-700' : u.role === 'ADMIN' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600';
         const stColor = u.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
         const ud = JSON.stringify(u).replace(/"/g, '&quot;');
-        // Edit: SUPERADMIN bisa edit semua; ADMIN hanya bisa edit USER (bukan sesama ADMIN)
-        const canEdit = currentUserRole === 'SUPERADMIN' || u.role === 'USER';
-        // Toggle nonaktif: SUPERADMIN tidak bisa dinonaktifkan; ADMIN hanya bisa toggle USER
+        const canEdit   = currentUserRole === 'SUPERADMIN' || u.role === 'USER';
         const canToggle = u.role !== 'SUPERADMIN' && (currentUserRole === 'SUPERADMIN' || u.role === 'USER');
+        const canDelete = u.role !== 'SUPERADMIN' && (currentUserRole === 'SUPERADMIN' || u.role === 'USER');
         const toggleBtn = canToggle
           ? `<button onclick="toggleUserStatus('${u.id}', ${u.isActive})" class="text-xs font-semibold px-2 py-1 rounded transition-all ${u.isActive ? 'text-red-500 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'}">${u.isActive ? 'Nonaktifkan' : 'Aktifkan'}</button>`
           : '';
-        // Hapus: akun SUPERADMIN tidak bisa dihapus siapapun; SUPERADMIN bisa hapus USER & ADMIN; ADMIN hanya bisa hapus USER
-        const canDelete = u.role !== 'SUPERADMIN' && (currentUserRole === 'SUPERADMIN' || u.role === 'USER');
         const deleteBtn = canDelete
           ? `<button onclick="deleteUser('${u.id}', '${u.fullName.replace(/'/g, "\\'")}')" class="text-xs font-semibold px-2 py-1 rounded text-red-500 hover:text-red-700 hover:bg-red-50 transition-all" title="Hapus user"><i class="fa-solid fa-trash-can"></i></button>`
           : '';
-        // Reset Password: hanya SUPERADMIN yang bisa reset password user mana pun
         const resetPwdBtn = currentUserRole === 'SUPERADMIN'
           ? `<button onclick="resetUserPassword('${u.id}', '${u.fullName.replace(/'/g, "\\'")}')" class="text-xs font-semibold px-2 py-1 rounded text-purple-600 hover:text-purple-800 hover:bg-purple-50 transition-all" title="Reset Password"><i class="fa-solid fa-key"></i></button>`
           : '';
@@ -641,13 +695,40 @@
           <td class="px-5 py-3">
             <div class="flex items-center gap-1">
               ${canEdit ? `<button onclick='editUser(${ud})' class="text-blue-600 hover:text-blue-800 text-xs font-semibold px-2 py-1 rounded hover:bg-blue-50 transition-all">Edit</button>` : ''}
-              ${resetPwdBtn}
-              ${toggleBtn}
-              ${deleteBtn}
+              ${resetPwdBtn}${toggleBtn}${deleteBtn}
             </div>
           </td>
         </tr>`;
-      }).join('');
+      }
+
+      let html = '';
+      pts.forEach(pt => {
+        const areas = Object.keys(groups[pt]).sort((a, b) => a === '—' ? 1 : b === '—' ? -1 : a.localeCompare(b));
+        const ptTotal = areas.reduce((sum, a) => sum + groups[pt][a].length, 0);
+        html += `<tr style="background:#eff6ff;">
+          <td colspan="8" class="px-5 py-2 border-l-4 border-blue-500">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-building text-blue-500 text-xs"></i>
+              <span class="text-xs font-bold text-blue-700 uppercase tracking-wide">PT ${pt !== '—' ? pt : 'Tanpa PT'}</span>
+              <span class="tag bg-blue-100 text-blue-700">${ptTotal} user</span>
+            </div>
+          </td>
+        </tr>`;
+        areas.forEach(area => {
+          const areaUsers = groups[pt][area];
+          html += `<tr style="background:#f8fafc;">
+            <td colspan="8" class="px-9 py-1.5 border-l-4 border-gray-300">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-location-dot text-gray-400 text-xs"></i>
+                <span class="text-xs font-semibold text-gray-600">${area !== '—' ? area : 'Tanpa Area'}</span>
+                <span class="text-xs text-gray-400">${areaUsers.length} user</span>
+              </div>
+            </td>
+          </tr>`;
+          areaUsers.forEach(u => { html += buildUserRow(u); });
+        });
+      });
+      tbody.innerHTML = html;
     }
 
     // ── Modal: Add / Edit ───────────────────────────────────
