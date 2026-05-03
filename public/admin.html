@@ -902,7 +902,14 @@
             </td>
             <td class="px-5 py-3"><a href="${a.url}" target="_blank" class="text-blue-500 hover:text-blue-700 text-xs flex items-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i> ${a.url}</a></td>
             <td class="px-5 py-3"><div class="flex flex-wrap gap-1">${(a.allowedDepartemen||[]).length ? (a.allowedDepartemen).map(d=>'<span class="tag bg-indigo-50 text-indigo-700">'+d+'</span>').join('') : '<span class="text-red-400 text-xs font-medium">⚠ Tidak tampil</span>'}</div></td>
-            <td class="px-5 py-3"><span class="tag ${a.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${a.isActive ? 'Active' : 'Inactive'}</span></td>
+            <td class="px-5 py-3">
+              <div class="flex items-center gap-2">
+                <button onclick='toggleAppActive("${a.id}", ${a.isActive})' title="${a.isActive ? 'Klik untuk nonaktifkan' : 'Klik untuk aktifkan'}" class="relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none ${a.isActive ? 'bg-green-500' : 'bg-gray-300'}">
+                  <span class="inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${a.isActive ? 'translate-x-4' : 'translate-x-0.5'}"></span>
+                </button>
+                <span class="text-xs font-medium ${a.isActive ? 'text-green-600' : 'text-gray-400'}">${a.isActive ? 'Aktif' : 'Nonaktif'}</span>
+              </div>
+            </td>
             <td class="px-5 py-3">
               <div class="flex gap-1">
                 <button onclick='editApp(${ad})' class="text-blue-600 hover:text-blue-800 text-xs font-semibold px-2 py-1 rounded hover:bg-blue-50 transition-all"><i class="fa-solid fa-pen text-xs"></i> Edit</button>
@@ -956,7 +963,10 @@
             + '<td class="px-5 py-3"><a href="' + r.url + '" target="_blank" class="text-indigo-500 hover:text-indigo-700 text-xs flex items-center gap-1" title="' + r.url + '"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i> ' + shortUrl + '</a></td>'
             + '<td class="px-5 py-3"><div class="flex flex-wrap gap-1">' + deptHtml + '</div></td>'
             + '<td class="px-5 py-3">'
-            + '<div class="flex gap-1">'
+            + '<div class="flex items-center gap-2">'
+            + '<button onclick=\'toggleAppActive("' + r.app.id + '", ' + r.app.isActive + ')\' title="' + (r.app.isActive ? 'Klik untuk nonaktifkan' : 'Klik untuk aktifkan') + '" class="relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none ' + (r.app.isActive ? 'bg-green-500' : 'bg-gray-300') + '">'
+            + '<span class="inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ' + (r.app.isActive ? 'translate-x-4' : 'translate-x-0.5') + '"></span>'
+            + '</button>'
             + '<button onclick=\'editLinkAreaRow("' + r.app.id + '", "' + r.area.replace(/'/g, "\\'") + '")\' class="text-blue-600 hover:text-blue-800 text-xs font-semibold px-2 py-1 rounded hover:bg-blue-50 transition-all"><i class="fa-solid fa-pen text-xs"></i> Edit</button>'
             + '<button onclick=\'confirmDeleteLink("' + r.app.id + '", "' + r.app.name.replace(/'/g, "\\'") + '", "' + r.area.replace(/'/g, "\\'") + '")\' class="text-red-500 hover:text-red-700 text-xs font-semibold px-2 py-1 rounded hover:bg-red-50 transition-all"><i class="fa-solid fa-trash text-xs"></i></button>'
             + '</div>'
@@ -964,6 +974,25 @@
             + '</tr>';
         }).join('');
       } catch(e) { console.error(e); }
+    }
+
+    /** Toggle aplikasi aktif/nonaktif — SUPERADMIN only */
+    async function toggleAppActive(appId, curIsActive) {
+      const label = curIsActive ? 'nonaktifkan' : 'aktifkan';
+      if (!confirm('Yakin ingin ' + label + ' aplikasi ini?\n\n' + (curIsActive ? 'Aplikasi tidak akan tampil untuk semua user.' : 'Aplikasi akan kembali tampil untuk user.'))) return;
+      try {
+        const res = await fetch('/api/admin/applications/' + appId + '/toggle', {
+          method: 'PATCH', credentials: 'include'
+        });
+        const data = await res.json();
+        if (res.ok) {
+          _allAppsCache = [];
+          loadApps();
+          loadLinks();
+        } else {
+          alert(data.error || 'Gagal mengubah status aplikasi.');
+        }
+      } catch(e) { alert('Koneksi gagal.'); }
     }
 
     /** Delete SSO app confirmation */

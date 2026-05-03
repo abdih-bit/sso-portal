@@ -404,6 +404,40 @@ async function updateApplication(req, res) {
 }
 
 /**
+ * PATCH /api/admin/applications/:id/toggle
+ * Toggle isActive status — SUPERADMIN only
+ */
+async function toggleApplicationActive(req, res) {
+  try {
+    const { id } = req.params;
+    const app = await prisma.application.findUnique({ where: { id } });
+    if (!app) return res.status(404).json({ error: 'Aplikasi tidak ditemukan.' });
+
+    const updated = await prisma.application.update({
+      where: { id },
+      data: { isActive: !app.isActive }
+    });
+
+    await createAuditLog({
+      userId: req.user.id,
+      action: 'APP_UPDATED',
+      resource: `${updated.name} [${updated.isActive ? 'AKTIF' : 'NONAKTIF'}]`,
+      req
+    });
+
+    return res.json({
+      message: `Aplikasi berhasil ${updated.isActive ? 'diaktifkan' : 'dinonaktifkan'}.`,
+      application: updated
+    });
+  } catch (error) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Aplikasi tidak ditemukan.' });
+    }
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+/**
  * DELETE /api/admin/applications/:id
  */
 async function deleteApplication(req, res) {
@@ -788,6 +822,7 @@ module.exports = {
   getApplications,
   createApplication,
   updateApplication,
+  toggleApplicationActive,
   deleteApplication,
   getAuditLogs,
   getStats,

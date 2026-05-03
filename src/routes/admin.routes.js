@@ -19,6 +19,7 @@ router.delete('/users/:id', adminController.deleteUser);
 router.get('/applications', adminController.getApplications);
 router.post('/applications', adminController.createApplication);
 router.put('/applications/:id', adminController.updateApplication);
+router.patch('/applications/:id/toggle', requireRole('SUPERADMIN'), adminController.toggleApplicationActive);
 router.delete('/applications/:id', requireRole('SUPERADMIN'), adminController.deleteApplication);
 
 // Audit Logs
