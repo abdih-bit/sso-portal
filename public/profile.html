@@ -185,6 +185,42 @@
               </div>
             </div>
             <div class="info-row">
+              <div class="info-icon" style="background:#fdf4ff;">
+                <i class="fa-solid fa-envelope" style="color:#a21caf;font-size:12px;"></i>
+              </div>
+              <div>
+                <div style="font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">Email</div>
+                <div style="font-size:13.5px;font-weight:600;color:#0f172a;" id="profileEmail">-</div>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-icon" style="background:#eff6ff;">
+                <i class="fa-solid fa-building" style="color:#2563eb;font-size:12px;"></i>
+              </div>
+              <div>
+                <div style="font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">PT</div>
+                <div style="font-size:13.5px;font-weight:600;color:#0f172a;" id="profilePt">-</div>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-icon" style="background:#f0fdf4;">
+                <i class="fa-solid fa-location-dot" style="color:#16a34a;font-size:12px;"></i>
+              </div>
+              <div>
+                <div style="font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">DC / Area</div>
+                <div style="font-size:13.5px;font-weight:600;color:#0f172a;" id="profileArea">-</div>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-icon" style="background:#fff7ed;">
+                <i class="fa-solid fa-briefcase" style="color:#ea580c;font-size:12px;"></i>
+              </div>
+              <div>
+                <div style="font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">Jabatan</div>
+                <div style="font-size:13.5px;font-weight:600;color:#0f172a;" id="profileJabatan">-</div>
+              </div>
+            </div>
+            <div class="info-row">
               <div class="info-icon" style="background:#dcfce7;">
                 <i class="fa-solid fa-circle-check" style="color:#16a34a;font-size:12px;"></i>
               </div>
@@ -345,6 +381,10 @@
       document.getElementById('profileName').textContent = user.fullName;
       document.getElementById('profileRoleText').textContent = user.role;
       document.getElementById('profileUsername').textContent = '@' + user.username;
+      document.getElementById('profileEmail').textContent = user.email || '—';
+      document.getElementById('profilePt').textContent = user.pt || '—';
+      document.getElementById('profileArea').textContent = user.area || '—';
+      document.getElementById('profileJabatan').textContent = user.jabatan || '—';
 
       const badge = document.getElementById('profileRoleBadge');
       if (user.role === 'SUPERADMIN') badge.className = 'tag bg-red-100 text-red-600 mt-1';
