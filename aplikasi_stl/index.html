@@ -2183,11 +2183,8 @@ document.addEventListener('DOMContentLoaded', function() {
              };
 
             const loadReportFilters = async () => {
-                // (DIUBAH) Sama seperti dashboard, filter untuk HO
-                let parentHoId = null;
-                if (currentUser && currentUser.area_name && currentUser.area_name.includes('Head Office')) {
-                    parentHoId = currentUser.area_id;
-                }
+                // Filter berdasarkan PT HO user (ho_area_id dari session)
+                const parentHoId = (currentUser && currentUser.ho_area_id) ? currentUser.ho_area_id : null;
                 await loadAreaOptions(document.getElementById('report-area'), 'dc', 'Semua Area', parentHoId);
             };
 
@@ -2522,7 +2519,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     const isHoUser = currentUser && (currentUser.role_id === 'admin_ho' || (currentUser.area_name && currentUser.area_name.includes('Head Office')));
 
                     if (isAdminDc) {
-                        if (areaFilterWrapper) areaFilterWrapper.style.display = 'none';
+                        // Ka Admin: tampilkan filter tapi hanya area sendiri
+                        if (areaFilterWrapper) areaFilterWrapper.style.display = '';
+                        const reportAreaSelect = document.getElementById('report-area');
+                        reportAreaSelect.innerHTML = `<option value="${currentUser.area_id}">${currentUser.area_name}</option>`;
+                        reportAreaSelect.value = currentUser.area_id;
+                        reportAreaSelect.disabled = true;
                     } else if (isHoUser) {
                         await loadReportFilters();
                         document.getElementById('report-area').value = '';
@@ -2563,13 +2565,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     const areaSenderSelect = document.getElementById('report-satu-arah-area-sender');
                     const areaReceiverSelect = document.getElementById('report-satu-arah-area-receiver');
 
-                    await loadAreaOptions(areaSenderSelect, 'dc', 'Semua Pengirim');
-                    await loadAreaOptions(areaReceiverSelect, 'dc', 'Semua Penerima');
-
+                    // Area Pengirim: Ka Admin hanya area sendiri; Head AR semua area PT-nya
                     if (isAdminDcSA) {
+                        areaSenderSelect.innerHTML = `<option value="${currentUser.area_id}">${currentUser.area_name}</option>`;
                         areaSenderSelect.value = currentUser.area_id;
                         areaSenderSelect.disabled = true;
-                    } else if (isHoUserSA) {
+                    } else {
+                        const ptHoId = (currentUser && currentUser.ho_area_id) ? currentUser.ho_area_id : null;
+                        await loadAreaOptions(areaSenderSelect, 'dc', 'Semua Pengirim', ptHoId);
+                    }
+                    await loadAreaOptions(areaReceiverSelect, 'dc', 'Semua Penerima');
+
+                    if (isHoUserSA) {
                         areaReceiverSelect.value = '';
                     }
 
