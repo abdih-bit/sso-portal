@@ -281,7 +281,20 @@
             align-items: center;
             justify-content: flex-end;
             gap: 0.5rem;
-            padding: 0.4rem 0 0.6rem 0;
+            padding: 0.4rem 0 0.4rem 0;
+        }
+        .topbar-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 1021;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+            margin-bottom: 1rem;
+        }
+        body.dark-mode .topbar-wrapper {
+            background: #1e1e2e;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
         }
         .topbar-user-card {
             display: flex;
@@ -499,8 +512,9 @@
             </div>
 
             <!-- Main Content -->
-            <main class="main-content p-3">
+            <main class="main-content">
                 <!-- Topbar -->
+                <div class="topbar-wrapper">
                 <div class="topbar">
                     <!-- Mobile Menu Button -->
                     <button class="btn btn-primary d-md-none me-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobile-sidebar" aria-controls="mobile-sidebar">
@@ -521,8 +535,9 @@
                         <i class="bi bi-box-arrow-right"></i>
                     </button>
                 </div>
+                </div>
 
-                <div id="content">
+                <div id="content" class="p-3">
                     <!-- Content for each page will be loaded here -->
                 </div>
             </main>
