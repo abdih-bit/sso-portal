@@ -35,7 +35,8 @@
             min-height: 100vh;
             transition: width 0.35s ease-in-out;
             white-space: nowrap;
-            background-image: linear-gradient(to bottom, #023e8a, #0077b6, #00b4d8);
+            background-color: #ffffff;
+            border-right: 1px solid #dee2e6;
         }
         .sidebar > * {
             transition: opacity 0.2s linear;
@@ -68,9 +69,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #023e8a;
+            background-color: #6366f1;
             color: white;
-            border: 1px solid #023e8a;
+            border: 1px solid #6366f1;
         }
         .main-content {
             flex: 1;
@@ -79,50 +80,53 @@
             font-size: 0.875rem;
         }
 
-        /* (DIUBAH) Styling Menu Baru */
+        /* Styling Menu - SPD Style */
         .sidebar .nav-link {
-            color: #f8f9fa;
+            color: #495057;
             font-weight: 500;
-            border-radius: 0.375rem; /* Menambahkan border-radius */
-            margin-bottom: 0.25rem; /* Sedikit jarak antar menu */
+            border-radius: 0.375rem;
+            margin-bottom: 0.25rem;
         }
         .sidebar .nav-link:hover {
-            color: #fff;
-            background-color: rgba(0, 0, 0, 0.2);
+            color: #6366f1;
+            background-color: #e9ecef;
         }
         .sidebar .nav-link.active {
             color: #fff;
-            background-color: rgba(0, 0, 0, 0.3);
+            background-color: #6366f1;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
         .sidebar .nav-link .bi {
             margin-right: 0.75rem;
         }
-        /* (BARU) Styling untuk Menu Kategori Statis */
+        /* Styling untuk Menu Kategori */
         .sidebar .nav-category-header {
-            color: #ffffffb3;
-            font-size: 0.8rem;
+            color: #6c757d;
+            font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
             padding: 1.5rem 1rem 0.5rem 1rem;
             letter-spacing: 0.5px;
         }
-        /* (BARU) Styling untuk Accordion Menu (Lain-lain & Management) */
+        /* Styling untuk Accordion Menu */
         .sidebar .accordion-button,
         .sidebar .accordion-button:focus,
         .sidebar .accordion-button:not(.collapsed) {
             background: transparent !important;
-            color: #f8f9fa !important;
+            color: #495057 !important;
             box-shadow: none !important;
             border: none !important;
             font-weight: 500;
-            padding: 0.75rem 1rem; /* Padding disesuaikan */
-            border-radius: 0.375rem; /* Menambahkan border-radius */
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
         }
         .sidebar .accordion-button:hover {
-            background-color: rgba(0, 0, 0, 0.2) !important;
+            background-color: #e9ecef !important;
+            color: #6366f1 !important;
         }
         .sidebar .accordion-button::after {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23f8f9fa'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23495057'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
         }
         .sidebar .accordion-item {
             border: none !important;
@@ -136,35 +140,37 @@
             position: relative;
             font-size: 0.95rem; /* Sedikit lebih kecil */
         }
-        /* (BARU) Garis kecil penanda sub-menu */
+        /* Garis kecil penanda sub-menu */
         .sidebar .accordion-body .nav-link::before {
             content: '';
             position: absolute;
-            left: 1.5rem; /* Disesuaikan */
+            left: 1.5rem;
             top: 50%;
             transform: translateY(-50%);
             height: 1px;
             width: 10px;
-            background-color: rgba(255, 255, 255, 0.3);
+            background-color: rgba(99, 102, 241, 0.4);
         }
         /* End Styling Menu Baru */
 
         .offcanvas.offcanvas-start {
-             background-image: linear-gradient(to bottom, #023e8a, #0077b6, #00b4d8);
+            background-color: #ffffff;
+            border-right: 1px solid #dee2e6;
         }
-        /* New Icon Styles */
+        /* Icon Styles */
         .sidebar-icon-container {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(99, 102, 241, 0.15);
             border-radius: 50%;
             width: 40px;
             height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0; /* Prevent shrinking */
+            flex-shrink: 0;
+            color: #6366f1;
         }
         .login-icon-container {
-            background-image: linear-gradient(to bottom, #023e8a, #0077b6, #00b4d8);
+            background: linear-gradient(135deg, #6366f1, #818cf8);
             border-radius: 50%;
             width: 80px;
             height: 80px;
@@ -255,19 +261,18 @@
             background-color: #f0f0f0;
         }
         .login-btn-gradient {
-            background-image: linear-gradient(to right, #0077b6, #00b4d8);
+            background: linear-gradient(135deg, #6366f1, #818cf8);
             border: none;
             transition: all 0.3s ease;
         }
         .login-btn-gradient:hover {
-             background-image: linear-gradient(to right, #023e8a, #0077b6);
-             transform: translateY(-2px);
-             box-shadow: 0 4px 15px rgba(0, 119, 182, 0.4);
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
         }
 
-        /* (DIUBAH) Perbaikan Tampilan Login */
         .login-form-side {
-            background: linear-gradient(to bottom, #ade8f4, #f8f9fa 60%);
+            background: linear-gradient(to bottom, #e0e7ff, #f8f9fa 60%);
         }
 
         /* ── Topbar ── */
@@ -330,7 +335,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
         body.dark-mode .dark-toggle {
-            background: #0077b6;
+            background: #6366f1;
         }
         body.dark-mode .dark-toggle::after {
             transform: translateX(20px);
@@ -390,6 +395,26 @@
         body.dark-mode .text-muted { color: #9e9e9e !important; }
         body.dark-mode .bg-white { background-color: #1e1e2e !important; }
         body.dark-mode .alert-secondary { background-color: #2a2a3e; border-color: #3e3e5e; color: #e0e0e0; }
+        /* Dark mode sidebar */
+        body.dark-mode .sidebar {
+            background-color: #1e1e2e !important;
+            border-right-color: #2e2e3e !important;
+        }
+        body.dark-mode .offcanvas.offcanvas-start {
+            background-color: #1e1e2e !important;
+            border-right-color: #2e2e3e !important;
+        }
+        body.dark-mode .sidebar .nav-link { color: #a0aec0; }
+        body.dark-mode .sidebar .nav-link:hover { background-color: #2a2a3e; color: #c7d2fe; }
+        body.dark-mode .sidebar .nav-link.active { background-color: #4f46e5; color: #fff; }
+        body.dark-mode .sidebar .nav-category-header { color: #718096; }
+        body.dark-mode .sidebar .accordion-button { color: #a0aec0 !important; }
+        body.dark-mode .sidebar .accordion-button:hover { background-color: #2a2a3e !important; color: #c7d2fe !important; }
+        /* Form focus indigo */
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+            border-color: #818cf8;
+        }
     </style>
 </head>
 <!-- (Bersambung ke Bagian 2) -->
@@ -436,7 +461,7 @@
     <div id="app-container" class="d-none">
         <div class="d-flex" id="main-wrapper">
             <!-- Sidebar -->
-            <aside class="sidebar text-white p-3 d-none d-md-flex flex-column">
+            <aside class="sidebar p-3 d-none d-md-flex flex-column">
                 <div class="d-flex align-items-center mb-4 p-2">
                     <div class="sidebar-icon-container me-3">
                         <i class="bi bi-archive-fill fs-5"></i>
@@ -456,15 +481,15 @@
             </button>
 
             <!-- Mobile Offcanvas Sidebar -->
-            <div class="offcanvas offcanvas-start text-white" tabindex="-1" id="mobile-sidebar" aria-labelledby="mobile-sidebar-label">
-                <div class="offcanvas-header border-bottom border-secondary">
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="mobile-sidebar" aria-labelledby="mobile-sidebar-label">
+                <div class="offcanvas-header border-bottom">
                     <div class="d-flex align-items-center">
                         <div class="sidebar-icon-container me-3">
                            <i class="bi bi-archive-fill fs-5"></i>
                         </div>
                         <h5 class="offcanvas-title h6 mb-0 fw-bold" id="mobile-sidebar-label">Serah Terima Laporan</h5>
                     </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button></button>
                 </div>
                 <div class="offcanvas-body d-flex flex-column p-3">
                      <nav class="nav flex-column flex-grow-1" id="mobile-nav">
@@ -478,7 +503,7 @@
                 <!-- Topbar -->
                 <div class="topbar">
                     <!-- Mobile Menu Button -->
-                    <button class="btn btn-dark d-md-none me-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobile-sidebar" aria-controls="mobile-sidebar">
+                    <button class="btn btn-primary d-md-none me-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobile-sidebar" aria-controls="mobile-sidebar">
                         <i class="bi bi-list"></i>
                     </button>
 
@@ -722,10 +747,20 @@
 
         const pageContents = {
             'dashboard': `
-                <h2 class="h2 fw-bold text-dark mb-4">Dashboard</h2>
-                <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-body p-4">
-                        <form id="dashboard-filter-form" class="row g-3 align-items-end">
+                <!-- Welcome Banner -->
+                <div class="card border-0 mb-4 overflow-hidden" style="background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);">
+                    <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                        <div class="text-white">
+                            <h4 class="fw-bold mb-1">Serah Terima Laporan</h4>
+                            <p class="mb-0 small" style="opacity:0.8;">Kelola dan pantau alur dokumen antar area secara real-time</p>
+                        </div>
+                        <i class="bi bi-archive-fill" style="font-size:3rem; opacity:0.2; color:#fff;"></i>
+                    </div>
+                </div>
+                <!-- Filter -->
+                <div class="card bg-light border-0 shadow-sm mb-4">
+                    <div class="card-body p-3">
+                        <form id="dashboard-filter-form" class="row g-2 align-items-end">
                             <div class="col-md-3" id="start-date-wrapper">
                                 <label for="dashboard-start-date" class="form-label">Dari Tanggal</label>
                                 <input type="date" class="form-control" id="dashboard-start-date">
@@ -733,15 +768,11 @@
                             <div class="col-md-3" id="end-date-wrapper">
                                 <label for="dashboard-end-date" class="form-label">Sampai Tanggal</label>
                                 <input type="date" class="form-control" id="dashboard-end-date">
-                                <div class="invalid-feedback">
-                                    Tanggal akhir tidak boleh kurang dari tanggal awal.
-                                </div>
+                                <div class="invalid-feedback">Tanggal akhir tidak boleh kurang dari tanggal awal.</div>
                             </div>
                             <div class="col-md-4" id="area-filter-wrapper">
                                 <label for="dashboard-area" class="form-label">Area</label>
-                                <select class="form-select" id="dashboard-area">
-                                    <!-- Options will be populated by JS -->
-                                </select>
+                                <select class="form-select" id="dashboard-area"></select>
                             </div>
                             <div class="col-md-2 d-flex gap-2">
                                 <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i></button>
@@ -750,90 +781,90 @@
                         </form>
                     </div>
                 </div>
-                <div class="row g-4 row-cols-1 row-cols-md-2 row-cols-lg-3">
-                    <div class="col">
-                        <div class="card shadow-sm border-0 h-100">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <p class="text-muted mb-1">Total Dokumen</p>
-                                    <h3 id="total-dokumen-count" class="h2 fw-bold mb-0">0</h3>
+                <!-- KPI Stats -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4 col-6">
+                        <div class="card border-0 shadow-sm text-center h-100">
+                            <div class="card-body py-3">
+                                <div class="mx-auto mb-2 d-flex align-items-center justify-content-center rounded-3" style="width:44px;height:44px;background:rgba(249,115,22,0.12);">
+                                    <i class="bi bi-files fs-5" style="color:#f97316;"></i>
                                 </div>
-                                <div class="text-white p-3 rounded-3 fs-4" style="background-color: #FF881B;"><i class="bi bi-files"></i></div>
+                                <p class="text-muted mb-1 small">Total Dokumen</p>
+                                <p id="total-dokumen-count" class="h3 fw-bold mb-0" style="color:#f97316;">0</p>
                             </div>
                         </div>
                     </div>
-                     <div class="col">
-                        <div class="card shadow-sm border-0 h-100">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <p class="text-muted mb-1">Dikirim ke HO</p>
-                                    <h3 id="dikirim-ho-count" class="h2 fw-bold mb-0">0</h3>
+                    <div class="col-md-4 col-6">
+                        <div class="card border-0 shadow-sm text-center h-100">
+                            <div class="card-body py-3">
+                                <div class="mx-auto mb-2 d-flex align-items-center justify-content-center rounded-3" style="width:44px;height:44px;background:rgba(234,179,8,0.12);">
+                                    <i class="bi bi-send fs-5" style="color:#ca8a04;"></i>
                                 </div>
-                                <div class="bg-warning text-white p-3 rounded-3 fs-4"><i class="bi bi-send"></i></div>
+                                <p class="text-muted mb-1 small">Dikirim ke HO</p>
+                                <p id="dikirim-ho-count" class="h3 fw-bold mb-0" style="color:#ca8a04;">0</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col">
-                        <div class="card shadow-sm border-0 h-100">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <p class="text-muted mb-1">Diterima di HO</p>
-                                    <h3 id="diterima-ho-count" class="h2 fw-bold mb-0">0</h3>
+                    <div class="col-md-4 col-6">
+                        <div class="card border-0 shadow-sm text-center h-100">
+                            <div class="card-body py-3">
+                                <div class="mx-auto mb-2 d-flex align-items-center justify-content-center rounded-3" style="width:44px;height:44px;background:rgba(99,102,241,0.12);">
+                                    <i class="bi bi-building-check fs-5" style="color:#6366f1;"></i>
                                 </div>
-                                <div class="bg-primary text-white p-3 rounded-3 fs-4"><i class="bi bi-building-check"></i></div>
+                                <p class="text-muted mb-1 small">Diterima di HO</p>
+                                <p id="diterima-ho-count" class="h3 fw-bold mb-0" style="color:#6366f1;">0</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col">
-                        <div class="card shadow-sm border-0 h-100">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <p class="text-muted mb-1">Dokumen Cek</p>
-                                    <h3 id="dokumen-cek-count" class="h2 fw-bold mb-0">0</h3>
+                    <div class="col-md-4 col-6">
+                        <div class="card border-0 shadow-sm text-center h-100">
+                            <div class="card-body py-3">
+                                <div class="mx-auto mb-2 d-flex align-items-center justify-content-center rounded-3" style="width:44px;height:44px;background:rgba(139,92,246,0.12);">
+                                    <i class="bi bi-search fs-5" style="color:#8b5cf6;"></i>
                                 </div>
-                                <div class="text-white p-3 rounded-3 fs-4" style="background-color: #6f42c1;"><i class="bi bi-search"></i></div>
+                                <p class="text-muted mb-1 small">Dokumen Cek</p>
+                                <p id="dokumen-cek-count" class="h3 fw-bold mb-0" style="color:#8b5cf6;">0</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col">
-                        <div class="card shadow-sm border-0 h-100">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <p class="text-muted mb-1">Dikembalikan ke DC</p>
-                                    <h3 id="dikembalikan-dc-count" class="h2 fw-bold mb-0">0</h3>
+                    <div class="col-md-4 col-6">
+                        <div class="card border-0 shadow-sm text-center h-100">
+                            <div class="card-body py-3">
+                                <div class="mx-auto mb-2 d-flex align-items-center justify-content-center rounded-3" style="width:44px;height:44px;background:rgba(6,182,212,0.12);">
+                                    <i class="bi bi-truck fs-5" style="color:#0891b2;"></i>
                                 </div>
-                                <div class="bg-info text-white p-3 rounded-3 fs-4"><i class="bi bi-truck"></i></div>
+                                <p class="text-muted mb-1 small">Dikembalikan ke DC</p>
+                                <p id="dikembalikan-dc-count" class="h3 fw-bold mb-0" style="color:#0891b2;">0</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col">
-                        <div class="card shadow-sm border-0 h-100">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <p class="text-muted mb-1">Selesai di DC</p>
-                                    <h3 id="selesai-dc-count" class="h2 fw-bold mb-0">0</h3>
+                    <div class="col-md-4 col-6">
+                        <div class="card border-0 shadow-sm text-center h-100">
+                            <div class="card-body py-3">
+                                <div class="mx-auto mb-2 d-flex align-items-center justify-content-center rounded-3" style="width:44px;height:44px;background:rgba(34,197,94,0.12);">
+                                    <i class="bi bi-check2-circle fs-5" style="color:#16a34a;"></i>
                                 </div>
-                                <div class="bg-success text-white p-3 rounded-3 fs-4"><i class="bi bi-check2-circle"></i></div>
+                                <p class="text-muted mb-1 small">Selesai di DC</p>
+                                <p id="selesai-dc-count" class="h3 fw-bold mb-0" style="color:#16a34a;">0</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="row g-4 mt-2">
+                <!-- Charts -->
+                <div class="row g-3">
                     <div class="col-lg-7">
-                        <div class="card shadow-sm border-0 h-100">
+                        <div class="card border-0 shadow-sm h-100">
                             <div class="card-body p-4">
-                                <h3 class="h5 card-title fw-semibold text-dark mb-3 text-center">Diagram Batang Status Dokumen</h3>
-                                <div id="dashboard-bar-chart-container" class="d-flex align-items-end justify-content-around" style="height: 250px;">
-                                    <!-- Bar Chart will be rendered here -->
-                                </div>
+                                <h6 class="fw-semibold text-dark mb-3"><i class="bi bi-bar-chart-line me-2 text-primary"></i>Status Dokumen</h6>
+                                <div id="dashboard-bar-chart-container" class="d-flex align-items-end justify-content-around" style="height: 240px;"></div>
                             </div>
                         </div>
                     </div>
                     <div class="col-lg-5">
-                         <div class="card shadow-sm border-0 h-100">
+                        <div class="card border-0 shadow-sm h-100">
                             <div class="card-body p-4 d-flex flex-column justify-content-center">
-                                <h3 class="h5 card-title fw-semibold text-dark mb-3 text-center">Perbandingan Dokumen Selesai</h3>
-                                <div id="dashboard-donut-chart-container" style="position: relative; height:250px; width:100%">
+                                <h6 class="fw-semibold text-dark mb-3"><i class="bi bi-pie-chart me-2 text-primary"></i>Perbandingan Selesai</h6>
+                                <div id="dashboard-donut-chart-container" style="position:relative;height:240px;width:100%">
                                     <canvas id="donutChart"></canvas>
                                 </div>
                             </div>
