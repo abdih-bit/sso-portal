@@ -52,6 +52,7 @@ async function getUsers(req, res) {
         select: {
           id: true,
           username: true,
+          email: true,
           fullName: true,
           role: true,
           pt: true,
@@ -88,7 +89,7 @@ async function getUsers(req, res) {
  */
 async function createUser(req, res) {
   try {
-    const { username, password, fullName, role, pt, area, jabatan, divisi } = req.body;
+    const { username, password, fullName, email, role, pt, area, jabatan, divisi } = req.body;
 
     if (!username || !password || !fullName) {
       return res.status(400).json({ error: 'Nama lengkap, username, dan password wajib diisi.' });
@@ -126,6 +127,14 @@ async function createUser(req, res) {
       return res.status(400).json({ error: 'Username sudah terdaftar.' });
     }
 
+    // Cek email duplikat jika diisi
+    if (email) {
+      const emailExists = await prisma.user.findFirst({ where: { email: email.toLowerCase() } });
+      if (emailExists) {
+        return res.status(400).json({ error: 'Email sudah terdaftar.' });
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(password, parseInt(process.env.BCRYPT_ROUNDS) || 12);
 
     const user = await prisma.user.create({
@@ -133,6 +142,7 @@ async function createUser(req, res) {
         username: username.toLowerCase(),
         password: hashedPassword,
         fullName,
+        email: email ? email.toLowerCase() : null,
         role: role || 'USER',
         pt: pt || null,
         area: area || null,
@@ -141,7 +151,7 @@ async function createUser(req, res) {
         isVerified: true,
       },
       select: {
-        id: true, username: true, fullName: true, role: true,
+        id: true, username: true, email: true, fullName: true, role: true,
         pt: true, area: true, jabatan: true, divisi: true, createdAt: true
       }
     });
@@ -166,7 +176,7 @@ async function createUser(req, res) {
 async function updateUser(req, res) {
   try {
     const { id } = req.params;
-    const { fullName, role, isActive, pt, area, jabatan, divisi, newPassword } = req.body;
+    const { fullName, role, isActive, pt, area, jabatan, divisi, newPassword, email } = req.body;
 
     // Cek user yang akan diupdate
     const existing = await prisma.user.findUnique({ where: { id }, select: { role: true } });
@@ -199,6 +209,7 @@ async function updateUser(req, res) {
         where: { id },
         data: {
           ...(fullName && { fullName }),
+          ...(email !== undefined && { email: email ? email.toLowerCase() : null }),
           ...(pt !== undefined && { pt: pt || null }),
           ...(area !== undefined && { area: area || null }),
           ...(jabatan !== undefined && { jabatan: jabatan || null }),
@@ -228,6 +239,7 @@ async function updateUser(req, res) {
         ...(fullName && { fullName }),
         ...(role && { role }),
         ...(isActive !== undefined && { isActive }),
+        ...(email !== undefined && { email: email ? email.toLowerCase() : null }),
         ...(pt !== undefined && { pt: pt || null }),
         ...(area !== undefined && { area: area || null }),
         ...(jabatan !== undefined && { jabatan: jabatan || null }),

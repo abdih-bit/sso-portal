@@ -190,6 +190,13 @@
                   <input type="text" id="userFullName" required class="input-field pl-8" placeholder="Nama lengkap user">
                 </div>
               </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Email</label>
+                <div class="relative">
+                  <i class="fa-solid fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs"></i>
+                  <input type="email" id="userEmail" class="input-field pl-8" placeholder="email@example.com (opsional)">
+                </div>
+              </div>
               <div class="grid grid-cols-2 gap-2">
                 <div>
                   <label class="block text-xs font-medium text-gray-500 mb-1">Username <span class="text-red-500">*</span></label>
@@ -676,7 +683,7 @@
               <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">${initials}</div>
               <div>
                 <div class="font-medium text-gray-900 text-sm">${u.fullName}</div>
-                <div class="text-gray-400 text-xs">@${u.username}</div>
+                <div class="text-gray-400 text-xs">${u.email ? u.email : '@'+u.username}</div>
               </div>
             </div>
           </td>
@@ -753,6 +760,7 @@
       document.getElementById('userId').value = u.id;
       document.getElementById('userFullName').value = u.fullName;
       document.getElementById('userUsername').value = u.username;
+      document.getElementById('userEmail').value = u.email || '';
       // Setup role select sesuai hak akses
       setupRoleSelect(currentUserRole);
       // Jika edit SUPERADMIN — tampilkan opsi SUPERADMIN (tidak bisa diubah, disabled)
@@ -818,6 +826,7 @@
 
       const fullName = document.getElementById('userFullName').value.trim();
       const username = document.getElementById('userUsername').value.trim();
+      const email    = document.getElementById('userEmail').value.trim();
       const password = document.getElementById('userPassword').value;
 
       if (!fullName) { showFormError('Nama lengkap wajib diisi.'); return; }
@@ -849,6 +858,7 @@
       const body = {
         fullName: fullName,
         username: username,
+        email:    email || null,
         role:     role,
         pt:       pt || null,
         area:     area || null,
