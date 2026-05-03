@@ -2183,9 +2183,9 @@ document.addEventListener('DOMContentLoaded', function() {
              };
 
             const loadReportFilters = async () => {
-                // Filter berdasarkan PT HO user (ho_area_id dari session)
+                // Filter berdasarkan PT HO user (ho_area_id dari session) - termasuk area HO sendiri
                 const parentHoId = (currentUser && currentUser.ho_area_id) ? currentUser.ho_area_id : null;
-                await loadAreaOptions(document.getElementById('report-area'), 'dc', 'Semua Area', parentHoId);
+                await loadAreaOptions(document.getElementById('report-area'), 'all', 'Semua Area', parentHoId);
             };
 
             // (DIUBAH) Fungsi terpusat untuk memuat Opsi Area dengan filter parent HO
@@ -2572,7 +2572,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         areaSenderSelect.disabled = true;
                     } else {
                         const ptHoId = (currentUser && currentUser.ho_area_id) ? currentUser.ho_area_id : null;
-                        await loadAreaOptions(areaSenderSelect, 'dc', 'Semua Pengirim', ptHoId);
+                        await loadAreaOptions(areaSenderSelect, 'all', 'Semua Pengirim', ptHoId);
                     }
                     await loadAreaOptions(areaReceiverSelect, 'dc', 'Semua Penerima');
 
