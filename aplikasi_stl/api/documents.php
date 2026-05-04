@@ -89,7 +89,7 @@ switch ($method) {
             case 'terima_ho':
                 $rcv_user = (int)($data['receiver_ho_user_id'] ?? 0);
 
-                // Validasi: dokumen harus berstatus 'Dikirim ke HO'
+                // Validasi status
                 $stmtDoc = $pdo->prepare("SELECT status, receiver_ho_area_id FROM stl_documents WHERE barcode_id = ?");
                 $stmtDoc->execute([$bcode]);
                 $docRow = $stmtDoc->fetch();
@@ -100,13 +100,19 @@ switch ($method) {
                     json_response(['status' => 'error', 'message' => 'Dokumen sudah diproses sebelumnya (status: ' . $docRow['status'] . ').'], 400);
                 }
 
-                // Validasi: user harus di HO area yang sesuai (kecuali superadmin)
-                if ($currentUser['role_id'] !== 'superadmin' && $rcv_user && !empty($docRow['receiver_ho_area_id'])) {
-                    $stmtUsr = $pdo->prepare("SELECT area_id FROM stl_users WHERE user_id = ?");
-                    $stmtUsr->execute([$rcv_user]);
-                    $usrRow = $stmtUsr->fetch();
-                    if ($usrRow && (int)$usrRow['area_id'] !== (int)$docRow['receiver_ho_area_id']) {
-                        json_response(['status' => 'error', 'message' => 'Anda tidak dapat menerima berkas ini. Bukan area HO Anda.'], 403);
+                // Validasi PT: Head AR hanya boleh menerima dokumen untuk HO area-nya sendiri
+                if ($currentUser['role_id'] === 'admin_ho') {
+                    $docHoAreaId = (int)($docRow['receiver_ho_area_id'] ?? 0);
+                    $userAreaId  = (int)($currentUser['area_id'] ?? 0);
+                    if ($docHoAreaId && $userAreaId !== $docHoAreaId) {
+                        $stmtPt = $pdo->prepare("SELECT pt FROM areas WHERE id = ?");
+                        $stmtPt->execute([$docHoAreaId]);
+                        $ptRow  = $stmtPt->fetch();
+                        $docPt  = $ptRow ? strtolower(trim($ptRow['pt'] ?? '')) : '';
+                        $userPt = strtolower(trim($currentUser['pt'] ?? ''));
+                        if (!$docPt || !$userPt || $docPt !== $userPt) {
+                            json_response(['status' => 'error', 'message' => 'Anda tidak berwenang menerima berkas ini. Berkas ditujukan untuk HO PT yang berbeda.'], 403);
+                        }
                     }
                 }
 
@@ -119,8 +125,8 @@ switch ($method) {
             case 'cek_dokumen':
                 $check_notes = $data['check_notes'] ?? null;
 
-                // Validasi: dokumen harus berstatus 'Diterima di HO'
-                $stmtDoc = $pdo->prepare("SELECT status FROM stl_documents WHERE barcode_id = ?");
+                // Validasi status
+                $stmtDoc = $pdo->prepare("SELECT status, receiver_ho_area_id FROM stl_documents WHERE barcode_id = ?");
                 $stmtDoc->execute([$bcode]);
                 $docRow = $stmtDoc->fetch();
                 if (!$docRow) {
@@ -128,6 +134,22 @@ switch ($method) {
                 }
                 if ($docRow['status'] !== 'Diterima di HO') {
                     json_response(['status' => 'error', 'message' => 'Dokumen harus berstatus "Diterima di HO" untuk dapat dicek.'], 400);
+                }
+
+                // Validasi PT
+                if ($currentUser['role_id'] === 'admin_ho') {
+                    $docHoAreaId = (int)($docRow['receiver_ho_area_id'] ?? 0);
+                    $userAreaId  = (int)($currentUser['area_id'] ?? 0);
+                    if ($docHoAreaId && $userAreaId !== $docHoAreaId) {
+                        $stmtPt = $pdo->prepare("SELECT pt FROM areas WHERE id = ?");
+                        $stmtPt->execute([$docHoAreaId]);
+                        $ptRow  = $stmtPt->fetch();
+                        $docPt  = $ptRow ? strtolower(trim($ptRow['pt'] ?? '')) : '';
+                        $userPt = strtolower(trim($currentUser['pt'] ?? ''));
+                        if (!$docPt || !$userPt || $docPt !== $userPt) {
+                            json_response(['status' => 'error', 'message' => 'Anda tidak berwenang mengecek berkas ini. Berkas bukan milik PT Anda.'], 403);
+                        }
+                    }
                 }
 
                 $pdo->prepare(
@@ -139,8 +161,8 @@ switch ($method) {
             case 'kembalikan_dc':
                 $return_notes = $data['return_notes'] ?? null;
 
-                // Validasi: dokumen harus berstatus 'Sedang Dicek'
-                $stmtDoc = $pdo->prepare("SELECT status FROM stl_documents WHERE barcode_id = ?");
+                // Validasi status
+                $stmtDoc = $pdo->prepare("SELECT status, receiver_ho_area_id FROM stl_documents WHERE barcode_id = ?");
                 $stmtDoc->execute([$bcode]);
                 $docRow = $stmtDoc->fetch();
                 if (!$docRow) {
@@ -148,6 +170,22 @@ switch ($method) {
                 }
                 if ($docRow['status'] !== 'Sedang Dicek') {
                     json_response(['status' => 'error', 'message' => 'Dokumen harus berstatus "Sedang Dicek" untuk dikembalikan ke DC.'], 400);
+                }
+
+                // Validasi PT
+                if ($currentUser['role_id'] === 'admin_ho') {
+                    $docHoAreaId = (int)($docRow['receiver_ho_area_id'] ?? 0);
+                    $userAreaId  = (int)($currentUser['area_id'] ?? 0);
+                    if ($docHoAreaId && $userAreaId !== $docHoAreaId) {
+                        $stmtPt = $pdo->prepare("SELECT pt FROM areas WHERE id = ?");
+                        $stmtPt->execute([$docHoAreaId]);
+                        $ptRow  = $stmtPt->fetch();
+                        $docPt  = $ptRow ? strtolower(trim($ptRow['pt'] ?? '')) : '';
+                        $userPt = strtolower(trim($currentUser['pt'] ?? ''));
+                        if (!$docPt || !$userPt || $docPt !== $userPt) {
+                            json_response(['status' => 'error', 'message' => 'Anda tidak berwenang mengembalikan berkas ini. Berkas bukan milik PT Anda.'], 403);
+                        }
+                    }
                 }
 
                 $pdo->prepare(

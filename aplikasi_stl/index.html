@@ -2824,6 +2824,23 @@ document.addEventListener('DOMContentLoaded', function() {
                         const barcodeKembaliInput = document.getElementById('barcode-kembali-ho');
                         const btnKembalikanHo = document.getElementById('btn-kembalikan-ho');
 
+                        // Pre-scan PT validation for Head AR
+                        const validatePtOwnership = async (barcodeVal, alertId) => {
+                            if (currentUser.role_id !== 'admin_ho') return true; // superadmin: skip
+                            if (barcodeVal.length !== 10) return true; // too short: skip
+                            try {
+                                const res = await fetch(`${API_BASE_URL}documents.php?barcode_id=${barcodeVal}`);
+                                const docs = await res.json();
+                                const doc = Array.isArray(docs) ? docs[0] : docs;
+                                if (!doc || !doc.receiver_ho_area_id) return true;
+                                if (parseInt(doc.receiver_ho_area_id) !== parseInt(currentUser.area_id)) {
+                                    showAlert(alertId, 'Berkas ini bukan milik PT Anda. Anda tidak berwenang memvalidasi berkas ini.', 'warning');
+                                    return false;
+                                }
+                            } catch(e) { /* network error: biarkan backend yang validasi */ }
+                            return true;
+                        };
+
                         const validateCekForm = () => {
                             const catatanValid = catatanCekInput.value.trim() !== '';
                             const barcodeValid = barcodeCekInput.value.trim().length === 10;
@@ -2836,6 +2853,17 @@ document.addEventListener('DOMContentLoaded', function() {
                             barcodeKembaliInput.disabled = !catatanValid;
                             btnKembalikanHo.disabled = !(catatanValid && barcodeValid);
                         };
+
+                        // Pre-scan check on barcode inputs
+                        document.getElementById('barcode-terima-ho').addEventListener('change', async (e) => {
+                            await validatePtOwnership(e.target.value.trim(), 'terima-ho-alert');
+                        });
+                        barcodeCekInput.addEventListener('change', async (e) => {
+                            await validatePtOwnership(e.target.value.trim(), 'cek-dokumen-alert');
+                        });
+                        barcodeKembaliInput.addEventListener('change', async (e) => {
+                            await validatePtOwnership(e.target.value.trim(), 'kembali-ho-alert');
+                        });
 
                         catatanCekInput.addEventListener('input', validateCekForm);
                         barcodeCekInput.addEventListener('input', validateCekForm);
@@ -3771,6 +3799,18 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         const barcodeInput = document.getElementById('barcode-terima-ho');
         const barcodeVal = barcodeInput.value.trim();
+        // Pre-validasi PT sisi klien (early feedback, backend tetap memvalidasi ulang)
+        if (currentUser.role_id === 'admin_ho') {
+            try {
+                const res = await fetch(`${API_BASE_URL}documents.php?barcode_id=${barcodeVal}`);
+                const docs = await res.json();
+                const doc = Array.isArray(docs) ? docs[0] : docs;
+                if (doc && doc.receiver_ho_area_id && parseInt(doc.receiver_ho_area_id) !== parseInt(currentUser.area_id)) {
+                    showAlert('terima-ho-alert', 'Berkas ini bukan milik PT Anda. Anda tidak berwenang memvalidasinya.', 'warning');
+                    return;
+                }
+            } catch (err) { /* biarkan backend menangani */ }
+        }
         const { ok } = await callDocumentAction({
             action: 'terima_ho',
             barcode_id: barcodeVal,
@@ -3788,6 +3828,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const barcodeInput = document.getElementById('barcode-cek-dokumen');
         const notesInput = document.getElementById('cek-dokumen-catatan');
         const barcodeVal = barcodeInput.value.trim();
+        if (currentUser.role_id === 'admin_ho') {
+            try {
+                const res = await fetch(`${API_BASE_URL}documents.php?barcode_id=${barcodeVal}`);
+                const docs = await res.json();
+                const doc = Array.isArray(docs) ? docs[0] : docs;
+                if (doc && doc.receiver_ho_area_id && parseInt(doc.receiver_ho_area_id) !== parseInt(currentUser.area_id)) {
+                    showAlert('cek-dokumen-alert', 'Berkas ini bukan milik PT Anda. Anda tidak berwenang mengeceknya.', 'warning');
+                    return;
+                }
+            } catch (err) { /* biarkan backend menangani */ }
+        }
         const { ok } = await callDocumentAction({
             action: 'cek_dokumen',
             barcode_id: barcodeVal,
@@ -3808,6 +3859,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const barcodeInput = document.getElementById('barcode-kembali-ho');
         const notesInput = document.getElementById('kembali-ho-catatan');
         const barcodeVal = barcodeInput.value.trim();
+        if (currentUser.role_id === 'admin_ho') {
+            try {
+                const res = await fetch(`${API_BASE_URL}documents.php?barcode_id=${barcodeVal}`);
+                const docs = await res.json();
+                const doc = Array.isArray(docs) ? docs[0] : docs;
+                if (doc && doc.receiver_ho_area_id && parseInt(doc.receiver_ho_area_id) !== parseInt(currentUser.area_id)) {
+                    showAlert('kembali-ho-alert', 'Berkas ini bukan milik PT Anda. Anda tidak berwenang mengembalikannya.', 'warning');
+                    return;
+                }
+            } catch (err) { /* biarkan backend menangani */ }
+        }
         const { ok } = await callDocumentAction({
             action: 'kembalikan_dc',
             barcode_id: barcodeVal,
