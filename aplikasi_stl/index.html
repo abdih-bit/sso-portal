@@ -913,7 +913,7 @@
                     </li>
                 </ul>
 
-                <div id="section-two-way">
+                <div id="section-two-way" class="d-none">
                     <div class="card shadow-sm border-0">
                         <div class="card-body p-4 p-md-5">
                             <form id="create-doc-form">
@@ -1000,7 +1000,7 @@
                     </div>
                 </div>
 
-                <div id="section-one-way" class="d-none">
+                <div id="section-one-way">
                     <div class="card shadow-sm border-0">
                         <div class="card-body p-4 p-md-5">
                             <form id="kirim-berkas-form">
@@ -1321,7 +1321,7 @@
                     </li>
                 </ul>
 
-                <div id="section-riwayat-two-way">
+                <div id="section-riwayat-two-way" class="d-none">
                     <div class="card shadow-sm border-0">
                         <div class="card-body p-4">
                             <form id="riwayat-filter-form" class="row g-3 align-items-end mb-4">
@@ -1381,7 +1381,7 @@
                     </div>
                 </div>
 
-                <div id="section-riwayat-one-way" class="d-none">
+                <div id="section-riwayat-one-way">
                     <div class="card shadow-sm border-0">
                         <div class="card-body p-4">
                             <form id="riwayat-satu-arah-filter-form" class="row g-3 align-items-end mb-4">
@@ -2659,6 +2659,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 if (pageId === 'buat-dokumen' && currentUser) {
+                    // Tab switcher logic - HARUS sebelum await agar tidak ada flash
+                    const isHeadAR = currentUser.role_id && currentUser.role_id.startsWith('admin_ho');
+                    const switchTab = (type) => {
+                        const isTwoWay = (type === 'two-way');
+                        document.getElementById('btn-tab-two-way').classList.toggle('active', isTwoWay);
+                        document.getElementById('btn-tab-one-way').classList.toggle('active', !isTwoWay);
+                        document.getElementById('section-two-way').classList.toggle('d-none', !isTwoWay);
+                        document.getElementById('section-one-way').classList.toggle('d-none', isTwoWay);
+                    };
+                    document.getElementById('btn-tab-two-way').addEventListener('click', () => switchTab('two-way'));
+                    document.getElementById('btn-tab-one-way').addEventListener('click', () => switchTab('one-way'));
+                    if (!isHeadAR) {
+                        document.getElementById('btn-tab-two-way').classList.remove('d-none');
+                    }
+                    switchTab(isHeadAR ? 'one-way' : 'two-way');
+
                     const namaPengirimInput = document.getElementById('nama-pengirim');
                     const areaPengirimInput = document.getElementById('distribution-center');
                     const areaTujuanInput   = document.getElementById('area-tujuan');
@@ -2792,27 +2808,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     await loadJenisBerkasOptions(document.getElementById('kirim-jenis-berkas'), 'Pilih Jenis Berkas...');
                     await loadAreaOptions(document.getElementById('kirim-area-tujuan'), 'all', 'Pilih Area Tujuan...');
                     document.getElementById('kirim-berkas-form').addEventListener('submit', handleKirimBerkas);
-
-                    // Tab switcher logic
-                    const switchTab = (type) => {
-                        const isTwoWay = (type === 'two-way');
-                        document.getElementById('btn-tab-two-way').classList.toggle('active', isTwoWay);
-                        document.getElementById('btn-tab-one-way').classList.toggle('active', !isTwoWay);
-                        document.getElementById('section-two-way').classList.toggle('d-none', !isTwoWay);
-                        document.getElementById('section-one-way').classList.toggle('d-none', isTwoWay);
-                    };
-                    document.getElementById('btn-tab-two-way').addEventListener('click', () => switchTab('two-way'));
-                    document.getElementById('btn-tab-one-way').addEventListener('click', () => switchTab('one-way'));
-
-                    // Head AR: sembunyikan tab Two-Way, langsung ke One-Way
-                    const isHeadAR = currentUser.role_id && currentUser.role_id.startsWith('admin_ho');
-                    if (!isHeadAR) {
-                        document.getElementById('btn-tab-two-way').classList.remove('d-none');
-                    }
-
-                    // Default tab: HO users start on One-Way, DC/superadmin on Two-Way
-                    const defaultTab = isHeadAR ? 'one-way' : 'two-way';
-                    switchTab(defaultTab);
                 }
 
                 if (pageId === 'validasi-berkas') {
