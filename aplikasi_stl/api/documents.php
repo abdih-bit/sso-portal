@@ -88,6 +88,28 @@ switch ($method) {
         switch ($action) {
             case 'terima_ho':
                 $rcv_user = (int)($data['receiver_ho_user_id'] ?? 0);
+
+                // Validasi: dokumen harus berstatus 'Dikirim ke HO'
+                $stmtDoc = $pdo->prepare("SELECT status, receiver_ho_area_id FROM stl_documents WHERE barcode_id = ?");
+                $stmtDoc->execute([$bcode]);
+                $docRow = $stmtDoc->fetch();
+                if (!$docRow) {
+                    json_response(['status' => 'error', 'message' => 'Dokumen tidak ditemukan.'], 404);
+                }
+                if ($docRow['status'] !== 'Dikirim ke HO') {
+                    json_response(['status' => 'error', 'message' => 'Dokumen sudah diproses sebelumnya (status: ' . $docRow['status'] . ').'], 400);
+                }
+
+                // Validasi: user harus di HO area yang sesuai (kecuali superadmin)
+                if ($currentUser['role_id'] !== 'superadmin' && $rcv_user && !empty($docRow['receiver_ho_area_id'])) {
+                    $stmtUsr = $pdo->prepare("SELECT area_id FROM stl_users WHERE user_id = ?");
+                    $stmtUsr->execute([$rcv_user]);
+                    $usrRow = $stmtUsr->fetch();
+                    if ($usrRow && (int)$usrRow['area_id'] !== (int)$docRow['receiver_ho_area_id']) {
+                        json_response(['status' => 'error', 'message' => 'Anda tidak dapat menerima berkas ini. Bukan area HO Anda.'], 403);
+                    }
+                }
+
                 $pdo->prepare(
                     "UPDATE stl_documents SET status = 'Diterima di HO', receiver_ho_user_id = ?, received_at_ho = NOW()
                      WHERE barcode_id = ? AND status = 'Dikirim ke HO'"
@@ -96,6 +118,18 @@ switch ($method) {
 
             case 'cek_dokumen':
                 $check_notes = $data['check_notes'] ?? null;
+
+                // Validasi: dokumen harus berstatus 'Diterima di HO'
+                $stmtDoc = $pdo->prepare("SELECT status FROM stl_documents WHERE barcode_id = ?");
+                $stmtDoc->execute([$bcode]);
+                $docRow = $stmtDoc->fetch();
+                if (!$docRow) {
+                    json_response(['status' => 'error', 'message' => 'Dokumen tidak ditemukan.'], 404);
+                }
+                if ($docRow['status'] !== 'Diterima di HO') {
+                    json_response(['status' => 'error', 'message' => 'Dokumen harus berstatus "Diterima di HO" untuk dapat dicek.'], 400);
+                }
+
                 $pdo->prepare(
                     "UPDATE stl_documents SET status = 'Sedang Dicek', check_notes = ?, checked_at = NOW()
                      WHERE barcode_id = ?"
@@ -104,6 +138,18 @@ switch ($method) {
 
             case 'kembalikan_dc':
                 $return_notes = $data['return_notes'] ?? null;
+
+                // Validasi: dokumen harus berstatus 'Sedang Dicek'
+                $stmtDoc = $pdo->prepare("SELECT status FROM stl_documents WHERE barcode_id = ?");
+                $stmtDoc->execute([$bcode]);
+                $docRow = $stmtDoc->fetch();
+                if (!$docRow) {
+                    json_response(['status' => 'error', 'message' => 'Dokumen tidak ditemukan.'], 404);
+                }
+                if ($docRow['status'] !== 'Sedang Dicek') {
+                    json_response(['status' => 'error', 'message' => 'Dokumen harus berstatus "Sedang Dicek" untuk dikembalikan ke DC.'], 400);
+                }
+
                 $pdo->prepare(
                     "UPDATE stl_documents SET status = 'Dikembalikan ke DC', return_notes = ?, returned_at_ho = NOW()
                      WHERE barcode_id = ?"
@@ -112,6 +158,31 @@ switch ($method) {
 
             case 'terima_dc':
                 $rcv_dc = (int)($data['receiver_dc_user_id'] ?? 0);
+
+                // Validasi: dokumen harus berstatus 'Dikembalikan ke DC'
+                $stmtDoc = $pdo->prepare("SELECT status, sender_user_id FROM stl_documents WHERE barcode_id = ?");
+                $stmtDoc->execute([$bcode]);
+                $docRow = $stmtDoc->fetch();
+                if (!$docRow) {
+                    json_response(['status' => 'error', 'message' => 'Dokumen tidak ditemukan.'], 404);
+                }
+                if ($docRow['status'] !== 'Dikembalikan ke DC') {
+                    json_response(['status' => 'error', 'message' => 'Dokumen belum dikembalikan dari HO (status: ' . $docRow['status'] . ').'], 400);
+                }
+
+                // Validasi: penerima DC harus dari area yang sama dengan pengirim (kecuali superadmin)
+                if ($currentUser['role_id'] !== 'superadmin' && $rcv_dc && !empty($docRow['sender_user_id'])) {
+                    $stmtSender = $pdo->prepare("SELECT area_id FROM stl_users WHERE user_id = ?");
+                    $stmtSender->execute([$docRow['sender_user_id']]);
+                    $senderRow = $stmtSender->fetch();
+                    $stmtRcv = $pdo->prepare("SELECT area_id FROM stl_users WHERE user_id = ?");
+                    $stmtRcv->execute([$rcv_dc]);
+                    $rcvRow = $stmtRcv->fetch();
+                    if ($senderRow && $rcvRow && (int)$senderRow['area_id'] !== (int)$rcvRow['area_id']) {
+                        json_response(['status' => 'error', 'message' => 'Anda tidak dapat menerima berkas ini. Bukan DC pengirim asal.'], 403);
+                    }
+                }
+
                 $pdo->prepare(
                     "UPDATE stl_documents SET status = 'Diterima di DC', receiver_dc_user_id = ?, received_at_dc = NOW()
                      WHERE barcode_id = ? AND status = 'Dikembalikan ke DC'"
@@ -119,7 +190,7 @@ switch ($method) {
                 break;
 
             default:
-                // Generic update (status langsung)
+                // Generic update (tidak disarankan untuk alur two-way)
                 $new_status = $data['status'] ?? null;
                 if ($new_status) {
                     $pdo->prepare("UPDATE stl_documents SET status = ? WHERE barcode_id = ?")->execute([$new_status, $bcode]);

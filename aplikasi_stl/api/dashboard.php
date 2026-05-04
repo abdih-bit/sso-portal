@@ -77,6 +77,20 @@ $recent_activity = $stmtRecent->fetchAll();
 
 json_response([
     'total_dokumen'  => (int)$total_dokumen,
+    // Flat keys for KPI cards
+    'dikirim_ho'      => $status_counts['dikirim_ho'],
+    'diterima_ho'     => $status_counts['diterima_ho'],
+    'dokumen_cek'     => $status_counts['dokumen_cek'],
+    'dikembalikan_dc' => $status_counts['dikembalikan_dc'],
+    'selesai_dc'      => $status_counts['selesai_dc'],
+    // Keyed by status name for bar chart
+    'chart_data' => [
+        'Dikirim ke HO'      => $status_counts['dikirim_ho'],
+        'Diterima di HO'     => $status_counts['diterima_ho'],
+        'Sedang Dicek'       => $status_counts['dokumen_cek'],
+        'Dikembalikan ke DC' => $status_counts['dikembalikan_dc'],
+        'Diterima di DC'     => $status_counts['selesai_dc'],
+    ],
     'status_counts'  => $status_counts,
     'recent_activity'=> $recent_activity,
 ]);

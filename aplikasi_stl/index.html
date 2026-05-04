@@ -848,7 +848,7 @@
                                 <div class="mx-auto mb-1 d-flex align-items-center justify-content-center rounded-3" style="width:32px;height:32px;background:rgba(139,92,246,0.12);">
                                     <i class="bi bi-search" style="color:#8b5cf6;font-size:0.85rem;"></i>
                                 </div>
-                                <p class="text-muted mb-0" style="font-size:0.7rem;">Dokumen Cek</p>
+                                <p class="text-muted mb-0" style="font-size:0.7rem;">Sedang Dicek</p>
                                 <p id="dokumen-cek-count" class="fw-bold mb-0" style="color:#8b5cf6;font-size:1rem;">0</p>
                             </div>
                         </div>
@@ -870,7 +870,7 @@
                                 <div class="mx-auto mb-1 d-flex align-items-center justify-content-center rounded-3" style="width:32px;height:32px;background:rgba(34,197,94,0.12);">
                                     <i class="bi bi-check2-circle" style="color:#16a34a;font-size:0.85rem;"></i>
                                 </div>
-                                <p class="text-muted mb-0" style="font-size:0.7rem;">Selesai di DC</p>
+                                <p class="text-muted mb-0" style="font-size:0.7rem;">Diterima di DC</p>
                                 <p id="selesai-dc-count" class="fw-bold mb-0" style="color:#16a34a;font-size:1rem;">0</p>
                             </div>
                         </div>
@@ -1347,10 +1347,10 @@
                                     <select id="filter-doc-status" class="form-select">
                                         <option value="">Semua</option>
                                         <option value="Dikirim ke HO">Dikirim ke HO</option>
-                                        <option value="Diterima HO">Diterima HO</option>
-                                        <option value="Dokumen Cek">Dokumen Cek</option>
+                                        <option value="Diterima di HO">Diterima di HO</option>
+                                        <option value="Sedang Dicek">Sedang Dicek</option>
                                         <option value="Dikembalikan ke DC">Dikembalikan ke DC</option>
-                                        <option value="Selesai">Selesai</option>
+                                        <option value="Diterima di DC">Diterima di DC</option>
                                         <option value="Ditolak">Ditolak</option>
                                     </select>
                                 </div>
@@ -1504,10 +1504,10 @@
                                     <select id="report-status" class="form-select">
                                         <option value="">Semua</option>
                                         <option value="Dikirim ke HO">Dikirim ke HO</option>
-                                        <option value="Diterima HO">Diterima HO</option>
-                                        <option value="Dokumen Cek">Dokumen Cek</option>
+                                        <option value="Diterima di HO">Diterima di HO</option>
+                                        <option value="Sedang Dicek">Sedang Dicek</option>
                                         <option value="Dikembalikan ke DC">Dikembalikan ke DC</option>
-                                        <option value="Selesai">Selesai</option>
+                                        <option value="Diterima di DC">Diterima di DC</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2" id="report-area-filter-wrapper">
@@ -2128,12 +2128,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // --- Helper Functions ---
             const getStatusColor = (status) => {
                 switch(status) {
-                    case 'Selesai': return '#198754'; // success
-                    case 'Diterima HO': return '#0d6efd'; // primary
+                    case 'Diterima di DC': return '#198754'; // success
+                    case 'Diterima di HO': return '#0d6efd'; // primary
                     case 'Dikembalikan ke DC': return '#0dcaf0'; // info
                     case 'Dikirim ke HO': return '#ffc107'; // warning
                     case 'Ditolak': return '#dc3545'; // danger
-                    case 'Dokumen Cek': return '#6f42c1'; // purple
+                    case 'Sedang Dicek': return '#6f42c1'; // purple
                     case 'Dikirim': return '#ffc107'; // warning (untuk 1 arah)
                     case 'Diterima': return '#198754'; // success (untuk 1 arah)
                     default: return '#6c757d'; // secondary
@@ -2169,7 +2169,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const chartData = data.chart_data || {};
                         const maxValue = Math.max(...Object.values(chartData).map(Number), 1); 
 
-                        const statusOrder = ['Dikirim ke HO', 'Diterima HO', 'Dokumen Cek', 'Dikembalikan ke DC', 'Selesai'];
+                        const statusOrder = ['Dikirim ke HO', 'Diterima di HO', 'Sedang Dicek', 'Dikembalikan ke DC', 'Diterima di DC'];
                         statusOrder.forEach(status => {
                             const count = chartData[status] || 0;
                             const heightPercentage = (count / maxValue) * 100;
@@ -2206,7 +2206,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     label: 'Jumlah Dokumen',
                                     data: [selesaiDiDC, belumSelesai],
                                     backgroundColor: [
-                                        getStatusColor('Selesai'),
+                                        getStatusColor('Diterima di DC'),
                                         getStatusColor('Ditolak') // Red color for 'Belum Selesai'
                                     ],
                                     borderColor: '#fff',
@@ -3708,14 +3708,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const getStatusBadge = (status) => {
         switch(status) {
-            case 'Selesai': return 'text-bg-success';
-            case 'Diterima HO': return 'text-bg-primary';
+            case 'Diterima di DC': return 'text-bg-success';
+            case 'Diterima di HO': return 'text-bg-primary';
             case 'Ditolak': return 'text-bg-danger';
             case 'Dikembalikan ke DC': return 'text-bg-info';
             case 'Dikirim ke HO': return 'text-bg-warning';
-            case 'Dokumen Cek': return 'text-bg-secondary';
-            case 'Dikirim': return 'text-bg-warning'; // (BARU) 1 Arah
-            case 'Diterima': return 'text-bg-success'; // (BARU) 1 Arah
+            case 'Sedang Dicek': return 'text-bg-secondary';
+            case 'Dikirim': return 'text-bg-warning'; // 1 Arah
+            case 'Diterima': return 'text-bg-success'; // 1 Arah
             default: return 'text-bg-secondary';
         }
     };
@@ -3747,19 +3747,55 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+    const callDocumentAction = async (payload, alertContainerId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}documents.php`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                return { ok: true, result };
+            } else {
+                showAlert(alertContainerId, result.message || 'Terjadi kesalahan.', 'danger');
+                return { ok: false, result };
+            }
+        } catch (err) {
+            showAlert(alertContainerId, 'Gagal menghubungi server.', 'danger');
+            return { ok: false };
+        }
+    };
+
     const handlePenerimaanHO = async (e) => {
         e.preventDefault();
         const barcodeInput = document.getElementById('barcode-terima-ho');
-        const success = await updateDocumentStatus(barcodeInput.value, 'Diterima HO', 'terima-ho-alert');
-        if (success) barcodeInput.value = '';
+        const barcodeVal = barcodeInput.value.trim();
+        const { ok } = await callDocumentAction({
+            action: 'terima_ho',
+            barcode_id: barcodeVal,
+            receiver_ho_user_id: currentUser.user_id
+        }, 'terima-ho-alert');
+        if (ok) {
+            showAlert('terima-ho-alert', `Berkas ${barcodeVal} berhasil diterima di HO.`, 'success');
+            addLog('UPDATE_STATUS', `Berkas '${barcodeVal}' diterima di HO.`, 'Diterima di HO');
+            barcodeInput.value = '';
+        }
     };
-    
+
     const handleCekDokumen = async (e) => {
         e.preventDefault();
         const barcodeInput = document.getElementById('barcode-cek-dokumen');
         const notesInput = document.getElementById('cek-dokumen-catatan');
-        const success = await updateDocumentStatus(barcodeInput.value, 'Dokumen Cek', 'cek-dokumen-alert', notesInput.value);
-        if (success) {
+        const barcodeVal = barcodeInput.value.trim();
+        const { ok } = await callDocumentAction({
+            action: 'cek_dokumen',
+            barcode_id: barcodeVal,
+            check_notes: notesInput.value
+        }, 'cek-dokumen-alert');
+        if (ok) {
+            showAlert('cek-dokumen-alert', `Pengecekan berkas ${barcodeVal} berhasil divalidasi.`, 'success');
+            addLog('UPDATE_STATUS', `Berkas '${barcodeVal}' sedang dicek.`, 'Sedang Dicek');
             barcodeInput.value = '';
             notesInput.value = '';
             barcodeInput.disabled = true;
@@ -3771,8 +3807,15 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         const barcodeInput = document.getElementById('barcode-kembali-ho');
         const notesInput = document.getElementById('kembali-ho-catatan');
-        const success = await updateDocumentStatus(barcodeInput.value, 'Dikembalikan ke DC', 'kembali-ho-alert', notesInput.value);
-        if (success) {
+        const barcodeVal = barcodeInput.value.trim();
+        const { ok } = await callDocumentAction({
+            action: 'kembalikan_dc',
+            barcode_id: barcodeVal,
+            return_notes: notesInput.value
+        }, 'kembali-ho-alert');
+        if (ok) {
+            showAlert('kembali-ho-alert', `Berkas ${barcodeVal} berhasil dikembalikan ke DC.`, 'success');
+            addLog('UPDATE_STATUS', `Berkas '${barcodeVal}' dikembalikan ke DC.`, 'Dikembalikan ke DC');
             barcodeInput.value = '';
             notesInput.value = '';
             barcodeInput.disabled = true;
@@ -3783,8 +3826,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const handlePenerimaanDC = async (e) => {
         e.preventDefault();
         const barcodeInput = document.getElementById('barcode-terima-dc');
-        const success = await updateDocumentStatus(barcodeInput.value, 'Selesai', 'terima-dc-alert');
-        if (success) barcodeInput.value = '';
+        const barcodeVal = barcodeInput.value.trim();
+        const { ok } = await callDocumentAction({
+            action: 'terima_dc',
+            barcode_id: barcodeVal,
+            receiver_dc_user_id: currentUser.user_id
+        }, 'terima-dc-alert');
+        if (ok) {
+            showAlert('terima-dc-alert', `Berkas ${barcodeVal} berhasil diterima di DC. Alur selesai.`, 'success');
+            addLog('UPDATE_STATUS', `Berkas '${barcodeVal}' diterima di DC.`, 'Diterima di DC');
+            barcodeInput.value = '';
+        }
     };
     
     // --- Log Audit Logic ---
