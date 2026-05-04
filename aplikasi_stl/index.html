@@ -2474,8 +2474,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         document.getElementById('section-riwayat-two-way').classList.toggle('d-none', !isTwoWay);
                         document.getElementById('section-riwayat-one-way').classList.toggle('d-none', isTwoWay);
                     };
+                    const isHeadARRiwayat = currentUser.role_id && currentUser.role_id.startsWith('admin_ho');
+                    if (isHeadARRiwayat) {
+                        document.getElementById('btn-tab-riwayat-two-way').classList.add('d-none');
+                    }
                     document.getElementById('btn-tab-riwayat-two-way').addEventListener('click', () => switchRiwayatTab('two-way'));
                     document.getElementById('btn-tab-riwayat-one-way').addEventListener('click', () => switchRiwayatTab('one-way'));
+                    switchRiwayatTab(isHeadARRiwayat ? 'one-way' : 'two-way');
 
                     // Init Two-Way riwayat
                     const riwayatForm = document.getElementById('riwayat-filter-form');
