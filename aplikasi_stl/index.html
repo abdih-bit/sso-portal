@@ -436,6 +436,14 @@
             box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.2);
             border-color: #7dd3fc;
         }
+        /* Instant role-based visibility — set via body data attributes in showApp().
+           Eliminates any flash/delay regardless of JS async timing. */
+        body[data-role="admin_ho"] #btn-tab-two-way,
+        body[data-role="admin_ho"] #btn-tab-riwayat-two-way { display: none !important; }
+        body[data-role="admin_ho"] #section-two-way,
+        body[data-role="admin_ho"] #section-riwayat-two-way { display: none !important; }
+        body:not([data-role="superadmin"])[data-is-ho="true"] #dc-to-ho-card { display: none !important; }
+        body:not([data-role="superadmin"])[data-is-ho="false"] #ho-to-dc-card { display: none !important; }
     </style>
 </head>
 <!-- (Bersambung ke Bagian 2) -->
@@ -902,7 +910,7 @@
                 <h2 class="h2 fw-bold text-dark mb-3">Buat Dokumen</h2>
                 <ul class="nav nav-pills mb-4" id="doc-type-switcher">
                     <li class="nav-item me-2">
-                        <button type="button" class="nav-link active d-none" id="btn-tab-two-way">
+                        <button type="button" class="nav-link active" id="btn-tab-two-way">
                             <i class="bi bi-arrow-left-right me-2"></i>Two-Way Validation
                         </button>
                     </li>
@@ -913,7 +921,7 @@
                     </li>
                 </ul>
 
-                <div id="section-two-way" class="d-none">
+                <div id="section-two-way">
                     <div class="card shadow-sm border-0">
                         <div class="card-body p-4 p-md-5">
                             <form id="create-doc-form">
@@ -1000,7 +1008,7 @@
                     </div>
                 </div>
 
-                <div id="section-one-way">
+                <div id="section-one-way" class="d-none">
                     <div class="card shadow-sm border-0">
                         <div class="card-body p-4 p-md-5">
                             <form id="kirim-berkas-form">
@@ -1310,7 +1318,7 @@
                 <h2 class="h2 fw-bold text-dark mb-3">Riwayat</h2>
                 <ul class="nav nav-pills mb-4" id="riwayat-type-switcher">
                     <li class="nav-item me-2">
-                        <button type="button" class="nav-link active d-none" id="btn-tab-riwayat-two-way">
+                        <button type="button" class="nav-link active" id="btn-tab-riwayat-two-way">
                             <i class="bi bi-arrow-left-right me-2"></i>Two-Way Validation
                         </button>
                     </li>
@@ -1321,7 +1329,7 @@
                     </li>
                 </ul>
 
-                <div id="section-riwayat-two-way" class="d-none">
+                <div id="section-riwayat-two-way">
                     <div class="card shadow-sm border-0">
                         <div class="card-body p-4">
                             <form id="riwayat-filter-form" class="row g-3 align-items-end mb-4">
@@ -1381,7 +1389,7 @@
                     </div>
                 </div>
 
-                <div id="section-riwayat-one-way">
+                <div id="section-riwayat-one-way" class="d-none">
                     <div class="card shadow-sm border-0">
                         <div class="card-body p-4">
                             <form id="riwayat-satu-arah-filter-form" class="row g-3 align-items-end mb-4">
@@ -2567,6 +2575,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     };
                     document.getElementById('btn-tab-laporan-two-way').addEventListener('click', () => switchLaporanTab('two-way'));
                     document.getElementById('btn-tab-laporan-one-way').addEventListener('click', () => switchLaporanTab('one-way'));
+                    switchLaporanTab('two-way');
 
                     // --- Init Two-Way laporan ---
                     const laporanForm = document.getElementById('laporan-form');
@@ -2653,9 +2662,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     document.getElementById('export-report-satu-arah-pdf').addEventListener('click', handleExportReportSatuArahToPDF);
                     document.getElementById('export-report-satu-arah-excel').addEventListener('click', handleExportReportSatuArahToExcel);
-
-                    // Default: HO users start on Two-Way (bisa lihat laporan dua arah PT-nya), others on Two-Way
-                    switchLaporanTab('two-way');
                 }
 
                 if (pageId === 'buat-dokumen' && currentUser) {
@@ -2670,9 +2676,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     };
                     document.getElementById('btn-tab-two-way').addEventListener('click', () => switchTab('two-way'));
                     document.getElementById('btn-tab-one-way').addEventListener('click', () => switchTab('one-way'));
-                    if (!isHeadAR) {
-                        document.getElementById('btn-tab-two-way').classList.remove('d-none');
-                    }
                     switchTab(isHeadAR ? 'one-way' : 'two-way');
 
                     const namaPengirimInput = document.getElementById('nama-pengirim');
@@ -3080,6 +3083,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Tampilkan user di UI setelah berhasil login
     const showApp = (user) => {
         currentUser = user;
+        document.body.dataset.role = user.role_id || '';
+        document.body.dataset.isHo = user.is_ho ? 'true' : 'false';
         const userInfoDiv = document.getElementById('user-info');
         if (userInfoDiv) {
             const roleName = currentUser.role_name || currentUser.role_id || '';
