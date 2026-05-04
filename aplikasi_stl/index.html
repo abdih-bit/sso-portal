@@ -705,6 +705,7 @@
                       <thead class="table-light">
                           <tr>
                               <th>ID Dokumen</th>
+                              <th>Tipe</th>
                               <th>Jenis Berkas</th>
                               <th>Pengirim</th>
                               <th>Tanggal Kirim</th>
@@ -743,6 +744,7 @@
                 { id: 'riwayat', name: 'Riwayat', icon: 'bi-clock-history', type: 'link' },
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
                 { type: 'accordion', name: 'Lain-lain', icon: 'bi-three-dots', id: 'lain-lain', items: [
+                    { id: 'input-resi-ekspedisi', name: 'Input Resi Ekspedisi', icon: 'bi-upc-scan' },
                     { id: 'cek-resi-ekspedisi', name: 'Cek Resi Ekspedisi', icon: 'bi-truck' },
                     { id: 'log-audit', name: 'Log Audit', icon: 'bi-clipboard2-data' },
                     { id: 'management-berkas', name: 'Jenis Berkas', icon: 'bi-tags' }
@@ -755,6 +757,7 @@
                 { id: 'riwayat', name: 'Riwayat', icon: 'bi-clock-history', type: 'link' },
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
                 { type: 'accordion', name: 'Lain-lain', icon: 'bi-three-dots', id: 'lain-lain', items: [
+                    { id: 'input-resi-ekspedisi', name: 'Input Resi Ekspedisi', icon: 'bi-upc-scan' },
                     { id: 'cek-resi-ekspedisi', name: 'Cek Resi Ekspedisi', icon: 'bi-truck' },
                     { id: 'log-audit', name: 'Log Audit', icon: 'bi-clipboard2-data' }
                 ]}
@@ -766,6 +769,7 @@
                 { id: 'riwayat', name: 'Riwayat', icon: 'bi-clock-history', type: 'link' },
                 { id: 'laporan', name: 'Laporan', icon: 'bi-bar-chart-line', type: 'link' },
                 { type: 'accordion', name: 'Lain-lain', icon: 'bi-three-dots', id: 'lain-lain', items: [
+                    { id: 'input-resi-ekspedisi', name: 'Input Resi Ekspedisi', icon: 'bi-upc-scan' },
                     { id: 'cek-resi-ekspedisi', name: 'Cek Resi Ekspedisi', icon: 'bi-truck' }
                 ]}
             ]
@@ -1664,7 +1668,7 @@
                     </div>
                 </div>
             `,
-            'cek-resi-ekspedisi': `
+            'input-resi-ekspedisi': `
                 <h2 class="h2 fw-bold text-dark mb-4">Input Resi Ekspedisi</h2>
                 <div class="d-flex flex-column gap-4">
 
@@ -1765,55 +1769,91 @@
                     </div>
 
                 </div>
-                <div class="row g-4 mt-2">
-                    <div class="col-12" id="dc-results-card">
-                        <div class="card shadow-sm border-0">
-                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                                <h3 class="h5 mb-0 fw-semibold"><i class="bi bi-list-check me-2 text-primary"></i>Data Resi — DC ke HO</h3>
-                                <div class="input-group" style="max-width: 260px;">
-                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                    <input type="text" id="resi-dc-filter-input" class="form-control" placeholder="Cari ID Dokumen...">
+            `,
+            'cek-resi-ekspedisi': `
+                <h2 class="h2 fw-bold text-dark mb-4">Cek Resi Ekspedisi</h2>
+                <ul class="nav nav-pills mb-4" id="resi-type-switcher">
+                    <li class="nav-item me-2">
+                        <button type="button" class="nav-link active" id="btn-tab-resi-two-way">
+                            <i class="bi bi-arrow-left-right me-2"></i>Two-Way Validation
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" id="btn-tab-resi-one-way">
+                            <i class="bi bi-send me-2"></i>One-Way Document
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Two-Way section -->
+                <div id="section-resi-two-way">
+                    <div class="row g-4">
+                        <div class="col-12" id="dc-results-card">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                    <h3 class="h5 mb-0 fw-semibold"><i class="bi bi-list-check me-2 text-primary"></i>Data Resi &mdash; DC ke HO</h3>
+                                    <div class="input-group" style="max-width: 260px;">
+                                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                        <input type="text" id="resi-dc-filter-input" class="form-control" placeholder="Cari ID Dokumen...">
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr><th>ID Dokumen</th><th>Nomor Resi</th><th>Ekspedisi</th><th>Aksi</th></tr>
+                                            </thead>
+                                            <tbody id="resi-dc-results-table-body"></tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>ID Dokumen</th>
-                                                <th>Nomor Resi</th>
-                                                <th>Ekspedisi</th>
-                                                <th>Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="resi-dc-results-table-body"></tbody>
-                                    </table>
+                        </div>
+                        <div class="col-12" id="ho-results-card">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                    <h3 class="h5 mb-0 fw-semibold"><i class="bi bi-list-check me-2 text-success"></i>Data Resi &mdash; HO ke DC</h3>
+                                    <div class="input-group" style="max-width: 260px;">
+                                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                        <input type="text" id="resi-ho-filter-input" class="form-control" placeholder="Cari ID Dokumen...">
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr><th>ID Dokumen</th><th>Nomor Resi</th><th>Ekspedisi</th><th>Aksi</th></tr>
+                                            </thead>
+                                            <tbody id="resi-ho-results-table-body"></tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-12" id="ho-results-card">
-                        <div class="card shadow-sm border-0">
-                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                                <h3 class="h5 mb-0 fw-semibold"><i class="bi bi-list-check me-2 text-success"></i>Data Resi — HO ke DC</h3>
-                                <div class="input-group" style="max-width: 260px;">
-                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                    <input type="text" id="resi-ho-filter-input" class="form-control" placeholder="Cari ID Dokumen...">
+                </div>
+
+                <!-- One-Way section -->
+                <div id="section-resi-one-way" class="d-none">
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                    <h3 class="h5 mb-0 fw-semibold"><i class="bi bi-list-check me-2 text-primary"></i>Data Resi &mdash; One-Way</h3>
+                                    <div class="input-group" style="max-width: 260px;">
+                                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                        <input type="text" id="resi-oneway-filter-input" class="form-control" placeholder="Cari ID Dokumen...">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>ID Dokumen</th>
-                                                <th>Nomor Resi</th>
-                                                <th>Ekspedisi</th>
-                                                <th>Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="resi-ho-results-table-body"></tbody>
-                                    </table>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr><th>ID Dokumen</th><th>Nomor Resi</th><th>Ekspedisi</th><th>Aksi</th></tr>
+                                            </thead>
+                                            <tbody id="resi-oneway-results-table-body"></tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2085,6 +2125,7 @@
 document.addEventListener('DOMContentLoaded', function() {
             let currentUser = null;
             let documentsData = []; // Cache untuk Laporan 2 Arah
+            let fullResiData = []; // Cache data resi ekspedisi
             let donutChartInstance = null; // To hold the chart instance
             const API_BASE_URL = 'api/'; // Sesuaikan dengan path folder API Anda
 
@@ -2904,7 +2945,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     switchValidasiTab('two-way');
                 }
 
-                if (pageId === 'cek-resi-ekspedisi') {
+                if (pageId === 'input-resi-ekspedisi') {
                     loadJasaEkspedisi();
                     
                     document.getElementById('search-doc-btn-dc').addEventListener('click', () => openDocIdSearchModal('dc'));
@@ -2918,128 +2959,41 @@ document.addEventListener('DOMContentLoaded', function() {
                     const dcToHoCard = document.getElementById('dc-to-ho-card');
                     const hoToDcCard = document.getElementById('ho-to-dc-card');
 
-                    // Visibilitas form berdasarkan is_ho (dari areas table, set oleh session_check.php)
-                    // Head AR (admin_ho) = DC user → lihat DC→HO. HO area user → lihat HO→DC.
                     if (currentUser.role_id !== 'superadmin') {
                         if (currentUser.is_ho) {
-                            // User di area HO: tampilkan form HO→DC saja
                             dcToHoCard.classList.add('d-none');
                         } else {
-                            // User di area DC (termasuk Head AR): tampilkan form DC→HO saja
                             hoToDcCard.classList.add('d-none');
                         }
                     }
+                }
 
-                    // (DIUBAH) Event listener dipindahkan ke 'contentDiv'
+                if (pageId === 'cek-resi-ekspedisi') {
+                    // Tab switcher
+                    const switchResiTab = (type) => {
+                        const isTwoWay = type === 'two-way';
+                        document.getElementById('btn-tab-resi-two-way').classList.toggle('active', isTwoWay);
+                        document.getElementById('btn-tab-resi-one-way').classList.toggle('active', !isTwoWay);
+                        document.getElementById('section-resi-two-way').classList.toggle('d-none', !isTwoWay);
+                        document.getElementById('section-resi-one-way').classList.toggle('d-none', isTwoWay);
+                    };
+                    document.getElementById('btn-tab-resi-two-way').addEventListener('click', () => switchResiTab('two-way'));
+                    document.getElementById('btn-tab-resi-one-way').addEventListener('click', () => switchResiTab('one-way'));
+                    switchResiTab('two-way');
+
                     contentDiv.addEventListener('click', function(e) {
                         if (e.target.closest('.track-resi-table-btn')) {
                             const button = e.target.closest('.track-resi-table-btn');
-                            const resi = button.dataset.resi;
-                            const namaEkspedisi = button.dataset.ekspedisi;
-                            handleTrackResi(resi, namaEkspedisi);
+                            handleTrackResi(button.dataset.resi, button.dataset.ekspedisi);
                         }
                     });
 
-                    let fullResiData = [];
+                    document.getElementById('resi-dc-filter-input').addEventListener('input', renderFilteredResiTables);
+                    document.getElementById('resi-ho-filter-input').addEventListener('input', renderFilteredResiTables);
+                    document.getElementById('resi-oneway-filter-input').addEventListener('input', renderFilteredResiTables);
 
-                    const renderFilteredResiTables = () => {
-                        const dcFilterInput = document.getElementById('resi-dc-filter-input');
-                        const hoFilterInput = document.getElementById('resi-ho-filter-input');
-                        const dcFilter = dcFilterInput ? dcFilterInput.value.toLowerCase() : '';
-                        const hoFilter = hoFilterInput ? hoFilterInput.value.toLowerCase() : '';
-
-
-                        const tableBodyDc = document.getElementById('resi-dc-results-table-body');
-                        const tableBodyHo = document.getElementById('resi-ho-results-table-body');
-
-                        if (!tableBodyDc || !tableBodyHo) return;
-
-                        tableBodyDc.innerHTML = '';
-                        tableBodyHo.innerHTML = '';
-
-                        // is_ho tersedia dari session_check.php (query areas table)
-                        const isHoUser = currentUser.is_ho === true;
-                        const isDcUser = !isHoUser && currentUser.role_id !== 'superadmin';
-
-                        const resiDcDocuments = fullResiData.filter(doc =>
-                            doc.jenis_pengiriman === 'DC_ke_HO' && 
-                            doc.barcode_id.toLowerCase().includes(dcFilter) &&
-                            (!isHoUser) 
-                        );
-                        
-                        const resiHoDocuments = fullResiData.filter(doc =>
-                            doc.jenis_pengiriman === 'HO_ke_DC' && 
-                            doc.barcode_id.toLowerCase().includes(hoFilter) &&
-                            (!isDcUser) 
-                        );
-                        
-                        if (resiDcDocuments.length === 0 && !isHoUser) {
-                            tableBodyDc.innerHTML = '<tr><td colspan="4" class="text-center">Tidak ada data yang cocok.</td></tr>';
-                        } else {
-                            resiDcDocuments.forEach(doc => {
-                                const row = `
-                                    <tr>
-                                        <td>${doc.barcode_id}</td>
-                                        <td>${doc.nomor_resi || '-'}</td>
-                                        <td>${doc.nama_ekspedisi || '-'}</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-info track-resi-table-btn" 
-                                                    data-resi="${doc.nomor_resi}" 
-                                                    data-ekspedisi="${doc.nama_ekspedisi}">
-                                                <i class="bi bi-truck"></i> Lacak
-                                            </button>
-                                        </td>
-                                    </tr>
-                                `;
-                                tableBodyDc.insertAdjacentHTML('beforeend', row);
-                            });
-                        }
-
-                        if (resiHoDocuments.length === 0 && !isDcUser) {
-                            tableBodyHo.innerHTML = '<tr><td colspan="4" class="text-center">Tidak ada data yang cocok.</td></tr>';
-                        } else {
-                            resiHoDocuments.forEach(doc => {
-                                const row = `
-                                    <tr>
-                                        <td>${doc.barcode_id}</td>
-                                        <td>${doc.nomor_resi || '-'}</td>
-                                        <td>${doc.nama_ekspedisi || '-'}</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-info track-resi-table-btn" 
-                                                    data-resi="${doc.nomor_resi}" 
-                                                    data-ekspedisi="${doc.nama_ekspedisi}">
-                                        <i class="bi bi-truck"></i> Lacak
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
-                        tableBodyHo.insertAdjacentHTML('beforeend', row);
-                    });
+                    loadAndRenderResiData();
                 }
-                
-                if (isHoUser) document.getElementById('dc-results-card').classList.add('d-none');
-                if (isDcUser) document.getElementById('ho-results-card').classList.add('d-none');
-            };
-
-            const loadAndRenderResiData = async () => {
-                try {
-                    const response = await fetch(`${API_BASE_URL}ekspedisi.php`);
-                    fullResiData = await response.json();
-                    renderFilteredResiTables(); 
-                } catch (error) {
-                    console.error("Gagal memuat data resi:", error);
-                    const tableBodyDc = document.getElementById('resi-dc-results-table-body');
-                    const tableBodyHo = document.getElementById('resi-ho-results-table-body');
-                    if (tableBodyDc) tableBodyDc.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Gagal memuat data.</td></tr>';
-                    if (tableBodyHo) tableBodyHo.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Gagal memuat data.</td></tr>';
-                }
-            };
-
-            document.getElementById('resi-dc-filter-input').addEventListener('input', renderFilteredResiTables);
-            document.getElementById('resi-ho-filter-input').addEventListener('input', renderFilteredResiTables);
-
-            loadAndRenderResiData();
-        }
 
         if (pageId === 'management-berkas') {
             renderJenisBerkasList();
@@ -3447,6 +3401,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+    const fetchKirimBerkasForResi = async () => {
+        try {
+            const url = new URL(`${window.location.origin}${window.location.pathname.replace('index.html', '')}${API_BASE_URL}kirim_berkas.php`);
+            if (currentUser.role_id && currentUser.role_id.startsWith('admin_dc')) {
+                url.searchParams.append('area_id_sender', currentUser.area_id);
+            }
+            // admin_ho tidak mengirim one-way, kembalikan kosong
+            if (currentUser.role_id === 'admin_ho') return [];
+            const response = await fetch(url);
+            const data = await response.json();
+            return Array.isArray(data) ? data : [];
+        } catch(e) {
+            return [];
+        }
+    };
+
     const openDocIdSearchModal = async (type) => {
         const modalEl = document.getElementById('searchDocIdModal');
         if (!searchDocIdModal) {
@@ -3454,32 +3424,52 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         await fetchExistingResiData();
-        // (DIUBAH) fetchDocuments sekarang difilter berdasarkan peran HO
-        await fetchDocuments(); 
+        // fetchDocuments sekarang difilter berdasarkan peran HO
+        await fetchDocuments();
+        const kirimBerkasData = await fetchKirimBerkasForResi();
         let documentsToList = [];
 
         if (type === 'dc') {
             const dcResiExists = existingResiData
                 .filter(resi => resi.jenis_pengiriman === 'DC_ke_HO')
                 .map(resi => resi.barcode_id);
-            
-            documentsToList = documentsData.filter(doc => 
-                doc.sender_user_id == currentUser.user_id && 
-                doc.status === 'Dikirim ke HO' &&
-                !dcResiExists.includes(doc.barcode_id)
-            );
+
+            // Dokumen Two-Way
+            const twoWayDocs = documentsData
+                .filter(doc =>
+                    doc.sender_user_id == currentUser.user_id &&
+                    doc.status === 'Dikirim ke HO' &&
+                    !dcResiExists.includes(doc.barcode_id)
+                )
+                .map(doc => ({ ...doc, doc_source: 'two-way' }));
+
+            // Dokumen One-Way
+            const oneWayDocs = kirimBerkasData
+                .filter(doc =>
+                    doc.sender_user_id == currentUser.user_id &&
+                    doc.status === 'Dikirim' &&
+                    !dcResiExists.includes(doc.barcode_id)
+                )
+                .map(doc => ({
+                    barcode_id: doc.barcode_id,
+                    doc_type: doc.jenis_berkas,
+                    sender_name: doc.sender_name,
+                    created_at: doc.created_at,
+                    doc_source: 'one-way'
+                }));
+
+            documentsToList = [...twoWayDocs, ...oneWayDocs];
 
         } else if (type === 'ho') {
              const hoResiExists = existingResiData
                 .filter(resi => resi.jenis_pengiriman === 'HO_ke_DC')
                 .map(resi => resi.barcode_id);
 
-            // (DIUBAH) Filter berdasarkan HO Tujuan pengguna
+            // HO→DC hanya dokumen two-way
             documentsToList = documentsData.filter(doc => 
                 doc.status === 'Dikembalikan ke DC' &&
-                // doc.receiver_ho_area_id == currentUser.area_id && // Filter ini sudah ada di fetchDocuments
                 !hoResiExists.includes(doc.barcode_id)
-            );
+            ).map(doc => ({ ...doc, doc_source: 'two-way' }));
         }
         
         allDocIdsForResi = documentsToList;
@@ -3517,22 +3507,26 @@ document.addEventListener('DOMContentLoaded', function() {
         searchDocIdModal.show();
     };
     
-    // (DIUBAH) renderDocIdList sekarang menerima targetBody
+    // renderDocIdList sekarang menerima targetBody
     const renderDocIdList = (docs, targetBody) => {
         if (!targetBody) targetBody = document.getElementById('doc-id-list-body');
         targetBody.innerHTML = '';
         if (docs.length > 0) {
             docs.forEach(doc => {
-                const row = `<tr data-doc-id="${doc.barcode_id}" data-sender-name="${doc.sender_name}">
+                const typeBadge = doc.doc_source === 'one-way'
+                    ? '<span class="badge bg-primary">One-Way</span>'
+                    : '<span class="badge bg-success">Two-Way</span>';
+                const row = `<tr data-doc-id="${doc.barcode_id}" data-sender-name="${doc.sender_name || ''}">
                                 <td>${doc.barcode_id}</td>
-                                <td>${doc.doc_type}</td>
-                                <td>${doc.sender_name}</td>
+                                <td>${typeBadge}</td>
+                                <td>${doc.doc_type || '-'}</td>
+                                <td>${doc.sender_name || '-'}</td>
                                 <td>${new Date(doc.created_at).toLocaleDateString('id-ID')}</td>
                              </tr>`;
                 targetBody.insertAdjacentHTML('beforeend', row);
             });
         } else {
-            targetBody.innerHTML = '<tr><td colspan="4" class="text-center">Tidak ada dokumen yang cocok.</td></tr>';
+            targetBody.innerHTML = '<tr><td colspan="5" class="text-center">Tidak ada dokumen yang cocok.</td></tr>';
         }
     };
     
@@ -3614,74 +3608,87 @@ document.addEventListener('DOMContentLoaded', function() {
         const dcFilter = dcFilterInput ? dcFilterInput.value.toLowerCase() : '';
         const hoFilter = hoFilterInput ? hoFilterInput.value.toLowerCase() : '';
 
-
         const tableBodyDc = document.getElementById('resi-dc-results-table-body');
         const tableBodyHo = document.getElementById('resi-ho-results-table-body');
+        const tableBodyOw = document.getElementById('resi-oneway-results-table-body');
 
-        if (!tableBodyDc || !tableBodyHo) return;
+        if (!tableBodyDc && !tableBodyHo && !tableBodyOw) return;
 
-        tableBodyDc.innerHTML = '';
-        tableBodyHo.innerHTML = '';
-
-        const isHoUser = currentUser.area_name && currentUser.area_name.includes('Head Office');
+        const isHoUser = currentUser.is_ho === true;
         const isDcUser = !isHoUser && currentUser.role_id !== 'superadmin';
 
-        const resiDcDocuments = fullResiData.filter(doc =>
-            doc.jenis_pengiriman === 'DC_ke_HO' && 
-            doc.barcode_id.toLowerCase().includes(dcFilter) &&
-            (!isHoUser) 
-        );
-        
-        const resiHoDocuments = fullResiData.filter(doc =>
-            doc.jenis_pengiriman === 'HO_ke_DC' && 
-            doc.barcode_id.toLowerCase().includes(hoFilter) &&
-            (!isDcUser) 
-        );
-        
-        if (resiDcDocuments.length === 0 && !isHoUser) {
-            tableBodyDc.innerHTML = '<tr><td colspan="4" class="text-center">Tidak ada data yang cocok.</td></tr>';
-        } else {
-            resiDcDocuments.forEach(doc => {
-                const row = `
-                    <tr>
-                        <td>${doc.barcode_id}</td>
-                        <td>${doc.nomor_resi || '-'}</td>
-                        <td>${doc.nama_ekspedisi || '-'}</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-info track-resi-table-btn" 
-                                    data-resi="${doc.nomor_resi}" 
-                                    data-ekspedisi="${doc.nama_ekspedisi}">
-                                <i class="bi bi-truck"></i> Lacak
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                tableBodyDc.insertAdjacentHTML('beforeend', row);
-            });
+        // --- Two-Way: DC ke HO ---
+        if (tableBodyDc) {
+            tableBodyDc.innerHTML = '';
+            const resiDcDocuments = fullResiData.filter(doc =>
+                doc.jenis_pengiriman === 'DC_ke_HO' &&
+                doc.doc_source === 'two-way' &&
+                doc.barcode_id.toLowerCase().includes(dcFilter) &&
+                !isHoUser
+            );
+            if (resiDcDocuments.length === 0) {
+                tableBodyDc.innerHTML = '<tr><td colspan="4" class="text-center">Tidak ada data yang cocok.</td></tr>';
+            } else {
+                resiDcDocuments.forEach(doc => {
+                    tableBodyDc.insertAdjacentHTML('beforeend', `
+                        <tr>
+                            <td>${doc.barcode_id}</td>
+                            <td>${doc.nomor_resi || '-'}</td>
+                            <td>${doc.nama_ekspedisi || '-'}</td>
+                            <td><button class="btn btn-sm btn-outline-info track-resi-table-btn" data-resi="${doc.nomor_resi}" data-ekspedisi="${doc.nama_ekspedisi}"><i class="bi bi-truck"></i> Lacak</button></td>
+                        </tr>`);
+                });
+            }
         }
 
-        if (resiHoDocuments.length === 0 && !isDcUser) {
-            tableBodyHo.innerHTML = '<tr><td colspan="4" class="text-center">Tidak ada data yang cocok.</td></tr>';
-        } else {
-            resiHoDocuments.forEach(doc => {
-                const row = `
-                    <tr>
-                        <td>${doc.barcode_id}</td>
-                        <td>${doc.nomor_resi || '-'}</td>
-                        <td>${doc.nama_ekspedisi || '-'}</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-info track-resi-table-btn" 
-                                    data-resi="${doc.nomor_resi}" 
-                                    data-ekspedisi="${doc.nama_ekspedisi}">
-                                <i class="bi bi-truck"></i> Lacak
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                tableBodyHo.insertAdjacentHTML('beforeend', row);
-            });
+        // --- Two-Way: HO ke DC ---
+        if (tableBodyHo) {
+            tableBodyHo.innerHTML = '';
+            const resiHoDocuments = fullResiData.filter(doc =>
+                doc.jenis_pengiriman === 'HO_ke_DC' &&
+                doc.doc_source === 'two-way' &&
+                doc.barcode_id.toLowerCase().includes(hoFilter) &&
+                !isDcUser
+            );
+            if (resiHoDocuments.length === 0) {
+                tableBodyHo.innerHTML = '<tr><td colspan="4" class="text-center">Tidak ada data yang cocok.</td></tr>';
+            } else {
+                resiHoDocuments.forEach(doc => {
+                    tableBodyHo.insertAdjacentHTML('beforeend', `
+                        <tr>
+                            <td>${doc.barcode_id}</td>
+                            <td>${doc.nomor_resi || '-'}</td>
+                            <td>${doc.nama_ekspedisi || '-'}</td>
+                            <td><button class="btn btn-sm btn-outline-info track-resi-table-btn" data-resi="${doc.nomor_resi}" data-ekspedisi="${doc.nama_ekspedisi}"><i class="bi bi-truck"></i> Lacak</button></td>
+                        </tr>`);
+                });
+            }
         }
-        
+
+        // --- One-Way ---
+        if (tableBodyOw) {
+            tableBodyOw.innerHTML = '';
+            const owFilterInput = document.getElementById('resi-oneway-filter-input');
+            const owFilter = owFilterInput ? owFilterInput.value.toLowerCase() : '';
+            const resiOwDocuments = fullResiData.filter(doc =>
+                doc.doc_source === 'one-way' &&
+                doc.barcode_id.toLowerCase().includes(owFilter)
+            );
+            if (resiOwDocuments.length === 0) {
+                tableBodyOw.innerHTML = '<tr><td colspan="4" class="text-center">Tidak ada data yang cocok.</td></tr>';
+            } else {
+                resiOwDocuments.forEach(doc => {
+                    tableBodyOw.insertAdjacentHTML('beforeend', `
+                        <tr>
+                            <td>${doc.barcode_id}</td>
+                            <td>${doc.nomor_resi || '-'}</td>
+                            <td>${doc.nama_ekspedisi || '-'}</td>
+                            <td><button class="btn btn-sm btn-outline-info track-resi-table-btn" data-resi="${doc.nomor_resi}" data-ekspedisi="${doc.nama_ekspedisi}"><i class="bi bi-truck"></i> Lacak</button></td>
+                        </tr>`);
+                });
+            }
+        }
+
         const dcCard = document.getElementById('dc-results-card');
         const hoCard = document.getElementById('ho-results-card');
         if (isHoUser && dcCard) dcCard.classList.add('d-none');

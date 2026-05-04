@@ -8,14 +8,16 @@ switch ($method) {
     case 'GET':
         $stmt = $pdo->query(
             "SELECT e.barcode_id,
-                    d.sender_user_id,
-                    u_sender.full_name AS sender_name,
+                    COALESCE(u_d.full_name, u_b.full_name) AS sender_name,
                     e.jenis_pengiriman,
                     e.nomor_resi,
-                    j.nama_jasa AS nama_ekspedisi
+                    j.nama_jasa AS nama_ekspedisi,
+                    CASE WHEN d.barcode_id IS NOT NULL THEN 'two-way' ELSE 'one-way' END AS doc_source
              FROM stl_ekspedisi e
-             JOIN stl_documents d ON e.barcode_id = d.barcode_id
-             JOIN stl_users u_sender ON d.sender_user_id = u_sender.user_id
+             LEFT JOIN stl_documents d ON e.barcode_id = d.barcode_id
+             LEFT JOIN stl_users u_d ON d.sender_user_id = u_d.user_id
+             LEFT JOIN stl_berkas_satu_arah sa ON e.barcode_id = sa.barcode_id AND d.barcode_id IS NULL
+             LEFT JOIN stl_users u_b ON sa.sender_user_id = u_b.user_id
              JOIN stl_jasa_ekspedisi j ON e.jasa_ekspedisi_id = j.id
              ORDER BY e.created_at DESC"
         );
@@ -34,9 +36,13 @@ switch ($method) {
             json_response(['status' => 'error', 'message' => 'Semua field wajib diisi.'], 400);
         }
 
-        // Cek dokumen ada
-        $chk = $pdo->prepare("SELECT barcode_id FROM stl_documents WHERE barcode_id = ?");
-        $chk->execute([$barcode_id]);
+        // Cek dokumen ada di stl_documents atau stl_berkas_satu_arah
+        $chk = $pdo->prepare(
+            "SELECT barcode_id FROM stl_documents WHERE barcode_id = ?
+             UNION
+             SELECT barcode_id FROM stl_berkas_satu_arah WHERE barcode_id = ?"
+        );
+        $chk->execute([$barcode_id, $barcode_id]);
         if (!$chk->fetch()) {
             json_response(['status' => 'error', 'message' => 'ID Dokumen tidak ditemukan.'], 404);
         }

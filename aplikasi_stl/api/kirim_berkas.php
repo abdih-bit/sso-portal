@@ -11,6 +11,7 @@ switch ($method) {
         $where  = [];
 
         $sql = "SELECT b.barcode_id,
+                       b.sender_user_id,
                        u_sender.full_name AS sender_name,
                        a_sender.name AS sender_area_name,
                        b.jenis_berkas,
