@@ -12,7 +12,8 @@ switch ($method) {
                     e.jenis_pengiriman,
                     e.nomor_resi,
                     j.nama_jasa AS nama_ekspedisi,
-                    CASE WHEN d.barcode_id IS NOT NULL THEN 'two-way' ELSE 'one-way' END AS doc_source
+                    CASE WHEN d.barcode_id IS NOT NULL THEN 'two-way' ELSE 'one-way' END AS doc_source,
+                    COALESCE(d.status, sa.status) AS doc_status
              FROM stl_ekspedisi e
              LEFT JOIN stl_documents d ON e.barcode_id = d.barcode_id
              LEFT JOIN stl_users u_d ON d.sender_user_id = u_d.user_id
