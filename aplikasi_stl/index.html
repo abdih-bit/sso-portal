@@ -2573,7 +2573,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     const areaFilterWrapper = document.getElementById('report-area-filter-wrapper');
                     const isAdminDc = currentUser && currentUser.role_id.startsWith('admin_dc');
-                    const isHoUser = currentUser && (currentUser.role_id === 'admin_ho' || (currentUser.area_name && currentUser.area_name.includes('Head Office')));
+                    const isAdminHo = currentUser && currentUser.role_id === 'admin_ho';
 
                     if (isAdminDc) {
                         // Ka Admin: tampilkan filter tapi hanya area sendiri
@@ -2582,9 +2582,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         reportAreaSelect.innerHTML = `<option value="${currentUser.area_id}">${currentUser.area_name}</option>`;
                         reportAreaSelect.value = currentUser.area_id;
                         reportAreaSelect.disabled = true;
-                    } else if (isHoUser) {
-                        await loadReportFilters();
-                        document.getElementById('report-area').value = '';
+                    } else if (isAdminHo) {
+                        // Head AR: tampilkan DC area di bawah PT-nya sebagai filter
+                        const ptHoId = currentUser.ho_area_id || currentUser.area_id;
+                        await loadAreaOptions(document.getElementById('report-area'), 'dc', 'Semua DC (PT Saya)', ptHoId);
                     } else {
                         await loadReportFilters();
                     }
@@ -2648,8 +2649,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('export-report-satu-arah-pdf').addEventListener('click', handleExportReportSatuArahToPDF);
                     document.getElementById('export-report-satu-arah-excel').addEventListener('click', handleExportReportSatuArahToExcel);
 
-                    // Default: HO users start on One-Way, others on Two-Way
-                    switchLaporanTab(isHoUser ? 'one-way' : 'two-way');
+                    // Default: HO users start on Two-Way (bisa lihat laporan dua arah PT-nya), others on Two-Way
+                    switchLaporanTab('two-way');
                 }
 
                 if (pageId === 'buat-dokumen' && currentUser) {
@@ -3412,6 +3413,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (currentUser && currentUser.role_id.startsWith('admin_dc')) {
             params.area_id = currentUser.area_id;
+        } else if (currentUser && currentUser.role_id === 'admin_ho') {
+            // Head AR: filter by PT (ho_area_id), bukan area_id pengirim
+            // Jika ada filter DC spesifik dipilih, pakai area_id; jika tidak, pakai ho_area_id untuk semua DC di PT
+            if (!params.area_id) {
+                params.ho_area_id = currentUser.ho_area_id || currentUser.area_id;
+            }
         }
 
         await fetchDocuments(params);
