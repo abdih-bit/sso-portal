@@ -902,7 +902,7 @@
                 <h2 class="h2 fw-bold text-dark mb-3">Buat Dokumen</h2>
                 <ul class="nav nav-pills mb-4" id="doc-type-switcher">
                     <li class="nav-item me-2">
-                        <button type="button" class="nav-link active" id="btn-tab-two-way">
+                        <button type="button" class="nav-link active d-none" id="btn-tab-two-way">
                             <i class="bi bi-arrow-left-right me-2"></i>Two-Way Validation
                         </button>
                     </li>
@@ -1310,7 +1310,7 @@
                 <h2 class="h2 fw-bold text-dark mb-3">Riwayat</h2>
                 <ul class="nav nav-pills mb-4" id="riwayat-type-switcher">
                     <li class="nav-item me-2">
-                        <button type="button" class="nav-link active" id="btn-tab-riwayat-two-way">
+                        <button type="button" class="nav-link active d-none" id="btn-tab-riwayat-two-way">
                             <i class="bi bi-arrow-left-right me-2"></i>Two-Way Validation
                         </button>
                     </li>
@@ -2475,8 +2475,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         document.getElementById('section-riwayat-one-way').classList.toggle('d-none', isTwoWay);
                     };
                     const isHeadARRiwayat = currentUser.role_id && currentUser.role_id.startsWith('admin_ho');
-                    if (isHeadARRiwayat) {
-                        document.getElementById('btn-tab-riwayat-two-way').classList.add('d-none');
+                    if (!isHeadARRiwayat) {
+                        document.getElementById('btn-tab-riwayat-two-way').classList.remove('d-none');
                     }
                     document.getElementById('btn-tab-riwayat-two-way').addEventListener('click', () => switchRiwayatTab('two-way'));
                     document.getElementById('btn-tab-riwayat-one-way').addEventListener('click', () => switchRiwayatTab('one-way'));
@@ -2806,8 +2806,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Head AR: sembunyikan tab Two-Way, langsung ke One-Way
                     const isHeadAR = currentUser.role_id && currentUser.role_id.startsWith('admin_ho');
-                    if (isHeadAR) {
-                        document.getElementById('btn-tab-two-way').classList.add('d-none');
+                    if (!isHeadAR) {
+                        document.getElementById('btn-tab-two-way').classList.remove('d-none');
                     }
 
                     // Default tab: HO users start on One-Way, DC/superadmin on Two-Way
