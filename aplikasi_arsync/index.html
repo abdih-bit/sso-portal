@@ -16,12 +16,12 @@
     <style>
         /* Modern Styling */
         :root {
-            --bs-primary-rgb: 2, 132, 199;
+            --bs-primary-rgb: 99, 102, 241;
             --sidebar-bg: #ffffff;
             --sidebar-text: #1e293b;
-            --sidebar-link-text: #64748b;
-            --sidebar-link-hover-bg: #f0f9ff;
-            --sidebar-link-active-bg: #0284c7;
+            --sidebar-link-text: #495057;
+            --sidebar-link-hover-bg: #e9ecef;
+            --sidebar-link-active-bg: #6366f1;
             --page-bg: #f0f9ff;
             --card-bg: #ffffff;
             --card-border: #e5e7eb;
@@ -35,7 +35,7 @@
             background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 40%, #e0f7fa 70%, #ccfbf1 100%);
         }
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Poppins', sans-serif;
             color: var(--text-primary);
         }
         .sidebar {
@@ -100,16 +100,19 @@
         
         .nav-link {
             color: var(--sidebar-link-text);
-            transition: all 0.2s ease-in-out;
+            font-weight: 500;
+            padding: 0.75rem 1.25rem;
+            transition: all 0.2s ease;
         }
         .nav-link:hover {
             background-color: var(--sidebar-link-hover-bg);
-            color: #0284c7;
+            color: #6366f1;
         }
         .nav-link.active {
-            background-color: #e0f2fe;
-            color: #0369a1;
+            background-color: #6366f1;
+            color: white;
             font-weight: 600;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
         /* Login Page Styling */
@@ -165,7 +168,7 @@
         }
 
         .table-header-custom {
-            background-color: #0369a1;
+            background-color: #4f46e5;
             color: white;
         }
         .status-badge {
@@ -186,7 +189,7 @@
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Sora:wght@700&display=swap" rel="stylesheet">
 </head>
 <body class="bg-light">
     <script>
@@ -288,21 +291,23 @@
         </aside>
 
         <div class="main-content-wrapper">
-             <!-- Top Bar -->
-            <header class="d-flex justify-content-end align-items-center px-4 py-2 bg-white border-bottom">
-                <div class="d-flex align-items-center border-end pe-3 me-3">
-                    <div id="current-user-display" class="text-end">
-                        <!-- Info user aktif akan muncul di sini -->
+            <!-- Top Bar -->
+            <header class="sticky-top p-3" style="z-index: 1021; top: 0;">
+                <div class="card p-3">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div id="current-user-display" class="text-end me-3">
+                            <!-- Info user aktif akan muncul di sini -->
+                        </div>
+                        <a href="#" id="logout-btn" class="btn btn-danger btn-sm">
+                            <svg style="width:16px; height:16px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="d-inline-block align-text-top"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
+                            Logout
+                        </a>
                     </div>
                 </div>
-                <a href="#" id="logout-btn" class="btn btn-outline-danger btn-sm">
-                   <svg style="width:16px; height:16px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="d-inline-block align-text-top"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
-                    Logout
-                </a>
             </header>
-            
+
             <!-- Main Content -->
-            <main class="main-content p-4 p-md-5">
+            <main class="main-content p-3 pt-0">
                 <div id="dashboard-page" class="page-content">
                     <h1 class="h2 fw-bold text-dark mb-4">Dashboard</h1>
                     <!-- Summary Cards -->
