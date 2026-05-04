@@ -1,0 +1,2569 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARsync Portal</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230d6efd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8'/%3E%3Cpath d='M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16'/%3E%3Cpath d='M8 5L3 5v5'/%3E%3Cpath d='M16 19l5 0v-5'/%3E%3C/svg%3E">
+    <!-- Memuat Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Memuat SheetJS (xlsx.js) untuk membaca file Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Memuat Tone.js untuk efek suara -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <!-- Memuat Chart.js untuk grafik -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Modern Styling */
+        :root {
+            --bs-primary-rgb: 13, 110, 253;
+            --sidebar-bg: #111827;
+            --sidebar-text: #e5e7eb;
+            --sidebar-link-text: #9ca3af;
+            --sidebar-link-hover-bg: #374151;
+            --sidebar-link-active-bg: #0d6efd;
+            --page-bg: #f9fafb;
+            --card-bg: #ffffff;
+            --card-border: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--page-bg);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+        }
+        .sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+        }
+        .main-content-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .main-content {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+        .status-card {
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+        }
+        .paid {
+            background-color: #f0fdf4; 
+            border-left: 4px solid #22c55e;
+            color: #166534;
+        }
+        .cocok {
+            background-color: #f5f3ff;
+            border-left: 4px solid #8b5cf6;
+            color: #5b21b6;
+        }
+        .tidak-sesuai {
+            background-color: #fefce8;
+            border-left: 4px solid #facc15;
+            color: #854d0e;
+        }
+        .error {
+            background-color: #fef2f2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .page-content { display: none; }
+        .page-content.active { display: block; }
+        
+        .nav-link {
+            color: var(--sidebar-link-text);
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link:hover {
+            background-color: var(--sidebar-link-hover-bg);
+            color: #ffffff;
+        }
+        .nav-link.active {
+            background-color: var(--sidebar-link-active-bg);
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        /* Login Page Styling */
+        body.view-login #login-view {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-image: url('https://images.unsplash.com/photo-1620658839921-293f998260d5?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-position: center;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 430px;
+            padding: 3rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4));
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        #login-view, #app-view {
+            display: none;
+        }
+        body.view-app #app-view {
+            display: flex;
+        }
+
+        #create-batch-menu,
+        #area-management-menu,
+        #user-management-menu,
+        #ttd-management-menu {
+            display: none;
+        }
+        body.is-admin #create-batch-menu,
+        body.is-admin #area-management-menu,
+        body.is-admin #user-management-menu,
+        body.is-admin #ttd-management-menu {
+            display: block;
+        }
+
+        .form-control, .form-select {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #fff;
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.2);
+        }
+
+        .table-header-custom {
+            background-color: #1f2937;
+            color: white;
+        }
+        .status-badge {
+            padding: 0.35em 0.65em;
+            font-size: .8em;
+            font-weight: 700;
+            line-height: 1;
+            color: #fff;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.375rem;
+        }
+        .status-confirmed { background-color: #8b5cf6; } 
+        .status-paid { background-color: #22c55e; }
+        .status-unconfirmed { background-color: #f59e0b; color: #000; }
+        .status-not-scanned { background-color: #6b7280; }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <script>
+        // Jangan tampilkan apa pun saat load — session_check akan menentukan tampilan
+        document.body.classList.add('view-loading');
+    </script>
+
+    <!-- SSO Login View (muncul saat gagal/fallback) -->
+    <div id="login-view">
+        <div class="login-card">
+            <div class="text-center mb-5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--sidebar-link-active-bg)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M8 5L3 5v5"/><path d="M16 19l5 0v-5"/></svg>
+                <h1 class="h2 fw-bold" style="font-family: 'Sora', sans-serif;">ARsync Portal</h1>
+                <p class="text-muted">Selamat datang! Silakan masuk untuk melanjutkan.</p>
+            </div>
+            <!-- Pesan loading saat cek session -->
+            <div id="login-loading" class="text-center py-3">
+                <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+                <p class="mt-2 text-muted small">Memeriksa sesi...</p>
+            </div>
+            <!-- Tombol SSO — muncul jika gagal auto-redirect -->
+            <div id="sso-btn-wrap" class="d-none">
+                <div id="login-error" class="alert alert-danger d-none mb-3" role="alert"></div>
+                <div class="d-grid">
+                    <button id="sso-login-btn" class="btn btn-primary btn-lg">
+                        <svg style="width:20px;height:20px;margin-right:8px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="d-inline-block align-text-top"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
+                        Login via SSO Portal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-view" class="d-flex h-100">
+        <!-- Sidebar -->
+        <aside class="sidebar p-4 d-flex flex-column">
+            <div class="d-flex align-items-center gap-3 mb-4 px-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M8 5L3 5v5"/><path d="M16 19l5 0v-5"/></svg>
+                <div>
+                    <h1 class="h4 mb-0 text-white" style="font-family: 'Sora', sans-serif;">ARsync</h1>
+                </div>
+            </div>
+            <nav class="flex-grow-1">
+                <ul id="nav-menu" class="nav flex-column gap-2">
+                    <li class="nav-item">
+                        <a href="#dashboard" data-page="dashboard-page" class="nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-3">
+                            <svg style="width:24px; height:24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                     <li class="nav-item" id="create-batch-menu">
+                        <a href="#create-batch" data-page="create-batch-page" class="nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-3">
+                            <svg style="width:24px; height:24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10.5 11.25h3M12 15V7.5" /><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 7.5h16.5v-1.5a2.25 2.25 0 00-2.25-2.25h-12a2.25 2.25 0 00-2.25 2.25v1.5z" /></svg>
+                            <span>Create Batch</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#pindai" data-page="pindai-page" class="nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-3">
+                            <svg style="width:24px; height:24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5h16.5v15H3.75v-15zm12.75 3h-9v9h9v-9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 10.5h6" /></svg>
+                            <span>Pindai</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#report" data-page="report-page" class="nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-3">
+                           <svg style="width:24px; height:24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 100 15 7.5 7.5 0 000-15z" /><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 10.5V15m0-4.5V3" /><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 10.5H15m-4.5 0H6" /></svg>
+                            <span>Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#download-ba" data-page="download-ba-page" class="nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-3">
+                            <svg style="width:24px; height:24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                            <span>Download BA</span>
+                        </a>
+                    </li>
+                     <li class="nav-item" id="area-management-menu">
+                        <a href="#area-management" data-page="area-management-page" class="nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-3">
+                            <svg style="width:24px; height:24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m0 0v2.25m0-2.25h3.75m-3.75 0H5.25m4.5 0V6.75m0 0H6.75m2.25 0h3.75m-3.75 0H5.25m6.75 0v2.25m0 0V15m0 0s-1.5 2.25-3.75 2.25M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            <span>Managemen Area</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="user-management-menu">
+                        <a href="#user-management" data-page="user-management-page" class="nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-3">
+                            <svg style="width:24px; height:24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m-7.5-2.962a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM10.5 18.75a9 9 0 100-18 9 9 0 000 18z" /></svg>
+                            <span>Managemen Pengguna</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="ttd-management-menu">
+                        <a href="#ttd-management" data-page="ttd-management-page" class="nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-3">
+                            <svg style="width:24px; height:24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                            <span>Managemen TTD</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="small text-secondary px-2 mt-auto border-top border-secondary-subtle pt-3 text-center">
+                <p class="mb-1">&copy; 2025 ARsync</p>
+                <p class="small lh-sm mb-0">Portal Rekonsiliasi &<br>Monitoring Piutang</p>
+            </div>
+        </aside>
+
+        <div class="main-content-wrapper">
+             <!-- Top Bar -->
+            <header class="d-flex justify-content-end align-items-center px-4 py-2 bg-white border-bottom">
+                <div class="d-flex align-items-center border-end pe-3 me-3">
+                    <div id="current-user-display" class="text-end">
+                        <!-- Info user aktif akan muncul di sini -->
+                    </div>
+                </div>
+                <a href="#" id="logout-btn" class="btn btn-outline-danger btn-sm">
+                   <svg style="width:16px; height:16px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="d-inline-block align-text-top"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
+                    Logout
+                </a>
+            </header>
+            
+            <!-- Main Content -->
+            <main class="main-content p-4 p-md-5">
+                <div id="dashboard-page" class="page-content">
+                    <h1 class="h2 fw-bold text-dark mb-4">Dashboard</h1>
+                    <!-- Summary Cards -->
+                    <div class="row g-4 mb-4 row-cols-1 row-cols-md-2 row-cols-xl-5">
+                        <div class="col">
+                            <div class="card h-100">
+                                 <div class="card-body">
+                                    <h5 class="card-title text-secondary">Total Records</h5>
+                                    <p id="total-data" class="display-4 fw-bold">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success">Paid</h5>
+                                    <p id="total-paid" class="display-4 fw-bold text-success">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title" style="color:#8b5cf6;">Confirmed</h5>
+                                    <p id="total-cocok" class="display-4 fw-bold" style="color:#8b5cf6;">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-warning">Unconfirmed</h5>
+                                    <p id="total-tidak-sesuai" class="display-4 fw-bold text-warning">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-secondary">Not Scanned</h5>
+                                    <p id="total-belum-scan" class="display-4 fw-bold text-secondary">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Chart -->
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <div style="max-width: 450px; margin: auto;">
+                                 <canvas id="statusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="create-batch-page" class="page-content">
+                    <h1 class="h2 fw-bold text-dark mb-4">Create Batch</h1>
+                     <div class="card">
+                        <div class="card-body p-4 p-md-5">
+                            <div class="mx-auto" style="max-width: 500px;">
+                                <div class="mb-3">
+                                    <label for="nama-input" class="form-label">Nama Petugas</label>
+                                    <input type="text" id="nama-input" class="form-control" placeholder="Nama Anda" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="business-area-input" class="form-label">Business Area</label>
+                                    <select id="business-area-input" class="form-select"></select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="sales-office-input" class="form-label">Sales Office</label>
+                                    <select id="sales-office-input" class="form-select"></select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cutoff-date-input" class="form-label">Tanggal Cut Off</label>
+                                    <input type="date" id="cutoff-date-input" class="form-control">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="file-input" class="form-label">Unggah File Excel</label>
+                                    <input type="file" id="file-input" class="form-control" accept=".xlsx, .xls">
+                                </div>
+                                <div id="upload-status" class="text-center p-3 rounded-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="pindai-page" class="page-content">
+                    <div class="container-fluid p-0">
+                        <div class="row g-4">
+                            <!-- Kolom 1: Input Area -->
+                            <div class="col-lg-5">
+                                <div class="vstack gap-4">
+                                    <!-- Card 1: Pindai Barcode -->
+                                    <div class="card">
+                                        <div class="card-body p-4">
+                                            <h2 class="card-title h5 mb-3">Pindai Barcode</h2>
+                                            <div class="position-relative">
+                                                <span class="position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary">
+                                                    <svg style="width:24px; height:24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5h16.5v15H3.75v-15zm12.75 3h-9v9h9v-9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 10.5h6" /></svg>
+                                                </span>
+                                                <input type="text" id="barcode-input" placeholder="Silakan buat batch..." class="form-control form-control-lg ps-5" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Card 2: Input Cicilan -->
+                                    <div class="card">
+                                        <div class="card-body p-4">
+                                            <h2 class="card-title h5 mb-3">Input Cicilan</h2>
+                                            <div class="input-group input-group-lg">
+                                                <span class="input-group-text">Rp</span>
+                                                <input type="number" id="cicilan-input" class="form-control" placeholder="0" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Kolom 2: Status -->
+                            <div class="col-lg-7">
+                                <div class="card h-100">
+                                    <div class="card-body p-4">
+                                         <h2 class="card-title h5 mb-3">Status</h2>
+                                         <div id="result-container">
+                                            <p class="text-secondary">Hasil pemindaian akan muncul di sini.</p>
+                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="report-page" class="page-content">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1 class="h2 fw-bold text-dark mb-0">Laporan Batch</h1>
+                        <button id="export-button" class="btn btn-success" disabled>
+                            <svg style="width:20px; height:20px; margin-right: 8px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="d-inline-block align-text-top"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                            Ekspor ke Excel
+                        </button>
+                    </div>
+                    <div id="report-batch-info" class="mb-4"></div>
+                    <div id="report-container" class="card">
+                        <div class="card-body p-4">
+                            <p class="text-secondary">Laporan akan muncul di sini setelah Anda memindai data. Jika Anda sudah memindai, klik menu "Report" lagi untuk memuat ulang.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="download-ba-page" class="page-content">
+                    <h1 class="h2 fw-bold text-dark mb-4">Download Berita Acara</h1>
+                    
+                    <div class="card mb-4">
+                        <div class="card-body p-4">
+                            <h2 class="card-title h4 mb-3">Ringkasan Batch Aktif</h2>
+                            <div id="active-ba-summary-container">
+                                <p class="text-secondary">Tidak ada batch aktif. Buat batch baru untuk melihat ringkasan.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                 <h2 class="card-title h4 mb-0">Riwayat Berita Acara</h2>
+                                 <div class="w-50">
+                                    <input type="text" id="ba-search-input" class="form-control" placeholder="Cari Nomor BA, Area, Petugas...">
+                                 </div>
+                            </div>
+                            <div id="ba-history-container" class="table-responsive">
+                                <p class="text-secondary">Memuat riwayat...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="area-management-page" class="page-content">
+                    <h1 class="h2 fw-bold text-dark mb-4">Managemen Area</h1>
+                    <div class="row g-4">
+                        <!-- Business Area Column -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body p-4">
+                                    <h2 class="card-title h4 mb-3">Tambah Business Area</h2>
+                                    <form id="add-business-area-form">
+                                        <div class="mb-3">
+                                            <label for="new-business-area-code-input" class="form-label">Kode Area</label>
+                                            <input type="text" id="new-business-area-code-input" class="form-control" placeholder="e.g., CPXX" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="new-business-area-name-input" class="form-label">Business Area</label>
+                                            <input type="text" id="new-business-area-name-input" class="form-control" placeholder="e.g., Area Medan" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Tambah</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="card mt-4">
+                                 <div class="card-body p-4">
+                                     <h2 class="card-title h4 mb-3">Daftar Business Area</h2>
+                                     <div class="table-responsive">
+                                         <table class="table table-hover">
+                                             <thead>
+                                                 <tr>
+                                                     <th>Kode Area</th>
+                                                     <th>Business Area</th>
+                                                     <th>Aksi</th>
+                                                 </tr>
+                                             </thead>
+                                             <tbody id="business-area-list">
+                                                 <!-- Data akan diisi oleh JavaScript -->
+                                             </tbody>
+                                         </table>
+                                     </div>
+                                 </div>
+                            </div>
+                        </div>
+                        <!-- Sales Office Column -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body p-4">
+                                    <h2 class="card-title h4 mb-3">Tambah Sales Office</h2>
+                                    <form id="add-sales-office-form">
+                                         <div class="mb-3">
+                                            <label for="new-sales-office-code-input" class="form-label">Kode Office</label>
+                                            <input type="text" id="new-sales-office-code-input" class="form-control" placeholder="e.g., CXXX" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="new-sales-office-name-input" class="form-label">Sales Office</label>
+                                            <input type="text" id="new-sales-office-name-input" class="form-control" placeholder="e.g., Kantor Cabang Siantar" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Tambah</button>
+                                    </form>
+                                </div>
+                            </div>
+                             <div class="card mt-4">
+                                 <div class="card-body p-4">
+                                     <h2 class="card-title h4 mb-3">Daftar Sales Office</h2>
+                                     <div class="table-responsive">
+                                         <table class="table table-hover">
+                                             <thead>
+                                                 <tr>
+                                                     <th>Kode Office</th>
+                                                     <th>Sales Office</th>
+                                                     <th>Aksi</th>
+                                                 </tr>
+                                             </thead>
+                                             <tbody id="sales-office-list">
+                                                 <!-- Data akan diisi oleh JavaScript -->
+                                             </tbody>
+                                         </table>
+                                     </div>
+                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="user-management-page" class="page-content">
+                    <h1 class="h2 fw-bold text-dark mb-4">Managemen Pengguna</h1>
+                    <div class="row g-4">
+                        <div class="col-lg-5">
+                            <div class="card">
+                                <div class="card-body p-4">
+                                    <h2 class="card-title h4 mb-3">Daftarkan Pengguna Baru</h2>
+                                    <form id="register-user-form">
+                                        <div class="mb-3">
+                                            <label for="new-fullname" class="form-label">Nama Lengkap</label>
+                                            <input type="text" id="new-fullname" class="form-control" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="new-username" class="form-label">Username</label>
+                                            <input type="text" id="new-username" class="form-control" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="new-password" class="form-label">Password</label>
+                                            <input type="password" id="new-password" class="form-control" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="new-jabatan" class="form-label">Jabatan</label>
+                                            <select id="new-jabatan" class="form-select" required>
+                                                <option value="">Pilih Jabatan...</option>
+                                                <option value="Head AR">Head AR</option>
+                                                <option value="Head Admin">Head Admin</option>
+                                                <option value="Head ACC">Head ACC</option>
+                                                <option value="Admin FAT">Admin FAT</option>
+                                                <option value="ITE">ITE</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="new-role" class="form-label">Role</label>
+                                            <select id="new-role" class="form-select">
+                                                <option value="user">User</option>
+                                                <option value="admin">Admin</option>
+                                            </select>
+                                        </div>
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-primary">Daftarkan</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="card">
+                                <div class="card-body p-4">
+                                    <h2 class="card-title h4 mb-3">Daftar Pengguna</h2>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nama Lengkap</th>
+                                                    <th>Username</th>
+                                                    <th>Jabatan</th>
+                                                    <th>Role</th>
+                                                    <th>Aksi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="user-list-table">
+                                                <!-- User data will be inserted here by JavaScript -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ttd-management-page" class="page-content">
+                    <h1 class="h2 fw-bold text-dark mb-4">Managemen Tanda Tangan (BA)</h1>
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <h2 class="card-title h4 mb-4">Atur Penanda Tangan Berita Acara</h2>
+                            <form id="ttd-form">
+                                <div class="row g-4">
+                                    <!-- Dibuat Oleh -->
+                                    <div class="col-md-4">
+                                        <fieldset class="border p-3 rounded-3">
+                                            <legend class="float-none w-auto px-2 h6">Dibuat oleh:</legend>
+                                            <div class="mb-3">
+                                                <label for="dibuat-name" class="form-label">Nama Lengkap</label>
+                                                <input type="text" id="dibuat-name" class="form-control" required>
+                                            </div>
+                                            <div>
+                                                <label for="dibuat-title" class="form-label">Jabatan</label>
+                                                <input type="text" id="dibuat-title" class="form-control" value="Collection" disabled readonly>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <!-- Diperiksa Oleh -->
+                                    <div class="col-md-4">
+                                        <fieldset class="border p-3 rounded-3">
+                                            <legend class="float-none w-auto px-2 h6">Diperiksa oleh:</legend>
+                                            <div class="mb-3">
+                                                <label for="diperiksa-name" class="form-label">Nama Lengkap</label>
+                                                <input type="text" id="diperiksa-name" class="form-control" required>
+                                            </div>
+                                            <div>
+                                                <label for="diperiksa-title" class="form-label">Jabatan</label>
+                                                <input type="text" id="diperiksa-title" class="form-control" required>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <!-- Disetujui Oleh -->
+                                    <div class="col-md-4">
+                                        <fieldset class="border p-3 rounded-3">
+                                            <legend class="float-none w-auto px-2 h6">Disetujui oleh:</legend>
+                                            <div class="mb-3">
+                                                <label for="disetujui-name" class="form-label">Nama Lengkap</label>
+                                                <input type="text" id="disetujui-name" class="form-control" required>
+                                            </div>
+                                            <div>
+                                                <label for="disetujui-title" class="form-label">Jabatan</label>
+                                                <input type="text" id="disetujui-title" class="form-control" required>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                                <div class="text-end mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg">Simpan Perubahan</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Modal untuk Join Batch -->
+    <div class="modal fade" id="joinBatchModal" tabindex="-1" aria-labelledby="joinBatchModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="joinBatchModalLabel">Batch Aktif Ditemukan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                     <p>Ada sesi batch yang sedang aktif dibuat oleh <strong id="active-batch-petugas"></strong>. Apakah Anda ingin bergabung?</p>
+                    <p id="active-batch-filename" class="text-muted small"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="decline-join-btn">Tidak, Buat Baru</button>
+                    <button type="button" class="btn btn-primary" id="confirm-join-btn">Ya, Gabung</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit Area -->
+    <div class="modal fade" id="editAreaModal" tabindex="-1" aria-labelledby="editAreaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editAreaModalLabel">Edit Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-area-form">
+                        <input type="hidden" id="edit-area-id">
+                        <input type="hidden" id="edit-area-type"> <!-- 'business' or 'sales' -->
+                        <div class="mb-3">
+                            <label for="edit-area-code" class="form-label">Kode</label>
+                            <input type="text" id="edit-area-code" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-area-name" class="form-label">Nama</label>
+                            <input type="text" id="edit-area-name" class="form-control" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" form="edit-area-form" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Edit User -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Edit Pengguna</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-user-form">
+                        <input type="hidden" id="edit-user-id">
+                        <div class="mb-3">
+                            <label for="edit-fullname" class="form-label">Nama Lengkap</label>
+                            <input type="text" id="edit-fullname" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-username" class="form-label">Username</label>
+                            <input type="text" id="edit-username" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-password" class="form-label">Password (Kosongkan jika tidak diubah)</label>
+                            <input type="password" id="edit-password" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-jabatan" class="form-label">Jabatan</label>
+                            <select id="edit-jabatan" class="form-select" required>
+                                <option value="">Pilih Jabatan...</option>
+                                <option value="Head AR">Head AR</option>
+                                <option value="Head Admin">Head Admin</option>
+                                <option value="Head ACC">Head ACC</option>
+                                <option value="Admin FAT">Admin FAT</option>
+                                <option value="ITE">ITE</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-role" class="form-label">Role</label>
+                            <select id="edit-role" class="form-select">
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" form="edit-user-form" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Memuat Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // --- START OF STANDARDIZATION ---
+            const STANDARD_HEADERS = [
+                'Business Area', 'Collector', 'Collectors Name', 'Cust. No', 
+                'Cust. Name', 'Billing No', 'Delv Num.', 'Billing Date', 
+                'Bill. Due Date', 'Doc type', 'Amount', 'Payment', 
+                'Remain', 'TOP', 'Jadwal'
+            ];
+            const BARCODE_COLUMN_STANDARD = 'Delv Num.';
+            const BILLING_NO_COLUMN_STANDARD = 'Billing No'; // Kolom pencarian baru
+            const PAYMENT_COLUMN_STANDARD = 'Payment';
+            const DATE_COLUMN_STANDARD = 'Billing Date';
+            // --- END OF STANDARDIZATION ---
+            
+            const API_BASE_URL = 'api/'; 
+
+            const loginLoading  = document.getElementById('login-loading');
+            const ssoBtnWrap    = document.getElementById('sso-btn-wrap');
+            const ssoLoginBtn   = document.getElementById('sso-login-btn');
+            const loginError    = document.getElementById('login-error');
+            const logoutBtn     = document.getElementById('logout-btn');
+            const currentUserDisplay = document.getElementById('current-user-display');
+            const fileInput = document.getElementById('file-input');
+            const uploadStatus = document.getElementById('upload-status');
+            const barcodeInput = document.getElementById('barcode-input');
+            const cicilanInput = document.getElementById('cicilan-input');
+            const resultContainer = document.getElementById('result-container');
+            const navMenu = document.getElementById('nav-menu');
+            const pages = document.querySelectorAll('.page-content');
+            const reportContainer = document.getElementById('report-container');
+            const exportButton = document.getElementById('export-button');
+            const namaInput = document.getElementById('nama-input');
+            const businessAreaInput = document.getElementById('business-area-input');
+            const salesOfficeInput = document.getElementById('sales-office-input');
+            const cutoffDateInput = document.getElementById('cutoff-date-input');
+            const reportBatchInfo = document.getElementById('report-batch-info');
+            const registerUserForm = document.getElementById('register-user-form');
+            const userListTable = document.getElementById('user-list-table');
+            const activeBaSummaryContainer = document.getElementById('active-ba-summary-container');
+            const baHistoryContainer = document.getElementById('ba-history-container');
+            const baSearchInput = document.getElementById('ba-search-input');
+            const ttdForm = document.getElementById('ttd-form');
+            
+            // Area Management Elements
+            const addBusinessAreaForm = document.getElementById('add-business-area-form');
+            const newBusinessAreaCodeInput = document.getElementById('new-business-area-code-input');
+            const newBusinessAreaNameInput = document.getElementById('new-business-area-name-input');
+            const businessAreaList = document.getElementById('business-area-list');
+            const addSalesOfficeForm = document.getElementById('add-sales-office-form');
+            const newSalesOfficeCodeInput = document.getElementById('new-sales-office-code-input');
+            const newSalesOfficeNameInput = document.getElementById('new-sales-office-name-input');
+            const salesOfficeList = document.getElementById('sales-office-list');
+            const editAreaForm = document.getElementById('edit-area-form');
+            let editAreaModal = new bootstrap.Modal(document.getElementById('editAreaModal'));
+            
+            // User Management Elements
+            const editUserForm = document.getElementById('edit-user-form');
+            let editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+
+
+            let excelData = [];
+            let scanHistory = new Map();
+            let chartInstance = null;
+            let batchInfo = { 
+                nama: '', 
+                businessArea: '', 
+                businessAreaName: '', 
+                salesOffice: '', 
+                salesOfficeName: '', 
+                cutoffDate: '', 
+                creationDate: '' 
+            };
+            let users = [];
+            let businessAreas = [];
+            let salesOffices = [];
+            let baHistoryData = [];
+            let currentUser = null;
+            let signatureData = {};
+            
+            let currentBatchId = null;
+            let pollingInterval = null;
+            let joinBatchModal = new bootstrap.Modal(document.getElementById('joinBatchModal'));
+
+            const synth = new Tone.Synth().toDestination();
+            
+            const parseCurrencyValue = (value) => {
+                if (typeof value === 'number') {
+                    return value;
+                }
+                if (value === null || value === undefined) {
+                    return 0;
+                }
+                
+                let s = String(value).trim();
+                if (s === '') return 0;
+                
+                let isNegative = (s.startsWith('(') && s.endsWith(')')) || s.startsWith('-');
+
+                // Remove all non-digit characters
+                const numberStr = s.replace(/[^\d]/g, '');
+
+                if (numberStr === '') return 0;
+                
+                let num = parseInt(numberStr, 10);
+
+                if (isNaN(num)) return 0;
+                
+                return isNegative ? -num : num;
+            };
+
+            function playSound(type) {
+                Tone.start().then(() => {
+                    if (type === 'success') synth.triggerAttackRelease("C5", "8n");
+                    else if (type === 'error') synth.triggerAttackRelease("C3", "8n");
+                });
+            }
+            
+            async function fetchUsers() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}users.php`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    users = await response.json();
+                    renderUserList();
+                } catch (error) {
+                    console.error('Error fetching users:', error);
+                }
+            }
+
+            async function fetchAreas() {
+                 try {
+                    const response = await fetch(`${API_BASE_URL}areas.php`);
+                     if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    businessAreas = data.business_areas;
+                    salesOffices = data.sales_offices;
+                    renderAreas();
+                } catch (error) {
+                    console.error('Error fetching areas:', error);
+                }
+            }
+
+            async function fetchSignatures() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}signatures.php`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const result = await response.json();
+                    if (result.success) {
+                        signatureData = result.data;
+                        const ttdFormElement = document.getElementById('ttd-form');
+                        if (ttdFormElement && ttdFormElement.closest('.page-content.active')) {
+                            const dibuatOleh = signatureData.dibuat_oleh || { name: '', title: 'Collection' };
+                            const diperiksaOleh = signatureData.diperiksa_oleh || { name: '', title: '' };
+                            const disetujuiOleh = signatureData.disetujui_oleh || { name: '', title: '' };
+
+                            document.getElementById('dibuat-name').value = dibuatOleh.name;
+                            document.getElementById('diperiksa-name').value = diperiksaOleh.name;
+                            document.getElementById('diperiksa-title').value = diperiksaOleh.title;
+                            document.getElementById('disetujui-name').value = disetujuiOleh.name;
+                            document.getElementById('disetujui-title').value = disetujuiOleh.title;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching signatures:', error);
+                }
+            }
+            
+            async function fetchBaHistory() {
+                baHistoryContainer.innerHTML = '<p class="text-secondary">Memuat riwayat...</p>';
+                try {
+                    const response = await fetch(`${API_BASE_URL}berita_acara.php`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    baHistoryData = await response.json();
+                    renderBaHistory(baHistoryData);
+                } catch (error) {
+                    console.error("Error fetching BA history:", error);
+                    baHistoryContainer.innerHTML = '<p class="text-danger">Gagal memuat riwayat.</p>';
+                }
+            }
+            
+            // --- SSO Helper Functions ---
+            const redirectToSSO = (ssoPublicUrl, appSlug) => {
+                const callbackUrl = window.location.href.split('?')[0];
+                const authorizeUrl = `${ssoPublicUrl}/api/sso/authorize?app=${appSlug}&redirect=${encodeURIComponent(callbackUrl)}`;
+                window.location.href = authorizeUrl;
+            };
+
+            const showApp = (user) => {
+                currentUser = user;
+                document.body.classList.remove('view-login', 'view-loading');
+                document.body.classList.add('view-app');
+                updateUserInfo();
+                updateUIVisibility();
+                if (namaInput) namaInput.value = currentUser.fullname || '';
+            };
+
+            const checkSession = async () => {
+                if (loginLoading)  loginLoading.classList.remove('d-none');
+                if (ssoBtnWrap)    ssoBtnWrap.classList.add('d-none');
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const ssoToken  = urlParams.get('sso_token');
+
+                try {
+                    if (ssoToken) {
+                        // Validasi SSO token dari URL
+                        const cbRes = await fetch(`${API_BASE_URL}sso_callback.php`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            credentials: 'same-origin',
+                            body: JSON.stringify({ sso_token: ssoToken }),
+                        });
+                        // Hapus token dari URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
+
+                        if (!cbRes.ok) {
+                            const err = await cbRes.json().catch(() => ({}));
+                            throw new Error(err.message || 'Validasi SSO gagal.');
+                        }
+                        const cbData = await cbRes.json();
+                        if (cbData.status === 'success') {
+                            // Refresh data lengkap dari session
+                            const sesRes2 = await fetch(`${API_BASE_URL}session_check.php`, { credentials: 'same-origin' });
+                            const sesData2 = await sesRes2.json();
+                            showApp(sesData2.status === 'success' ? sesData2.user : cbData.user);
+                            await loadInitialData();
+                            return;
+                        }
+                    }
+
+                    // Cek session yang sudah ada
+                    const sesRes  = await fetch(`${API_BASE_URL}session_check.php`, { credentials: 'same-origin' });
+                    const sesData = await sesRes.json();
+
+                    if (sesData.status === 'success') {
+                        showApp(sesData.user);
+                        await loadInitialData();
+                    } else if (!ssoToken) {
+                        // Auto-redirect ke SSO Portal jika belum login
+                        redirectToSSO(sesData.sso_public_url, sesData.sso_app_slug);
+                    } else {
+                        // Token gagal — tampilkan tombol SSO manual
+                        if (loginLoading) loginLoading.classList.add('d-none');
+                        if (ssoBtnWrap)   ssoBtnWrap.classList.remove('d-none');
+                        if (loginError) {
+                            loginError.textContent = 'Validasi SSO gagal. Silakan coba login ulang.';
+                            loginError.classList.remove('d-none');
+                        }
+                        if (ssoLoginBtn) {
+                            ssoLoginBtn.addEventListener('click', () => {
+                                redirectToSSO(sesData.sso_public_url, sesData.sso_app_slug);
+                            });
+                        }
+                    }
+                } catch (err) {
+                    if (loginLoading) loginLoading.classList.add('d-none');
+                    if (ssoBtnWrap)   ssoBtnWrap.classList.remove('d-none');
+                    if (loginError) {
+                        loginError.textContent = err.message || 'Terjadi kesalahan. Silakan coba lagi.';
+                        loginError.classList.remove('d-none');
+                    }
+                    console.error('SSO check error:', err);
+                }
+            };
+
+            logoutBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                let portalUrl = 'https://portal.hqmedan.com';
+                try {
+                    const res  = await fetch(`${API_BASE_URL}logout.php`, { credentials: 'same-origin' });
+                    const data = await res.json().catch(() => ({}));
+                    if (data.sso_public_url) portalUrl = data.sso_public_url;
+                } catch (_) {}
+                currentUser = null;
+                window.location.href = portalUrl;
+            });
+
+            function updateUserInfo() {
+                if (currentUser) {
+                    currentUserDisplay.innerHTML = `
+                        <p class="mb-1"><strong>${currentUser.fullname}</strong></p>
+                        <p class="mb-0 text-capitalize small text-muted">${currentUser.jabatan || currentUser.role}</p>
+                    `;
+                }
+            }
+            
+            function updateUIVisibility() {
+                const declineJoinBtn = document.getElementById('decline-join-btn');
+
+                if (currentUser && currentUser.role === 'admin') {
+                    document.body.classList.add('is-admin');
+                    declineJoinBtn.style.display = 'inline-block';
+
+                    const canEdit = currentUser.jabatan === 'ITE';
+                    const canAddUser = canEdit || currentUser.jabatan === 'Head AR';
+
+                    const areaPage = document.getElementById('area-management-page');
+                    const userPage = document.getElementById('user-management-page');
+                    
+                    if(areaPage) areaPage.querySelectorAll('form').forEach(form => form.style.display = canEdit ? 'block' : 'none');
+                    if(userPage) userPage.querySelector('form').style.display = canAddUser ? 'block' : 'none';
+                    
+                } else {
+                    document.body.classList.remove('is-admin');
+                    declineJoinBtn.style.display = 'none';
+                }
+            }
+
+
+            function showPage(pageId) {
+                if (currentUser && currentUser.role !== 'admin') {
+                    if (['user-management-page', 'area-management-page', 'create-batch-page', 'ttd-management-page'].includes(pageId)) {
+                        pageId = 'dashboard-page';
+                    }
+                }
+                
+                pages.forEach(page => page.classList.remove('active'));
+                const pageToShow = document.getElementById(pageId);
+                if (pageToShow) {
+                    pageToShow.classList.add('active');
+                } else {
+                    document.getElementById('dashboard-page').classList.add('active');
+                    pageId = 'dashboard-page';
+                }
+
+                navMenu.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.dataset.page === pageId) {
+                        link.classList.add('active');
+                    }
+                });
+                
+                if(pageId) {
+                    sessionStorage.setItem('lastActivePage', pageId);
+                }
+                
+                if (pageId === 'report-page' && currentBatchId) {
+                    generateReport();
+                } else if (pageId === 'dashboard-page' && currentBatchId) {
+                    updateDashboard();
+                } else if (pageId === 'user-management-page' && currentUser.role === 'admin') {
+                    fetchUsers();
+                } else if (pageId === 'download-ba-page') {
+                    if (currentBatchId) {
+                        generateActiveBaSummary();
+                    } else {
+                        activeBaSummaryContainer.innerHTML = '<p class="text-secondary">Tidak ada batch aktif. Buat batch baru untuk melihat ringkasan.</p>';
+                    }
+                    fetchBaHistory();
+                } else if (pageId === 'area-management-page' && currentUser.role === 'admin') {
+                    fetchAreas();
+                } else if (pageId === 'ttd-management-page' && currentUser.role === 'admin') {
+                    fetchSignatures();
+                }
+
+                if(currentUser && currentUser.role === 'admin') {
+                    updateUIVisibility();
+                }
+            }
+
+            navMenu.addEventListener('click', (e) => {
+                const link = e.target.closest('.nav-link');
+                if (link && link.id !== 'logout-btn') {
+                    e.preventDefault();
+                    showPage(link.dataset.page);
+                }
+            });
+
+            fileInput.addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                const fileName = file ? file.name : '';
+                
+                const selectedBusinessAreaOption = businessAreaInput.options[businessAreaInput.selectedIndex];
+                const selectedSalesOfficeOption = salesOfficeInput.options[salesOfficeInput.selectedIndex];
+
+                const extractName = (text) => text.includes(' - ') ? text.split(' - ')[1].trim() : text;
+
+                batchInfo.nama = namaInput.value;
+                batchInfo.businessArea = businessAreaInput.value; 
+                batchInfo.businessAreaName = extractName(selectedBusinessAreaOption.text); 
+                batchInfo.salesOffice = salesOfficeInput.value; 
+                batchInfo.salesOfficeName = extractName(selectedSalesOfficeOption.text); 
+                batchInfo.cutoffDate = cutoffDateInput.value;
+                batchInfo.creationDate = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\./g, '/');
+
+
+                if (!file || !batchInfo.nama || !batchInfo.businessArea || !batchInfo.salesOffice || !batchInfo.cutoffDate) {
+                    uploadStatus.innerHTML = 'Harap isi semua informasi batch dan pilih file Excel.';
+                    uploadStatus.className = 'alert alert-danger text-center p-3';
+                    fileInput.value = '';
+                    return;
+                }
+                
+                resetApp(false);
+                uploadStatus.innerHTML = 'Memproses file...';
+                uploadStatus.className = 'alert alert-warning text-center p-3';
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        
+                        const dataAsArray = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: "" });
+                        const dataRows = dataAsArray.slice(1);
+
+                        if (dataRows.length === 0) throw new Error("File Excel tidak memiliki data.");
+
+                        const jsonData = dataRows.map(row => {
+                            const rowObject = {};
+                            STANDARD_HEADERS.forEach((header, index) => {
+                                rowObject[header] = row[index] || "";
+                            });
+                            return rowObject;
+                        });
+
+                        // FIX: Filter out rows that do not have any valid identifier and add a consistent primary key.
+                        excelData = jsonData.filter(row => {
+                            const delvNum = String(row[BARCODE_COLUMN_STANDARD] || '').trim();
+                            const billNum = String(row[BILLING_NO_COLUMN_STANDARD] || '').trim();
+                            return (delvNum !== "" && delvNum !== "0") || (billNum !== "" && billNum !== "0");
+                        }).map(row => {
+                            // Add a consistent primary key to each row object on load
+                            row._primaryKey = getPrimaryKeyForRow(row);
+                            return row;
+                        });
+
+
+                        if (excelData.length > 0) {
+                            
+                            const response = await fetch(`${API_BASE_URL}batches.php`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ batchInfo, excelData, fileName })
+                            });
+                            
+                            const responseText = await response.text();
+                            if (!response.ok) {
+                                try {
+                                    const errorData = JSON.parse(responseText);
+                                    throw new Error(errorData.message || 'Gagal menyimpan batch ke database.');
+                                } catch (e) {
+                                    console.error("Server returned non-JSON error:", responseText);
+                                    throw new Error('Server error. See console for details.');
+                                }
+                            }
+
+                            const result = JSON.parse(responseText);
+                            if (result.success) {
+                                currentBatchId = result.batch_id;
+                                sessionStorage.setItem('currentBatchId', currentBatchId);
+                                startPolling(currentBatchId);
+
+                                scanHistory.clear();
+
+                                uploadStatus.innerHTML = `Berhasil memuat ${excelData.length} baris data dan membuat batch baru.`;
+                                uploadStatus.className = 'alert alert-success text-center p-3';
+                                
+                                barcodeInput.disabled = false;
+                                cicilanInput.disabled = false;
+                                barcodeInput.placeholder = 'Arahkan scanner...';
+                                playSound('success');
+
+                                setTimeout(() => {
+                                    showPage('pindai-page');
+                                    barcodeInput.focus();
+                                }, 1500);
+                            } else {
+                                throw new Error(result.message || 'Gagal membuat batch di server.');
+                            }
+                        } else {
+                            throw new Error("Gagal memproses data dari file.");
+                        }
+                    } catch (error) {
+                        uploadStatus.innerHTML = `Gagal memproses file. Error: ${error.message}`;
+                        uploadStatus.className = 'alert alert-danger text-center p-3';
+                        resetApp();
+                        playSound('error');
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            });
+
+            function prepareData() { /* This function is now empty but kept for potential future use */ }
+
+            function resetApp(clearBatchInfo = true) {
+                stopPolling();
+                currentBatchId = null;
+                sessionStorage.removeItem('currentBatchId');
+                barcodeInput.disabled = true;
+                cicilanInput.disabled = true;
+                barcodeInput.placeholder = 'Silakan buat batch...';
+                excelData = [];
+                scanHistory.clear();
+                exportButton.disabled = true;
+
+                if(clearBatchInfo) {
+                    namaInput.value = currentUser ? currentUser.fullname : '';
+                    businessAreaInput.value = '';
+                    salesOfficeInput.value = '';
+                    cutoffDateInput.value = '';
+                    batchInfo = { nama: '', businessArea: '', businessAreaName: '', salesOffice: '', salesOfficeName: '', cutoffDate: '', creationDate: '' };
+                }
+                updateDashboard();
+            }
+
+            barcodeInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    let barcodeValue = barcodeInput.value.trim();
+                    if (barcodeValue) {
+                        if (barcodeValue.length > 10) {
+                            barcodeValue = barcodeValue.slice(-10);
+                        }
+                        
+                        if (!/^[a-zA-Z0-9]{10}$/.test(barcodeValue)) {
+                            resultContainer.innerHTML = `<div class="status-card p-3 rounded-3 fade-in error"><h4 class="h6 mb-0 text-danger-emphasis">Input Tidak Valid</h4><p class="mb-0 mt-2">Nomor yang di-scan harus terdiri dari 10 karakter (angka dan huruf).</p></div>`;
+                            playSound('error');
+                            barcodeInput.value = '';
+                            cicilanInput.value = '';
+                            return;
+                        }
+
+                        const cicilanValue = parseFloat(cicilanInput.value) || 0;
+                        findData(barcodeValue, cicilanValue);
+                    }
+                    barcodeInput.value = '';
+                    cicilanInput.value = ''; 
+                }
+            });
+
+            async function findData(barcode, cicilanValue) {
+                if (excelData.length === 0 || !currentBatchId) {
+                    resultContainer.innerHTML = `<div class="status-card p-3 rounded-3 fade-in error"><h4 class="h6 mb-0 text-danger-emphasis">Error: Data Belum Dimuat</h4></div>`;
+                    playSound('error');
+                    return;
+                }
+
+                const foundRow = excelData.find(row => 
+                    (String(row[BARCODE_COLUMN_STANDARD] || '').trim() === barcode) || 
+                    (String(row[BILLING_NO_COLUMN_STANDARD] || '').trim() === barcode)
+                );
+                
+                
+                let primaryKey;
+                if (foundRow) {
+                    primaryKey = foundRow._primaryKey; // Use the pre-computed key
+                } else {
+                    primaryKey = barcode;
+                }
+
+
+                if (scanHistory.has(primaryKey)) {
+                    const previousScan = scanHistory.get(primaryKey);
+                    if (previousScan.status === 'Confirmed' || previousScan.status === 'Paid') {
+                        resultContainer.innerHTML = `<div class="status-card p-3 rounded-3 fade-in error"><h4 class="h6 mb-0 text-danger-emphasis">Gagal Memindai</h4><p class="mb-0 mt-2">Dokumen ini sudah terkonfirmasi dan tidak dapat dipindai ulang.</p></div>`;
+                        playSound('error');
+                        return;
+                    }
+                }
+
+                const status = displayResult(foundRow, barcode, cicilanValue);
+                
+                const finalStatuses = ['Confirmed', 'Unconfirmed', 'Paid'];
+                if (finalStatuses.includes(status)) {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}scan.php`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                batch_id: currentBatchId,
+                                barcode: primaryKey, 
+                                status: status,
+                                scanned_by: currentUser.fullname,
+                                data: foundRow || { [BARCODE_COLUMN_STANDARD]: barcode, [BILLING_NO_COLUMN_STANDARD]: barcode }
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                           const errorResult = await response.json();
+                           resultContainer.innerHTML = `<div class="status-card p-3 rounded-3 fade-in error"><h4 class="h6 mb-0 text-danger-emphasis">Gagal Memindai</h4><p class="mb-0 mt-2">${errorResult.message}</p></div>`;
+                           playSound('error');
+                           console.error('Server error on save scan:', errorResult.message);
+                        } else {
+                            await updateScanDataFromServer(currentBatchId);
+                        }
+                    } catch (error) {
+                        console.error("Gagal menyimpan pindaian ke server:", error);
+                        resultContainer.innerHTML = `<div class="status-card p-3 rounded-3 fade-in error"><h4 class="h6 mb-0 text-danger-emphasis">Error</h4><p class="mb-0 mt-2">Gagal terhubung ke server. Periksa koneksi Anda.</p></div>`;
+                        playSound('error');
+                    }
+                }
+            }
+
+            function displayResult(data, barcode, cicilanValue) {
+                const isFound = !!data;
+                let message, cardClass;
+
+                if (!isFound) {
+                    message = `Paid`; 
+                    cardClass = 'paid'; 
+                    playSound('success');
+                } else {
+                    const paymentInExcel = parseCurrencyValue(data[PAYMENT_COLUMN_STANDARD]);
+
+                    // FIX: Implement new logic for installments
+                    if (paymentInExcel > 0) {
+                        // Document has an installment.
+                        if (cicilanValue <= 0) {
+                            // First scan, no installment entered yet. Default to Unconfirmed.
+                            message = 'Unconfirmed';
+                            cardClass = 'tidak-sesuai';
+                            playSound('error'); // Prompt user to enter installment
+                        } else if (cicilanValue === paymentInExcel) {
+                            // Correct installment entered.
+                            message = 'Confirmed';
+                            cardClass = 'cocok';
+                            playSound('success');
+                        } else {
+                            // Incorrect installment entered.
+                            message = 'Unconfirmed';
+                            cardClass = 'tidak-sesuai';
+                            playSound('error');
+                        }
+                    } else {
+                        // Document does NOT have an installment.
+                        if (cicilanValue > 0) {
+                             // Installment entered for a non-installment document.
+                             message = 'Unconfirmed';
+                             cardClass = 'tidak-sesuai';
+                             playSound('error');
+                        } else {
+                            // No installment required, no installment entered.
+                            message = 'Confirmed';
+                            cardClass = 'cocok';
+                            playSound('success');
+                        }
+                    }
+                }
+
+                let contentHtml = `<div class="status-card p-3 rounded-3 ${cardClass} fade-in">`;
+                contentHtml += `<h4 class="h6 mb-2 fw-bold">${message}</h4><p class="fw-bold mb-0">${barcode}</p>`;
+                if (isFound && parseCurrencyValue(data[PAYMENT_COLUMN_STANDARD]) > 0 && message === 'Unconfirmed') {
+                    contentHtml += `<p class="small text-secondary mb-0 mt-2">Dokumen ini memiliki cicilan. Harap masukkan nominal pembayaran yang sesuai.</p>`;
+                }
+                if (isFound) {
+                    contentHtml += `<hr><dl class="row mb-0 small">`;
+                    for (const key in data) {
+                        if (key !== '_primaryKey') { // Don't show the internal primary key
+                           contentHtml += `<dt class="col-sm-5 fw-medium text-secondary">${key}</dt><dd class="col-sm-7">${data[key]}</dd>`;
+                        }
+                    }
+                    contentHtml += `</dl>`;
+                } else {
+                    contentHtml += `<p class="small text-secondary mb-0 mt-2">Data tidak ada dalam daftar piutang.</p>`;
+                }
+                contentHtml += `</div>`;
+                resultContainer.innerHTML = contentHtml;
+                return message;
+            }
+
+            function getPrimaryKeyForRow(row) {
+                const delvNum = String(row[BARCODE_COLUMN_STANDARD] || '').trim();
+                if (delvNum && delvNum !== '0') {
+                    return delvNum;
+                }
+                return String(row[BILLING_NO_COLUMN_STANDARD] || '').trim();
+            }
+
+            function getStatusCounts() {
+                const counts = { cocok: 0, paid: 0, tidakSesuai: 0, belumScan: 0 };
+                
+                excelData.forEach(row => {
+                    const primaryKey = row._primaryKey; // Use the pre-computed key
+                    if (scanHistory.has(primaryKey)) {
+                        const scan = scanHistory.get(primaryKey);
+                        if (scan.status === 'Confirmed') counts.cocok++;
+                        else if (scan.status === 'Unconfirmed') counts.tidakSesuai++;
+                    } else {
+                        counts.belumScan++;
+                    }
+                });
+
+                scanHistory.forEach((scan, key) => {
+                    if (scan.status === 'Paid') {
+                       const isInData = excelData.some(row => 
+                            row._primaryKey === key
+                        );
+                        if (!isInData) {
+                           counts.paid++;
+                        }
+                    }
+                });
+
+                return counts;
+            }
+
+            function updateDashboard() {
+                const counts = getStatusCounts();
+
+                document.getElementById('total-data').textContent = excelData.length;
+                document.getElementById('total-paid').textContent = counts.paid;
+                document.getElementById('total-cocok').textContent = counts.cocok;
+                document.getElementById('total-tidak-sesuai').textContent = counts.tidakSesuai;
+                document.getElementById('total-belum-scan').textContent = counts.belumScan;
+
+                const ctx = document.getElementById('statusChart').getContext('2d');
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
+                chartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Paid', 'Confirmed', 'Unconfirmed', 'Not Scanned'],
+                        datasets: [{
+                            label: 'Status Rekonsiliasi',
+                            data: [counts.paid, counts.cocok, counts.tidakSesuai, counts.belumScan],
+                            backgroundColor: ['#22c55e', '#8b5cf6', '#f59e0b', '#6b7280'],
+                            borderColor: '#fff',
+                            borderWidth: 4,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Distribusi Status Rekonsiliasi',
+                                padding: {
+                                    bottom: 20
+                                },
+                                font: {
+                                    size: 16
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function generateReport() {
+                if(batchInfo.nama || batchInfo.businessArea || batchInfo.cutoffDate) {
+                    reportBatchInfo.innerHTML = `
+                        <div class="card bg-light border-0 mb-4">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3"><strong>Nama Petugas:</strong> ${batchInfo.nama}</div>
+                                    <div class="col-md-3"><strong>Business Area:</strong> ${batchInfo.businessAreaName} (${batchInfo.businessArea})</div>
+                                    <div class="col-md-3"><strong>Sales Office:</strong> ${batchInfo.salesOfficeName} (${batchInfo.salesOffice})</div>
+                                    <div class="col-md-3"><strong>Tanggal Cut Off:</strong> ${batchInfo.cutoffDate}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    reportBatchInfo.innerHTML = '';
+                }
+
+                if (excelData.length === 0 && scanHistory.size === 0) {
+                    reportContainer.innerHTML = `<div class="card-body p-4"><p class="text-secondary">Tidak ada data untuk ditampilkan.</p></div>`;
+                    exportButton.disabled = true;
+                    return;
+                }
+
+                let reportData = [];
+                excelData.forEach(row => {
+                    const primaryKey = row._primaryKey; // Use the pre-computed key
+                    if (scanHistory.has(primaryKey)) {
+                        const scanInfo = scanHistory.get(primaryKey);
+                        reportData.push({ ...row, Status: scanInfo.status, 'Scanned By': scanInfo.scanned_by || '-' });
+                    } else {
+                        reportData.push({ ...row, Status: 'Not Scanned', 'Scanned By': '-' });
+                    }
+                });
+                
+                scanHistory.forEach((value, key) => {
+                    if (value.status === 'Paid') {
+                         if (!excelData.some(row => row._primaryKey === key)) {
+                            const paidData = { ...value.data, Status: 'Paid', 'Scanned By': value.scanned_by || '-' };
+                            STANDARD_HEADERS.forEach(h => { if(!paidData[h]) paidData[h] = '-'; });
+                            reportData.push(paidData);
+                        }
+                    }
+                });
+
+                let tableHtml = `<div class="table-responsive"><table class="table table-bordered table-hover"><thead><tr class="table-header-custom">`;
+                const finalHeaders = [...STANDARD_HEADERS, 'Status', 'Scanned By'];
+                finalHeaders.forEach(h => tableHtml += `<th>${h}</th>`);
+                tableHtml += `</tr></thead><tbody>`;
+                reportData.forEach(row => {
+                    tableHtml += `<tr>`;
+                    finalHeaders.forEach(h => {
+                        if (h === 'Status') {
+                            const status = row[h];
+                            let statusClass = '';
+                            switch(status) {
+                                case 'Confirmed': statusClass = 'status-confirmed'; break;
+                                case 'Paid': statusClass = 'status-paid'; break;
+                                case 'Unconfirmed': statusClass = 'status-unconfirmed'; break;
+                                case 'Not Scanned': statusClass = 'status-not-scanned'; break;
+                            }
+                            tableHtml += `<td><span class="status-badge ${statusClass}">${status}</span></td>`;
+                        } else if (['Amount', 'Payment', 'Remain'].includes(h)) {
+                            const numericValue = parseCurrencyValue(row[h]);
+                            const formattedValue = new Intl.NumberFormat('id-ID').format(numericValue);
+                            tableHtml += `<td>Rp ${formattedValue}</td>`;
+                        } else {
+                            tableHtml += `<td>${row[h] || ''}</td>`;
+                        }
+                    });
+                    tableHtml += `</tr>`;
+                });
+                tableHtml += `</tbody></table></div>`;
+                
+                reportContainer.innerHTML = reportData.length > 0 ? tableHtml : `<div class="card-body p-4"><p class="text-secondary">Tidak ada data untuk tanggal yang dipilih.</p></div>`;
+                exportButton.disabled = reportData.length === 0;
+            }
+
+            exportButton.addEventListener('click', () => {
+                let reportData = [];
+                excelData.forEach(row => {
+                    const primaryKey = row._primaryKey; // Use the pre-computed key
+                    if (scanHistory.has(primaryKey)) {
+                        const scanInfo = scanHistory.get(primaryKey);
+                        reportData.push({ ...row, Status: scanInfo.status, 'Scanned By': scanInfo.scanned_by || '-' });
+                    } else {
+                        reportData.push({ ...row, Status: 'Not Scanned', 'Scanned By': '-' });
+                    }
+                });
+                scanHistory.forEach((value, key) => {
+                     if (value.status === 'Paid') {
+                        if (!excelData.some(row => row._primaryKey === key)) {
+                            const paidData = { ...value.data, Status: 'Paid', 'Scanned By': value.scanned_by || '-' };
+                            STANDARD_HEADERS.forEach(h => { if(!paidData[h]) paidData[h] = '-'; });
+                            reportData.push(paidData);
+                        }
+                    }
+                });
+                
+                const workbook = XLSX.utils.book_new();
+                
+                const finalHeaders = [...STANDARD_HEADERS, 'Status', 'Scanned By'];
+                const batchHeader = [
+                    ['Laporan Rekonsiliasi Batch'],
+                    [],
+                    ['Nama Petugas', batchInfo.nama],
+                    ['Business Area', `${batchInfo.businessAreaName} (${batchInfo.businessArea})`],
+                    ['Sales Office', `${batchInfo.salesOfficeName} (${batchInfo.salesOffice})`],
+                    ['Tanggal Cut Off', batchInfo.cutoffDate],
+                    [] 
+                ];
+                
+                const worksheet = XLSX.utils.aoa_to_sheet(batchHeader);
+                XLSX.utils.sheet_add_json(worksheet, reportData, {
+                    origin: 'A7', 
+                    header: finalHeaders
+                });
+
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan");
+                XLSX.writeFile(workbook, `Laporan_Rekonsiliasi_${batchInfo.businessArea}_${batchInfo.cutoffDate}.xlsx`);
+            });
+
+             function getBaData() {
+                const systemQty = excelData.length;
+                const systemAmount = excelData.reduce((sum, row) => sum + parseCurrencyValue(row['Remain']), 0);
+                
+                let opnameQty = 0;
+                let opnameAmount = 0;
+
+                scanHistory.forEach(scan => {
+                    if (scan.status === 'Confirmed' || scan.status === 'Unconfirmed') {
+                        opnameQty++;
+                        if (scan.data && scan.data['Remain'] !== undefined) {
+                             opnameAmount += parseCurrencyValue(scan.data['Remain']);
+                        }
+                    }
+                });
+
+                const differenceQty = systemQty - opnameQty;
+                const differenceAmount = systemAmount - opnameAmount;
+
+                return {
+                    systemQty, opnameQty, differenceQty, systemAmount, opnameAmount, differenceAmount
+                };
+            }
+
+            function generateActiveBaSummary() {
+                if (excelData.length === 0) {
+                    activeBaSummaryContainer.innerHTML = '<p class="text-secondary">Tidak ada batch aktif. Buat batch baru untuk melihat ringkasan.</p>';
+                    return;
+                }
+
+                const baData = getBaData();
+                const currentDate = new Date();
+                const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                const year = currentDate.getFullYear();
+                const nomorBa = `${month}/AR/${batchInfo.businessArea}/${batchInfo.salesOffice}/${year}`;
+
+                const formatCurrency = (value) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
+                const formatNumber = (value) => new Intl.NumberFormat('id-ID').format(value);
+
+                let finalizeButtonHtml = '';
+                if (currentUser && currentUser.jabatan === 'Head Admin') {
+                    finalizeButtonHtml = `<button id="save-ba-btn" class="btn btn-primary">Simpan & Finalisasi</button>`;
+                } else {
+                    finalizeButtonHtml = `<button class="btn btn-primary" disabled title="Hanya Head Admin yang bisa finalisasi">Simpan & Finalisasi</button>`;
+                }
+
+                const tableHtml = `
+                    <table class="table table-bordered text-center align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nomor BA</th>
+                                <th>Tanggal Dibuat</th>
+                                <th>Bus Area</th>
+                                <th>Sales Office</th>
+                                <th>System Qty</th>
+                                <th>Opname Qty</th>
+                                <th>Selisih Qty</th>
+                                <th>System Amount</th>
+                                <th>Opname Amount</th>
+                                <th>Selisih Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>${nomorBa}</td>
+                                <td>${batchInfo.creationDate}</td>
+                                <td>${batchInfo.businessAreaName} (${batchInfo.businessArea})</td>
+                                <td>${batchInfo.salesOfficeName} (${batchInfo.salesOffice})</td>
+                                <td>${formatNumber(baData.systemQty)}</td>
+                                <td>${formatNumber(baData.opnameQty)}</td>
+                                <td>${formatNumber(baData.differenceQty)}</td>
+                                <td>${formatCurrency(baData.systemAmount)}</td>
+                                <td>${formatCurrency(baData.opnameAmount)}</td>
+                                <td>${formatCurrency(baData.differenceAmount)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="mt-3 text-end">
+                        ${finalizeButtonHtml}
+                    </div>
+                `;
+
+                activeBaSummaryContainer.innerHTML = tableHtml;
+                const saveBtn = document.getElementById('save-ba-btn');
+                if(saveBtn){
+                    saveBtn.addEventListener('click', saveActiveBa);
+                }
+            }
+
+            async function saveActiveBa() {
+                if (!currentBatchId) {
+                    alert('Tidak ada batch aktif untuk disimpan.');
+                    return;
+                }
+                const saveButton = document.getElementById('save-ba-btn');
+                saveButton.disabled = true;
+                saveButton.textContent = 'Menyimpan...';
+
+                const baData = getBaData();
+                const currentDate = new Date();
+                const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                const year = currentDate.getFullYear();
+
+                const payload = {
+                    batch_id: currentBatchId, 
+                    nomor_ba: `${month}/AR/${batchInfo.businessArea}/${batchInfo.salesOffice}/${year}`,
+                    creation_date: batchInfo.creationDate,
+                    business_area: batchInfo.businessArea,
+                    business_area_name: batchInfo.businessAreaName,
+                    sales_office: batchInfo.salesOffice,
+                    sales_office_name: batchInfo.salesOfficeName,
+                    petugas: batchInfo.nama,
+                    cutoff_date: batchInfo.cutoffDate,
+                    system_qty: baData.systemQty,
+                    opname_qty: baData.opnameQty,
+                    difference_qty: baData.differenceQty,
+                    system_amount: baData.systemAmount,
+                    opname_amount: baData.opnameAmount,
+                    difference_amount: baData.differenceAmount,
+                    is_finalized: 1,
+                    currentUserJabatan: currentUser.jabatan 
+                };
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}berita_acara.php`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('Berita Acara berhasil disimpan!');
+                        fetchBaHistory(); 
+                        resetApp(true);
+                        generateActiveBaSummary();
+                    } else {
+                         alert(`Gagal menyimpan: ${result.message}`);
+                         saveButton.disabled = false;
+                         saveButton.textContent = 'Simpan & Finalisasi';
+                    }
+                } catch (error) {
+                    console.error("Failed to save BA:", error);
+                    alert('Terjadi error saat menyimpan Berita Acara.');
+                    saveButton.disabled = false;
+                    saveButton.textContent = 'Simpan & Finalisasi';
+                }
+            }
+            
+            function renderBaHistory(history) {
+                if (history.length === 0) {
+                    baHistoryContainer.innerHTML = '<p class="text-secondary">Belum ada Berita Acara yang disimpan.</p>';
+                    return;
+                }
+
+                const formatCurrency = (value) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(parseFloat(value));
+                const formatNumber = (value) => new Intl.NumberFormat('id-ID').format(value);
+                 const formatDate = (dateStr) => {
+                    const date = new Date(dateStr);
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${day}/${month}/${year}`;
+                };
+
+                let tableHtml = `
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                             <tr>
+                                <th>Nomor BA</th>
+                                <th>Tgl Dibuat</th>
+                                <th>Business Area</th>
+                                <th>Sales Office</th>
+                                <th>Petugas</th>
+                                <th>Tgl Cut Off</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                history.forEach(ba => {
+                    const baDataString = JSON.stringify(ba).replace(/'/g, "&apos;");
+                    tableHtml += `
+                        <tr>
+                            <td>${ba.nomor_ba}</td>
+                            <td>${formatDate(ba.creation_date)}</td>
+                            <td>${ba.business_area_name} (${ba.business_area})</td>
+                            <td>${ba.sales_office_name} (${ba.sales_office})</td>
+                            <td>${ba.petugas}</td>
+                            <td>${formatDate(ba.cutoff_date)}</td>
+                            <td>
+                                <span class="badge ${ba.is_finalized == 1 ? 'bg-success' : 'bg-secondary'}">
+                                    ${ba.is_finalized == 1 ? 'Final' : 'Draft'}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-success download-excel-history-btn" data-ba='${baDataString}' title="Download as Excel">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-excel" viewBox="0 0 16 16">
+                                            <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.64L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
+                                            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 8 4.5v1.5438L14 9.5V4.5h-4.5z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-primary download-word-history-btn" data-ba='${baDataString}' title="Download as Word">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-word" viewBox="0 0 16 16">
+                                            <path d="M5.48 6.64h1.32v.843h.043a2.25 2.25 0 0 1 1.96-1.025c1.38 0 2.24 1.03 2.24 2.4v3.18h-1.32V9.45c0-.92-.63-1.42-1.38-1.42-.54 0-1.02.24-1.32.73-.29.49-.37.93-.37 1.45v2.82h-1.32V6.64z"/>
+                                            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 8 4.5v1.5438L14 9.5V4.5h-4.5z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tableHtml += '</tbody></table>';
+                baHistoryContainer.innerHTML = tableHtml;
+            }
+            
+            function downloadBaHistoryAsExcel(baData) {
+                const wb = XLSX.utils.book_new();
+                const wsData = [
+                    ["BERITA ACARA HASIL STOCK OPNAME DOKUMEN TAGIHAN"],
+                    [],
+                    ["Nama Petugas", baData.petugas],
+                    ["Business Area", `${baData.business_area_name} (${baData.business_area})`],
+                    ["Sales Office", `${baData.sales_office_name} (${baData.sales_office})`],
+                    ["Tanggal Cut Off", new Date(baData.cutoff_date).toLocaleDateString('id-ID')],
+                    [],
+                    ["Nomor BA Opname", baData.nomor_ba],
+                    ["Tanggal Create Batch", new Date(baData.creation_date).toLocaleDateString('id-ID')],
+                    [],
+                    ["Deskripsi", "Nilai"],
+                    ["System Qty", baData.system_qty],
+                    ["Opname Qty", baData.opname_qty],
+                    ["Difference Qty", baData.difference_qty],
+                    ["System Amount", baData.system_amount],
+                    ["Opname Amount", baData.opname_amount],
+                    ["Difference Amount", baData.difference_amount],
+                ];
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+                XLSX.utils.book_append_sheet(wb, ws, "Berita Acara");
+                XLSX.writeFile(wb, `Berita_Acara_${baData.business_area}_${baData.cutoff_date}.xlsx`);
+            }
+            
+            function downloadBaHistoryAsWord(baData) {
+                const imageUrl = 'https://i.ibb.co/6gS1P9s/Kop-MDR.png';
+                const formatCurrency = (value) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(parseFloat(value));
+                const formatNumber = (value) => new Intl.NumberFormat('id-ID').format(value);
+                const creationDate = new Date(baData.creation_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                
+                const dibuatOleh = signatureData.dibuat_oleh && signatureData.dibuat_oleh.name
+                    ? signatureData.dibuat_oleh
+                    : { name: '.........................', title: 'Collection' };
+                const diperiksaOleh = signatureData.diperiksa_oleh && signatureData.diperiksa_oleh.name
+                    ? signatureData.diperiksa_oleh
+                    : { name: '.........................', title: 'Kepala Admin' };
+                const disetujuiOleh = signatureData.disetujui_oleh && signatureData.disetujui_oleh.name
+                    ? signatureData.disetujui_oleh
+                    : { name: '.........................', title: 'DCM' };
+                
+                let businessAreaName = baData.business_area_name;
+                if (!businessAreaName) {
+                    const areaMatch = businessAreas.find(area => area.area_name === baData.business_area);
+                    businessAreaName = areaMatch ? areaMatch.business_area_name : baData.business_area;
+                }
+
+                let salesOfficeName = baData.sales_office_name;
+                if (!salesOfficeName) {
+                    const officeMatch = salesOffices.find(office => office.office_name === baData.sales_office);
+                    salesOfficeName = officeMatch ? officeMatch.sales_office_name : baData.sales_office;
+                }
+
+                const contentHtml = `
+                    <html>
+                    <head><meta charset='utf-8'><title>Berita Acara</title>
+                    <style>
+                        body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; margin: 1in; }
+                        table { border-collapse: collapse; width: 100%; }
+                        td, th { border: 1px solid black; padding: 2px; }
+                        h1, h2 { font-family: 'Times New Roman', Times, serif; text-align: center; margin: 0; text-decoration: underline; }
+                        h3 { font-family: 'Times New Roman', Times, serif; text-align: center; margin: 0; }
+                        p {font-family: 'Times New Roman', Times, serif; text-align: justify;}
+                        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid black; padding-bottom: 2px; }
+                        .header img { max-width: 100%; height: auto; }
+                        .no-border { border: 0; }
+                        .signature-table { margin-top: 50px; }
+                        .signature-table td { text-align: center; height: 100px; vertical-align: bottom; }
+                    </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                        </div>
+                        <h2>BERITA ACARA AR OPNAME</h1>
+                        <h3>${baData.nomor_ba}</h2>
+                        <br>
+                        <p>${businessAreaName}, ${creationDate}</p>
+                        <p>Telah dilakukan AR Opname di PT Medan Distribusindo Raya - DC ${salesOfficeName} pada tanggal ${creationDate}. Dengan ini kami yang bertanda tangan di bawah ini menyatakan AR Opname sudah dilakukan dengan benar dan sesuai dengan prosedur. Kami siap mempertanggungjawabkan kebenaran data yang terlampir dalam berita acara ini. Berikut ini hasil opname:</p>
+                        <table>
+                            <tr><td style="width: 200px;">Nomor BA</td><td> ${baData.nomor_ba}</td></tr>
+                            <tr><td style="width: 200px;">Nama Petugas</td><td> ${diperiksaOleh.name}</td></tr>
+                            <tr><td>Business Area</td><td> ${baData.business_area_name} (${baData.business_area})</td></tr>
+                            <tr><td>Sales Office</td><td> ${baData.sales_office_name} (${baData.sales_office})</td></tr>
+                            <tr><td>Tanggal Cut Off</td><td> ${new Date(baData.cutoff_date).toLocaleDateString('id-ID')}</td></tr>
+                        </table>
+                        <br>
+                        <p>Ringkasan Hasil Stock Opname:</p>
+                        <table>
+                           <thead>
+                                <tr>
+                                    <th>Deskripsi</th>
+                                    <th>Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>System Qty</td><td>${formatNumber(baData.system_qty)}</td></tr>
+                                <tr><td>Opname Qty</td><td>${formatNumber(baData.opname_qty)}</td></tr>
+                                <tr><td>Difference Qty</td><td>${formatNumber(baData.difference_qty)}</td></tr>
+                                <tr><td>System Amount</td><td>${formatCurrency(baData.system_amount)}</td></tr>
+                                <tr><td>Opname Amount</td><td>${formatCurrency(baData.opname_amount)}</td></tr>
+                                <tr><td>Difference Amount</td><td>${formatCurrency(baData.difference_amount)}</td></tr>
+                            </tbody>
+                        </table>
+                        <br>
+                        <p>Bersama berita acara ini, kami lampirkan dokumen pendukung berupa listing AR Opname yang telah kami lakukan. Demikian berita acara ini kami buat dengan sebenar-benarnya.</p>
+                        <table class="signature-table no-border">
+                            <tr>
+                                <td class="no-border"; style="padding-top: 0px; text-align: center;">Dibuat oleh,</td>
+                                <td class="no-border"; style="padding-top: 0px; text-align: center;">Diperiksa oleh,</td>
+                                <td class="no-border"; style="padding-top: 0px; text-align: center;">Disetujui oleh,</td>
+                            </tr>
+                            <tr>
+                                <td class="no-border" style="padding-top: 80px; text-align: center;">(${dibuatOleh.name})</td>
+                                <td class="no-border" style="padding-top: 80px; text-align: center;">(${diperiksaOleh.name})</td>
+                                <td class="no-border" style="padding-top: 80px; text-align: center;">(${disetujuiOleh.name})</td>
+                            </tr>
+                            <tr>
+                                <td class="no-border" style="padding-top: 5px; text-align: center;">(${dibuatOleh.title})</td>
+                                <td class="no-border" style="padding-top: 5px; text-align: center;">(${diperiksaOleh.title})</td>
+                                <td class="no-border" style="padding-top: 5px; text-align: center;">(${disetujuiOleh.title})</td>
+                            </tr>
+                        </table>
+                    </body>
+                    </html>
+                `;
+
+                const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Berita Acara</title></head><body>";
+                const footer = "</body></html>";
+                const sourceHTML = header + contentHtml + footer;
+                
+                const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+                const fileDownload = document.createElement("a");
+                document.body.appendChild(fileDownload);
+                fileDownload.href = source;
+                fileDownload.download = `Berita_Acara_${baData.nomor_ba.replace(/\//g, '-')}.doc`;
+                fileDownload.click();
+                document.body.removeChild(fileDownload);
+            }
+            
+            baHistoryContainer.addEventListener('click', (e) => {
+                const excelBtn = e.target.closest('.download-excel-history-btn');
+                const wordBtn = e.target.closest('.download-word-history-btn');
+
+                if (excelBtn) {
+                    const baData = JSON.parse(excelBtn.dataset.ba.replace(/&apos;/g, "'"));
+                    downloadBaHistoryAsExcel(baData);
+                }
+
+                if (wordBtn) {
+                    const baData = JSON.parse(wordBtn.dataset.ba.replace(/&apos;/g, "'"));
+                    downloadBaHistoryAsWord(baData);
+                }
+            });
+            
+             baSearchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                const filteredHistory = baHistoryData.filter(ba =>
+                    ba.nomor_ba.toLowerCase().includes(searchTerm) ||
+                    ba.business_area.toLowerCase().includes(searchTerm) ||
+                    ba.sales_office.toLowerCase().includes(searchTerm) ||
+                    ba.petugas.toLowerCase().includes(searchTerm)
+                );
+                renderBaHistory(filteredHistory);
+            });
+
+            function renderUserList() {
+                userListTable.innerHTML = '';
+                const canEdit = currentUser && currentUser.jabatan === 'ITE';
+                users.forEach(user => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${user.fullname}</td>
+                        <td>${user.username}</td>
+                        <td>${user.jabatan || '-'}</td>
+                        <td><span class="badge bg-primary">${user.role}</span></td>
+                        <td>
+                            ${canEdit ? `
+                            <button class="btn btn-sm btn-warning edit-user-btn" data-user='${JSON.stringify(user)}'>Edit</button>
+                            <button class="btn btn-sm btn-danger delete-user-btn" data-id="${user.id}">Hapus</button>
+                            ` : ''}
+                        </td>
+                    `;
+                    userListTable.appendChild(tr);
+                });
+            }
+            
+            function renderAreas() {
+                const canEdit = currentUser && currentUser.jabatan === 'ITE';
+                // Render Business Area List
+                businessAreaList.innerHTML = '';
+                businessAreaInput.innerHTML = '<option value="">Pilih Kode Area</option>';
+                businessAreas.forEach(area => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${area.area_name}</td>
+                        <td>${area.business_area_name}</td>
+                        <td>
+                            ${canEdit ? `
+                            <button class="btn btn-sm btn-warning edit-ba-btn" data-id="${area.id}" data-code="${area.area_name}" data-name="${area.business_area_name}">Edit</button>
+                            <button class="btn btn-sm btn-danger delete-ba-btn" data-id="${area.id}">Hapus</button>
+                            ` : ''}
+                        </td>
+                    `;
+                    businessAreaList.appendChild(tr);
+                    
+                    const option = document.createElement('option');
+                    option.value = area.area_name;
+                    option.textContent = `${area.area_name} - ${area.business_area_name}`;
+                    businessAreaInput.appendChild(option);
+                });
+
+                // Render Sales Office List
+                salesOfficeList.innerHTML = '';
+                salesOfficeInput.innerHTML = '<option value="">Pilih Kode Office</option>';
+                salesOffices.forEach(office => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${office.office_name}</td>
+                        <td>${office.sales_office_name}</td>
+                        <td>
+                            ${canEdit ? `
+                            <button class="btn btn-sm btn-warning edit-so-btn" data-id="${office.id}" data-code="${office.office_name}" data-name="${office.sales_office_name}">Edit</button>
+                            <button class="btn btn-sm btn-danger delete-so-btn" data-id="${office.id}">Hapus</button>
+                            `: ''}
+                        </td>
+                    `;
+                    salesOfficeList.appendChild(tr);
+
+                    const option = document.createElement('option');
+                    option.value = office.office_name;
+                    option.textContent = `${office.office_name} - ${office.sales_office_name}`;
+                    salesOfficeInput.appendChild(option);
+                });
+            }
+
+            addBusinessAreaForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const area_code = newBusinessAreaCodeInput.value.trim();
+                const area_name = newBusinessAreaNameInput.value.trim();
+                if (area_code && area_name) {
+                   try {
+                       await fetch(`${API_BASE_URL}areas.php`, {
+                           method: 'POST',
+                           headers: { 'Content-Type': 'application/json' },
+                           body: JSON.stringify({ area_code, area_name, currentUserJabatan: currentUser.jabatan })
+                       });
+                       addBusinessAreaForm.reset();
+                       fetchAreas();
+                   } catch(error) {
+                       console.error("Failed to add business area", error);
+                   }
+                }
+            });
+
+            addSalesOfficeForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const office_code = newSalesOfficeCodeInput.value.trim();
+                const office_name = newSalesOfficeNameInput.value.trim();
+                if (office_code && office_name) {
+                    try {
+                       await fetch(`${API_BASE_URL}areas.php`, {
+                           method: 'POST',
+                           headers: { 'Content-Type': 'application/json' },
+                           body: JSON.stringify({ office_code, office_name, currentUserJabatan: currentUser.jabatan })
+                       });
+                       addSalesOfficeForm.reset();
+                       fetchAreas();
+                   } catch(error) {
+                       console.error("Failed to add sales office", error);
+                   }
+                }
+            });
+            
+             businessAreaList.addEventListener('click', async (e) => {
+                if (e.target.classList.contains('delete-ba-btn')) {
+                    const area_id = e.target.dataset.id;
+                    if (confirm('Apakah Anda yakin ingin menghapus area ini?')) {
+                        try {
+                            const response = await fetch(`${API_BASE_URL}areas.php`, {
+                               method: 'DELETE',
+                               headers: { 'Content-Type': 'application/json' },
+                               body: JSON.stringify({ area_id: parseInt(area_id), currentUserJabatan: currentUser.jabatan })
+                            });
+                            const result = await response.json();
+                            if(result.success) {
+                                fetchAreas();
+                            } else {
+                                alert(result.message);
+                            }
+                        } catch(error) {
+                            console.error("Failed to delete business area", error);
+                        }
+                    }
+                }
+                if (e.target.classList.contains('edit-ba-btn')) {
+                    const button = e.target;
+                    document.getElementById('editAreaModalLabel').textContent = 'Edit Business Area';
+                    document.getElementById('edit-area-id').value = button.dataset.id;
+                    document.getElementById('edit-area-type').value = 'business';
+                    document.getElementById('edit-area-code').value = button.dataset.code;
+                    document.getElementById('edit-area-name').value = button.dataset.name;
+                    editAreaModal.show();
+                }
+            });
+
+            salesOfficeList.addEventListener('click', async (e) => {
+                if (e.target.classList.contains('delete-so-btn')) {
+                    const office_id = e.target.dataset.id;
+                     if (confirm('Apakah Anda yakin ingin menghapus office ini?')) {
+                        try {
+                            const response = await fetch(`${API_BASE_URL}areas.php`, {
+                               method: 'DELETE',
+                               headers: { 'Content-Type': 'application/json' },
+                               body: JSON.stringify({ office_id: parseInt(office_id), currentUserJabatan: currentUser.jabatan })
+                            });
+                            const result = await response.json();
+                            if(result.success) {
+                                fetchAreas();
+                            } else {
+                                alert(result.message);
+                            }
+                        } catch(error) {
+                            console.error("Failed to delete sales office", error);
+                        }
+                    }
+                }
+                 if (e.target.classList.contains('edit-so-btn')) {
+                    const button = e.target;
+                    document.getElementById('editAreaModalLabel').textContent = 'Edit Sales Office';
+                    document.getElementById('edit-area-id').value = button.dataset.id;
+                    document.getElementById('edit-area-type').value = 'sales';
+                    document.getElementById('edit-area-code').value = button.dataset.code;
+                    document.getElementById('edit-area-name').value = button.dataset.name;
+                    editAreaModal.show();
+                }
+            });
+
+            editAreaForm.addEventListener('submit', async(e) => {
+                e.preventDefault();
+                const payload = {
+                    action: 'update',
+                    id: parseInt(document.getElementById('edit-area-id').value),
+                    type: document.getElementById('edit-area-type').value,
+                    code: document.getElementById('edit-area-code').value,
+                    name: document.getElementById('edit-area-name').value,
+                    currentUserJabatan: currentUser.jabatan
+                };
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}areas.php`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const result = await response.json();
+                    if(result.success) {
+                        editAreaModal.hide();
+                        fetchAreas();
+                    } else {
+                        alert('Gagal menyimpan perubahan: ' + result.message);
+                    }
+                } catch (error) {
+                    console.error('Error updating area:', error);
+                }
+            });
+
+            registerUserForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const payload = {
+                    action: 'create',
+                    fullname: document.getElementById('new-fullname').value,
+                    username: document.getElementById('new-username').value,
+                    password: document.getElementById('new-password').value,
+                    jabatan: document.getElementById('new-jabatan').value,
+                    role: document.getElementById('new-role').value,
+                    currentUserJabatan: currentUser.jabatan
+                };
+
+                if (payload.fullname && payload.username && payload.password && payload.jabatan) {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}users.php`, {
+                           method: 'POST',
+                           headers: { 'Content-Type': 'application/json' },
+                           body: JSON.stringify(payload)
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            registerUserForm.reset();
+                            fetchUsers();
+                        } else {
+                            alert(result.message || 'Gagal menambahkan pengguna.');
+                        }
+                    } catch(error) {
+                        console.error("Failed to register user", error);
+                        alert('Terjadi kesalahan saat mendaftarkan pengguna.');
+                    }
+                }
+            });
+
+            userListTable.addEventListener('click', async (e) => {
+                if (e.target.classList.contains('delete-user-btn')) {
+                    const id = e.target.dataset.id;
+                    if(confirm('Apakah Anda yakin ingin menghapus pengguna ini?')) {
+                        try {
+                            const response = await fetch(`${API_BASE_URL}users.php`, {
+                               method: 'DELETE',
+                               headers: { 'Content-Type': 'application/json' },
+                               body: JSON.stringify({ id: parseInt(id), currentUserJabatan: currentUser.jabatan })
+                            });
+                            const result = await response.json();
+                            if(!result.success) {
+                                alert(result.message);
+                            }
+                            fetchUsers();
+                        } catch(error) {
+                            console.error("Failed to delete user", error);
+                        }
+                    }
+                }
+                if (e.target.classList.contains('edit-user-btn')) {
+                    const userData = JSON.parse(e.target.dataset.user);
+                    
+                    document.getElementById('edit-user-id').value = userData.id;
+                    document.getElementById('edit-fullname').value = userData.fullname;
+                    document.getElementById('edit-username').value = userData.username;
+                    document.getElementById('edit-jabatan').value = userData.jabatan;
+                    document.getElementById('edit-role').value = userData.role;
+                    document.getElementById('edit-password').value = ''; // Clear password field
+                    
+                    editUserModal.show();
+                }
+            });
+
+            editUserForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const payload = {
+                    action: 'update',
+                    id: document.getElementById('edit-user-id').value,
+                    fullname: document.getElementById('edit-fullname').value,
+                    username: document.getElementById('edit-username').value,
+                    password: document.getElementById('edit-password').value, // Will be empty if not changed
+                    jabatan: document.getElementById('edit-jabatan').value,
+                    role: document.getElementById('edit-role').value,
+                    currentUserJabatan: currentUser.jabatan
+                };
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}users.php`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        editUserModal.hide();
+                        fetchUsers();
+                    } else {
+                        alert('Gagal memperbarui pengguna: ' + result.message);
+                    }
+                } catch (error) {
+                    console.error("Failed to update user", error);
+                    alert('Terjadi kesalahan saat memperbarui pengguna.');
+                }
+            });
+
+            ttdForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const payload = {
+                    dibuat_oleh: {
+                        name: document.getElementById('dibuat-name').value,
+                        title: 'Collection'
+                    },
+                    diperiksa_oleh: {
+                        name: document.getElementById('diperiksa-name').value,
+                        title: document.getElementById('diperiksa-title').value
+                    },
+                    disetujui_oleh: {
+                        name: document.getElementById('disetujui-name').value,
+                        title: document.getElementById('disetujui-title').value
+                    }
+                };
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}signatures.php`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('Data tanda tangan berhasil disimpan.');
+                        await fetchSignatures();
+                    } else {
+                        throw new Error(result.message || 'Gagal menyimpan data.');
+                    }
+                } catch (error) {
+                    console.error('Failed to save signatures:', error);
+                    alert(`Error: ${error.message}`);
+                }
+            });
+
+            async function joinBatch(batchId) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}batches.php?id=${batchId}`);
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        const errorJson = JSON.parse(errorText);
+                        if (errorJson.finalized) {
+                            // Batch is finalized, handle gracefully
+                            console.log("Attempted to join a finalized batch.");
+                            return false;
+                        }
+                        throw new Error(`Gagal mengambil data batch. Status: ${response.status} ${response.statusText}. Server says: ${errorText}`);
+                    }
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        const batch = result.batch;
+                        currentBatchId = batch.id;
+                        sessionStorage.setItem('currentBatchId', currentBatchId);
+                        
+                        try {
+                             const rawExcelData = JSON.parse(batch.excel_data);
+                             excelData = rawExcelData.map(row => {
+                                row._primaryKey = getPrimaryKeyForRow(row);
+                                return row;
+                            });
+                        } catch (e) {
+                            console.error("Gagal mem-parsing excel_data:", e);
+                            throw new Error("Data Excel dari server tidak lengkap atau rusak. Coba buat batch baru.");
+                        }
+                        
+                        scanHistory.clear();
+                        if(batch.scans && Array.isArray(batch.scans)) {
+                             batch.scans.forEach(scan => {
+                                try {
+                                    scanHistory.set(scan.barcode, {
+                                        status: scan.status,
+                                        data: JSON.parse(scan.scan_data),
+                                        scanned_by: scan.scanned_by,
+                                        date: new Date().toISOString().split('T')[0]
+                                    });
+                                } catch (e) {
+                                    console.warn(`Gagal mem-parsing scan_data untuk barcode ${scan.barcode}`, e);
+                                }
+                            });
+                        }
+                        
+                        const baMatch = businessAreas.find(a => a.area_name === batch.business_area);
+                        const soMatch = salesOffices.find(o => o.office_name === batch.sales_office);
+
+                        batchInfo = {
+                            nama: batch.petugas,
+                            businessArea: batch.business_area,
+                            businessAreaName: baMatch ? baMatch.business_area_name : batch.business_area,
+                            salesOffice: batch.sales_office,
+                            salesOfficeName: soMatch ? soMatch.sales_office_name : batch.sales_office,
+                            cutoffDate: batch.cutoff_date,
+                            creationDate: new Date(batch.creation_date).toLocaleDateString('id-ID')
+                        };
+                        
+                        namaInput.value = batchInfo.nama;
+                        businessAreaInput.value = batchInfo.businessArea;
+                        salesOfficeInput.value = batchInfo.salesOffice;
+                        cutoffDateInput.value = batchInfo.cutoffDate;
+                        
+                        barcodeInput.disabled = false;
+                        cicilanInput.disabled = false;
+                        barcodeInput.placeholder = 'Arahkan scanner...';
+                        
+                        startPolling(batchId);
+
+                        return true;
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    console.error("Error details:", error);
+                    // Don't alert if it's a finalized batch, it's an expected outcome
+                    if (!error.message.includes("finalisasi")) {
+                        alert(`Error bergabung dengan batch: ${error.message}`);
+                    }
+                    sessionStorage.removeItem('currentBatchId');
+                    resetApp();
+                    showPage('dashboard-page');
+                    return false;
+                }
+            }
+
+            async function updateScanDataFromServer(batchId) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}scan.php?batch_id=${batchId}`);
+                    if (!response.ok) { 
+                        // FIX: Check for 410 Gone status specifically
+                        if (response.status === 410) {
+                             alert('Sesi batch ini telah difinalisasi oleh Head Admin.');
+                             stopPolling();
+                             resetApp();
+                             showPage('dashboard-page');
+                             return;
+                        }
+                        console.error(`Gagal mengambil data pindaian: ${response.statusText}`);
+                        return;
+                    }
+                    const scansFromServer = await response.json();
+                    
+                    const newScanHistory = new Map();
+                    scansFromServer.forEach(scan => {
+                        try {
+                            newScanHistory.set(scan.barcode, {
+                                status: scan.status,
+                                data: JSON.parse(scan.scan_data),
+                                scanned_by: scan.scanned_by,
+                                date: new Date().toISOString().split('T')[0]
+                            });
+                        } catch(e) {
+                            console.warn(`Gagal mem-parsing scan_data dari server untuk barcode ${scan.barcode}`);
+                        }
+                    });
+
+                    if (newScanHistory.size !== scanHistory.size || JSON.stringify(Array.from(newScanHistory.entries())) !== JSON.stringify(Array.from(scanHistory.entries()))) {
+                        scanHistory = newScanHistory;
+                        const activePage = document.querySelector('.page-content.active');
+                        if (activePage && activePage.id === 'dashboard-page') {
+                            updateDashboard();
+                        }
+                    }
+                } catch (error) {
+                    console.error("Gagal memproses data pindaian:", error);
+                }
+            }
+
+            function startPolling(batchId) {
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                }
+                pollingInterval = setInterval(() => {
+                    updateScanDataFromServer(batchId);
+                }, 5000);
+            }
+
+            function stopPolling() {
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                    pollingInterval = null;
+                }
+            }
+
+            async function loadInitialData() {
+                await fetchUsers();
+                await fetchAreas();
+                await fetchSignatures();
+                await fetchBaHistory();
+                const savedBatchId = sessionStorage.getItem('currentBatchId');
+                if (savedBatchId) {
+                    const success = await joinBatch(parseInt(savedBatchId, 10));
+                    showPage(success ? (sessionStorage.getItem('lastActivePage') || 'dashboard-page') : 'dashboard-page');
+                } else {
+                    const lastPage = sessionStorage.getItem('lastActivePage');
+                    showPage(lastPage || (currentUser && currentUser.role !== 'admin' ? 'pindai-page' : 'dashboard-page'));
+                }
+            }
+
+            // Jalankan pengecekan session saat halaman load
+            checkSession();
+
+        });
+    </script>
+</body>
+</html>
