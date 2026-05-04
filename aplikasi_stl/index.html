@@ -451,7 +451,7 @@
 <body class="bg-light">
 
     <!-- Login Page (SSO) -->
-    <div id="login-container" class="container-fluid min-vh-100 p-0 d-flex d-none">
+    <div id="login-container" class="container-fluid min-vh-100 p-0 d-flex">
         <div class="row g-0 flex-grow-1">
             <!-- Image Side -->
             <div class="col-lg-7 d-none d-lg-block position-relative">
@@ -2990,8 +2990,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Cek session + handle sso_token dari URL
     const checkSession = async () => {
-        // Sembunyikan login container — auto redirect ke SSO
-        loginContainer.classList.add('d-none');
+        loginLoading.classList.remove('d-none');
+        ssoBtnWrap.classList.add('d-none');
 
         const urlParams = new URLSearchParams(window.location.search);
         const ssoToken = urlParams.get('sso_token');
@@ -3032,8 +3032,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Belum login dan tidak ada token SSO — auto-redirect ke SSO Portal
                 redirectToSSO(sesData.sso_public_url, sesData.sso_app_slug);
             } else {
-                // Token SSO gagal — tampilkan tombol manual agar tidak loop tak terbatas
-                loginContainer.classList.remove('d-none');
+                // Token SSO gagal — tampilkan tombol agar tidak loop tak terbatas
                 loginLoading.classList.add('d-none');
                 ssoBtnWrap.classList.remove('d-none');
                 loginError.textContent = 'Validasi SSO gagal. Silakan coba login ulang.';
@@ -3043,7 +3042,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         } catch (err) {
-            loginContainer.classList.remove('d-none');
             loginLoading.classList.add('d-none');
             ssoBtnWrap.classList.remove('d-none');
             loginError.textContent = err.message || 'Terjadi kesalahan. Silakan coba lagi.';
