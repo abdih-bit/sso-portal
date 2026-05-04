@@ -6,8 +6,10 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
-        $stmt = $pdo->query(
-            "SELECT e.barcode_id,
+        $role    = $currentUser['role_id'] ?? '';
+        $area_id = (int)($currentUser['area_id'] ?? 0);
+
+        $sql = "SELECT e.barcode_id,
                     COALESCE(u_d.full_name, u_b.full_name) AS sender_name,
                     e.jenis_pengiriman,
                     e.nomor_resi,
@@ -19,9 +21,22 @@ switch ($method) {
              LEFT JOIN stl_users u_d ON d.sender_user_id = u_d.user_id
              LEFT JOIN stl_berkas_satu_arah sa ON e.barcode_id = sa.barcode_id AND d.barcode_id IS NULL
              LEFT JOIN stl_users u_b ON sa.sender_user_id = u_b.user_id
-             JOIN stl_jasa_ekspedisi j ON e.jasa_ekspedisi_id = j.id
-             ORDER BY e.created_at DESC"
-        );
+             JOIN stl_jasa_ekspedisi j ON e.jasa_ekspedisi_id = j.id";
+
+        $params = [];
+        if ($role !== 'superadmin' && $area_id > 0) {
+            // Hanya tampilkan record yang melibatkan area user (sebagai pengirim ATAU penerima)
+            $sql .= " WHERE (
+                (d.barcode_id IS NOT NULL AND (u_d.area_id = ? OR d.receiver_ho_area_id = ?))
+                OR
+                (sa.barcode_id IS NOT NULL AND (u_b.area_id = ? OR sa.receiver_area_id = ?))
+            )";
+            $params = [$area_id, $area_id, $area_id, $area_id];
+        }
+
+        $sql .= " ORDER BY e.created_at DESC";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
         json_response($stmt->fetchAll());
         break;
 
