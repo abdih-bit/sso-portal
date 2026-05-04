@@ -2798,8 +2798,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('btn-tab-two-way').addEventListener('click', () => switchTab('two-way'));
                     document.getElementById('btn-tab-one-way').addEventListener('click', () => switchTab('one-way'));
 
+                    // Head AR: sembunyikan tab Two-Way, langsung ke One-Way
+                    const isHeadAR = currentUser.role_id && currentUser.role_id.startsWith('admin_ho');
+                    if (isHeadAR) {
+                        document.getElementById('btn-tab-two-way').classList.add('d-none');
+                    }
+
                     // Default tab: HO users start on One-Way, DC/superadmin on Two-Way
-                    const defaultTab = (currentUser.role_id && currentUser.role_id.startsWith('admin_ho')) ? 'one-way' : 'two-way';
+                    const defaultTab = isHeadAR ? 'one-way' : 'two-way';
                     switchTab(defaultTab);
                 }
 
