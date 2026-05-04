@@ -10,8 +10,8 @@ define('SSO_INTERNAL_URL', 'http://localhost:3000');
 
 // Client ID & Secret dari SSO Portal
 // Di-generate oleh setup-apps.js
-define('SSO_CLIENT_ID',     'stl-client-hqmedan-2025');
-define('SSO_CLIENT_SECRET', 'stl-secret-hqmedan-2025-xK9mP');
+define('SSO_CLIENT_ID',     'b3f1a2e4-7c8d-4e5f-9a0b-1c2d3e4f5a6b');
+define('SSO_CLIENT_SECRET', 'e7f8a9b0-1c2d-4e5f-8a7b-6c5d4e3f2a1b');
 
 // URL publik SSO Portal (untuk redirect login dari browser)
 define('SSO_PUBLIC_URL', 'https://portal.hqmedan.com');

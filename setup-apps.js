@@ -13,16 +13,16 @@ const { prisma } = require('./src/database/client');
 // ======================================================
 // FIXED CREDENTIALS — salin ke config.php masing-masing
 // ======================================================
-const STL_CLIENT_ID     = 'stl-client-hqmedan-2025';
-const STL_CLIENT_SECRET = 'stl-secret-hqmedan-2025-xK9mP';
+const STL_CLIENT_ID     = 'b3f1a2e4-7c8d-4e5f-9a0b-1c2d3e4f5a6b';
+const STL_CLIENT_SECRET = 'e7f8a9b0-1c2d-4e5f-8a7b-6c5d4e3f2a1b';
 
 // SPD sudah punya credentials di config.php — gunakan yang sama
 const SPD_CLIENT_ID     = '0a76c993-b85d-4c27-8b9b-ea9748d4c266';
 const SPD_CLIENT_SECRET = 'c81e0366-412a-4c4b-9610-0f192d208a90';
 
 // ARsync credentials — sesuaikan dengan config.php aplikasi_arsync
-const ARSYNC_CLIENT_ID     = 'arsync-client-hqmedan-2025';
-const ARSYNC_CLIENT_SECRET = 'arsync-secret-hqmedan-2025-rT7nQ';
+const ARSYNC_CLIENT_ID     = 'f4e3d2c1-b0a9-4f8e-7d6c-5b4a3f2e1d0c';
+const ARSYNC_CLIENT_SECRET = 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d';
 
 async function setup() {
   console.log('🔧 Setup Aplikasi SSO Portal\n');
