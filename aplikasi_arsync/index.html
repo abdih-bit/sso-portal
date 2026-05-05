@@ -2272,7 +2272,7 @@
             });
 
             function renderAreas() {
-                const canEdit = currentUser && currentUser.jabatan === 'ITE';
+                const canEdit = currentUser && currentUser.role === 'admin';
                 // Render Business Area List
                 businessAreaList.innerHTML = '';
                 businessAreaInput.innerHTML = '<option value="">Pilih Kode Area</option>';
@@ -2281,11 +2281,11 @@
                     tr.innerHTML = `
                         <td>${area.area_name}</td>
                         <td>${area.business_area_name}</td>
-                        <td>
+                        <td class="text-end px-4">
                             ${canEdit ? `
-                            <button class="btn btn-sm btn-warning edit-ba-btn" data-id="${area.id}" data-code="${area.area_name}" data-name="${area.business_area_name}">Edit</button>
-                            <button class="btn btn-sm btn-danger delete-ba-btn" data-id="${area.id}">Hapus</button>
-                            ` : ''}
+                            <button class="btn btn-sm btn-outline-warning edit-ba-btn me-1" data-id="${area.id}" data-code="${area.area_name}" data-name="${area.business_area_name}"><i class="bi bi-pencil-square"></i> Edit</button>
+                            <button class="btn btn-sm btn-outline-danger delete-ba-btn" data-id="${area.id}"><i class="bi bi-trash3"></i> Hapus</button>
+                            ` : '—'}
                         </td>
                     `;
                     businessAreaList.appendChild(tr);
@@ -2304,11 +2304,11 @@
                     tr.innerHTML = `
                         <td>${office.office_name}</td>
                         <td>${office.sales_office_name}</td>
-                        <td>
+                        <td class="text-end px-4">
                             ${canEdit ? `
-                            <button class="btn btn-sm btn-warning edit-so-btn" data-id="${office.id}" data-code="${office.office_name}" data-name="${office.sales_office_name}">Edit</button>
-                            <button class="btn btn-sm btn-danger delete-so-btn" data-id="${office.id}">Hapus</button>
-                            `: ''}
+                            <button class="btn btn-sm btn-outline-warning edit-so-btn me-1" data-id="${office.id}" data-code="${office.office_name}" data-name="${office.sales_office_name}"><i class="bi bi-pencil-square"></i> Edit</button>
+                            <button class="btn btn-sm btn-outline-danger delete-so-btn" data-id="${office.id}"><i class="bi bi-trash3"></i> Hapus</button>
+                            ` : '—'}
                         </td>
                     `;
                     salesOfficeList.appendChild(tr);
