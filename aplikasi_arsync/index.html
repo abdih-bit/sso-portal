@@ -674,17 +674,20 @@
                                 <div class="card-body p-4">
                                     <form id="add-business-area-form">
                                         <div class="mb-3">
+                                            <label for="new-business-area-name-input" class="form-label fw-semibold">Pilih Area / DC</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-building"></i></span>
+                                                <select id="new-business-area-name-input" class="form-select" required>
+                                                    <option value="" disabled selected>-- Pilih Area / DC --</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-text">Daftar Area/DC dari SSO Portal</div>
+                                        </div>
+                                        <div class="mb-4">
                                             <label for="new-business-area-code-input" class="form-label fw-semibold">Kode Area</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-hash"></i></span>
                                                 <input type="text" id="new-business-area-code-input" class="form-control" placeholder="e.g., CPXX" required>
-                                            </div>
-                                        </div>
-                                        <div class="mb-4">
-                                            <label for="new-business-area-name-input" class="form-label fw-semibold">Business Area</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="bi bi-building"></i></span>
-                                                <input type="text" id="new-business-area-name-input" class="form-control" placeholder="e.g., Area Medan" required>
                                             </div>
                                         </div>
                                         <div class="d-grid">
@@ -742,17 +745,20 @@
                                 <div class="card-body p-4">
                                     <form id="add-sales-office-form">
                                         <div class="mb-3">
+                                            <label for="new-sales-office-name-input" class="form-label fw-semibold">Pilih Sales Office</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-shop"></i></span>
+                                                <select id="new-sales-office-name-input" class="form-select" required>
+                                                    <option value="" disabled selected>-- Pilih Sales Office --</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-text">Daftar Sales Office dari SSO Portal</div>
+                                        </div>
+                                        <div class="mb-4">
                                             <label for="new-sales-office-code-input" class="form-label fw-semibold">Kode Office</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-hash"></i></span>
                                                 <input type="text" id="new-sales-office-code-input" class="form-control" placeholder="e.g., CXXX" required>
-                                            </div>
-                                        </div>
-                                        <div class="mb-4">
-                                            <label for="new-sales-office-name-input" class="form-label fw-semibold">Sales Office</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="bi bi-shop"></i></span>
-                                                <input type="text" id="new-sales-office-name-input" class="form-control" placeholder="e.g., Kantor Cabang Siantar" required>
                                             </div>
                                         </div>
                                         <div class="d-grid">
@@ -1222,6 +1228,58 @@
                 }
             }
 
+            async function fetchSsoAreas() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}sso_areas.php`);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+                    populateSsoDropdowns(data.areas || [], data.sales_offices || []);
+                } catch (error) {
+                    console.error('Error fetching SSO areas:', error);
+                }
+            }
+
+            function populateSsoDropdowns(areas, salesOffices) {
+                // Populate Business Area dropdown
+                const baSelect = document.getElementById('new-business-area-name-input');
+                if (baSelect && baSelect.tagName === 'SELECT') {
+                    const currentVal = baSelect.value;
+                    baSelect.innerHTML = '<option value="" disabled selected>-- Pilih Area / DC --</option>';
+                    areas.forEach(area => {
+                        const opt = document.createElement('option');
+                        opt.value = area.name;
+                        opt.textContent = area.pt ? `${area.name} (${area.pt})` : area.name;
+                        baSelect.appendChild(opt);
+                    });
+                    if (currentVal) baSelect.value = currentVal;
+                }
+
+                // Populate Sales Office dropdown, grouped by area
+                const soSelect = document.getElementById('new-sales-office-name-input');
+                if (soSelect && soSelect.tagName === 'SELECT') {
+                    const currentVal = soSelect.value;
+                    soSelect.innerHTML = '<option value="" disabled selected>-- Pilih Sales Office --</option>';
+                    // Group by area_name
+                    const grouped = {};
+                    salesOffices.forEach(so => {
+                        if (!grouped[so.area_name]) grouped[so.area_name] = [];
+                        grouped[so.area_name].push(so);
+                    });
+                    Object.keys(grouped).sort().forEach(areaName => {
+                        const optgroup = document.createElement('optgroup');
+                        optgroup.label = areaName;
+                        grouped[areaName].forEach(so => {
+                            const opt = document.createElement('option');
+                            opt.value = so.name;
+                            opt.textContent = so.name;
+                            optgroup.appendChild(opt);
+                        });
+                        soSelect.appendChild(optgroup);
+                    });
+                    if (currentVal) soSelect.value = currentVal;
+                }
+            }
+
             async function fetchSignatures() {
                 try {
                     const response = await fetch(`${API_BASE_URL}signatures.php`);
@@ -1435,6 +1493,7 @@
                     fetchBaHistory();
                 } else if (pageId === 'area-management-page' && currentUser.role === 'admin') {
                     fetchAreas();
+                    fetchSsoAreas();
                 } else if (pageId === 'ttd-management-page' && currentUser.role === 'admin') {
                     fetchSignatures();
                 }
@@ -2425,6 +2484,7 @@
                        });
                        addBusinessAreaForm.reset();
                        fetchAreas();
+                       fetchSsoAreas();
                    } catch(error) {
                        console.error("Failed to add business area", error);
                    }
@@ -2444,6 +2504,7 @@
                        });
                        addSalesOfficeForm.reset();
                        fetchAreas();
+                       fetchSsoAreas();
                    } catch(error) {
                        console.error("Failed to add sales office", error);
                    }
