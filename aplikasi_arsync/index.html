@@ -667,14 +667,14 @@
                                 <div class="card-body p-4">
                                     <form id="add-business-area-form">
                                         <div class="mb-3">
-                                            <label for="new-business-area-name-input" class="form-label fw-semibold">Pilih Area / DC</label>
+                                            <label for="new-business-area-name-input" class="form-label fw-semibold">Pilih Area / DC atau Sales Office</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-building"></i></span>
                                                 <select id="new-business-area-name-input" class="form-select" required>
-                                                    <option value="" disabled selected>-- Pilih Area / DC --</option>
+                                                    <option value="" disabled selected>-- Pilih Area / DC atau Sales Office --</option>
                                                 </select>
                                             </div>
-                                            <div class="form-text">Daftar Area/DC dari SSO Portal</div>
+                                            <div class="form-text">Daftar Area/DC dan Sales Office dari SSO Portal</div>
                                         </div>
                                         <div class="mb-0">
                                             <label for="new-business-area-code-input" class="form-label fw-semibold">Kode Area</label>
@@ -736,14 +736,14 @@
                                 <div class="card-body p-4">
                                     <form id="add-sales-office-form">
                                         <div class="mb-3">
-                                            <label for="new-sales-office-name-input" class="form-label fw-semibold">Pilih Sales Office</label>
+                                            <label for="new-sales-office-name-input" class="form-label fw-semibold">Pilih Sales Office atau Area / DC</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-shop"></i></span>
                                                 <select id="new-sales-office-name-input" class="form-select" required>
-                                                    <option value="" disabled selected>-- Pilih Sales Office --</option>
+                                                    <option value="" disabled selected>-- Pilih Sales Office atau Area / DC --</option>
                                                 </select>
                                             </div>
-                                            <div class="form-text">Daftar Sales Office dari SSO Portal</div>
+                                            <div class="form-text">Daftar Sales Office dan Area/DC dari SSO Portal</div>
                                         </div>
                                         <div class="mb-0">
                                             <label for="new-sales-office-code-input" class="form-label fw-semibold">Kode Office</label>
@@ -1091,42 +1091,31 @@
             }
 
             function populateSsoDropdowns(areas, salesOffices) {
-                // Populate Business Area dropdown — grouped by PT
-                const baSelect = document.getElementById('new-business-area-name-input');
-                if (baSelect && baSelect.tagName === 'SELECT') {
-                    const currentVal = baSelect.value;
-                    baSelect.innerHTML = '<option value="" disabled selected>-- Pilih Area / DC --</option>';
-
-                    // Group areas by PT
+                // Helper: build area optgroups (grouped by PT)
+                function buildAreaOptgroups(areas) {
                     const grouped = {};
                     areas.forEach(area => {
                         const ptKey = area.pt || 'Lainnya';
                         if (!grouped[ptKey]) grouped[ptKey] = [];
                         grouped[ptKey].push(area);
                     });
-
+                    const frags = [];
                     Object.keys(grouped).forEach(pt => {
-                        const optgroup = document.createElement('optgroup');
-                        optgroup.label = pt;
+                        const og = document.createElement('optgroup');
+                        og.label = `📍 Area/DC — ${pt}`;
                         grouped[pt].forEach(area => {
                             const opt = document.createElement('option');
                             opt.value = area.name;
-                            opt.textContent = area.is_ho == 1 || area.is_ho === true ? `${area.name} (HO)` : area.name;
-                            optgroup.appendChild(opt);
+                            opt.textContent = (area.is_ho == 1 || area.is_ho === true) ? `${area.name} (HO)` : area.name;
+                            og.appendChild(opt);
                         });
-                        baSelect.appendChild(optgroup);
+                        frags.push(og);
                     });
-
-                    if (currentVal) baSelect.value = currentVal;
+                    return frags;
                 }
 
-                // Populate Sales Office dropdown — grouped by PT > Area
-                const soSelect = document.getElementById('new-sales-office-name-input');
-                if (soSelect && soSelect.tagName === 'SELECT') {
-                    const currentVal = soSelect.value;
-                    soSelect.innerHTML = '<option value="" disabled selected>-- Pilih Sales Office --</option>';
-
-                    // Group by pt, then area_name
+                // Helper: build sales office optgroups (grouped by PT > Area)
+                function buildSalesOfficeOptgroups(salesOffices) {
                     const grouped = {};
                     salesOffices.forEach(so => {
                         const ptKey = so.area_pt || 'Lainnya';
@@ -1134,21 +1123,40 @@
                         if (!grouped[ptKey][so.area_name]) grouped[ptKey][so.area_name] = [];
                         grouped[ptKey][so.area_name].push(so);
                     });
-
+                    const frags = [];
                     Object.keys(grouped).forEach(pt => {
                         Object.keys(grouped[pt]).forEach(areaName => {
-                            const optgroup = document.createElement('optgroup');
-                            optgroup.label = `${pt} — ${areaName}`;
+                            const og = document.createElement('optgroup');
+                            og.label = `🏪 SO — ${pt} / ${areaName}`;
                             grouped[pt][areaName].forEach(so => {
                                 const opt = document.createElement('option');
                                 opt.value = so.name;
                                 opt.textContent = so.name;
-                                optgroup.appendChild(opt);
+                                og.appendChild(opt);
                             });
-                            soSelect.appendChild(optgroup);
+                            frags.push(og);
                         });
                     });
+                    return frags;
+                }
 
+                // Populate Business Area dropdown — Area/DC first, then Sales Office
+                const baSelect = document.getElementById('new-business-area-name-input');
+                if (baSelect && baSelect.tagName === 'SELECT') {
+                    const currentVal = baSelect.value;
+                    baSelect.innerHTML = '<option value="" disabled selected>-- Pilih Area / DC atau Sales Office --</option>';
+                    buildAreaOptgroups(areas).forEach(og => baSelect.appendChild(og));
+                    buildSalesOfficeOptgroups(salesOffices).forEach(og => baSelect.appendChild(og));
+                    if (currentVal) baSelect.value = currentVal;
+                }
+
+                // Populate Sales Office dropdown — Sales Office first, then Area/DC
+                const soSelect = document.getElementById('new-sales-office-name-input');
+                if (soSelect && soSelect.tagName === 'SELECT') {
+                    const currentVal = soSelect.value;
+                    soSelect.innerHTML = '<option value="" disabled selected>-- Pilih Sales Office atau Area / DC --</option>';
+                    buildSalesOfficeOptgroups(salesOffices).forEach(og => soSelect.appendChild(og));
+                    buildAreaOptgroups(areas).forEach(og => soSelect.appendChild(og));
                     if (currentVal) soSelect.value = currentVal;
                 }
             }
