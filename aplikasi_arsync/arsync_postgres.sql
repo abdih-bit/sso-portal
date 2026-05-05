@@ -14,8 +14,10 @@ CREATE TABLE IF NOT EXISTS arsync_roles (
 );
 
 INSERT INTO arsync_roles (role_id, role_name) VALUES
-('admin',   'Admin'),
-('petugas', 'Petugas')
+('superadmin', 'Super Admin'),
+('head_ar',    'Head AR'),
+('admin',      'Admin'),
+('petugas',    'Petugas')
 ON CONFLICT (role_id) DO UPDATE SET role_name = EXCLUDED.role_name;
 
 -- ============================================================
