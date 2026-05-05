@@ -148,13 +148,11 @@
 
         #create-batch-menu,
         #area-management-menu,
-        #user-management-menu,
         #ttd-management-menu {
             display: none;
         }
         body.is-admin #create-batch-menu,
         body.is-admin #area-management-menu,
-        body.is-admin #user-management-menu,
         body.is-admin #ttd-management-menu {
             display: block;
         }
@@ -272,12 +270,7 @@
                             <span>Managemen Area</span>
                         </a>
                     </li>
-                    <li class="nav-item" id="user-management-menu">
-                        <a href="#user-management" data-page="user-management-page" class="nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-3">
-                            <svg style="width:24px; height:24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m-7.5-2.962a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM10.5 18.75a9 9 0 100-18 9 9 0 000 18z" /></svg>
-                            <span>Managemen Pengguna</span>
-                        </a>
-                    </li>
+
                     <li class="nav-item" id="ttd-management-menu">
                         <a href="#ttd-management" data-page="ttd-management-page" class="nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-3">
                             <svg style="width:24px; height:24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
@@ -798,76 +791,7 @@
                     </div>
                 </div>
 
-                <div id="user-management-page" class="page-content">
-                    <h1 class="h2 fw-bold text-dark mb-4">Managemen Pengguna</h1>
-                    <div class="row g-4">
-                        <div class="col-lg-5">
-                            <div class="card">
-                                <div class="card-body p-4">
-                                    <h2 class="card-title h4 mb-3">Daftarkan Pengguna Baru</h2>
-                                    <form id="register-user-form">
-                                        <div class="mb-3">
-                                            <label for="new-fullname" class="form-label">Nama Lengkap</label>
-                                            <input type="text" id="new-fullname" class="form-control" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="new-username" class="form-label">Username</label>
-                                            <input type="text" id="new-username" class="form-control" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="new-password" class="form-label">Password</label>
-                                            <input type="password" id="new-password" class="form-control" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="new-jabatan" class="form-label">Jabatan</label>
-                                            <select id="new-jabatan" class="form-select" required>
-                                                <option value="">Pilih Jabatan...</option>
-                                                <option value="Head AR">Head AR</option>
-                                                <option value="Head Admin">Head Admin</option>
-                                                <option value="Head ACC">Head ACC</option>
-                                                <option value="Admin FAT">Admin FAT</option>
-                                                <option value="ITE">ITE</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="new-role" class="form-label">Role</label>
-                                            <select id="new-role" class="form-select">
-                                                <option value="user">User</option>
-                                                <option value="admin">Admin</option>
-                                            </select>
-                                        </div>
-                                        <div class="d-grid">
-                                            <button type="submit" class="btn btn-primary">Daftarkan</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-7">
-                            <div class="card">
-                                <div class="card-body p-4">
-                                    <h2 class="card-title h4 mb-3">Daftar Pengguna</h2>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>Nama Lengkap</th>
-                                                    <th>Username</th>
-                                                    <th>Jabatan</th>
-                                                    <th>Role</th>
-                                                    <th>Aksi</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="user-list-table">
-                                                <!-- User data will be inserted here by JavaScript -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
 
                 <div id="ttd-management-page" class="page-content">
                     <!-- Banner -->
@@ -1024,56 +948,7 @@
         </div>
     </div>
     
-    <!-- Modal Edit User -->
-    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editUserModalLabel">Edit Pengguna</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="edit-user-form">
-                        <input type="hidden" id="edit-user-id">
-                        <div class="mb-3">
-                            <label for="edit-fullname" class="form-label">Nama Lengkap</label>
-                            <input type="text" id="edit-fullname" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit-username" class="form-label">Username</label>
-                            <input type="text" id="edit-username" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit-password" class="form-label">Password (Kosongkan jika tidak diubah)</label>
-                            <input type="password" id="edit-password" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit-jabatan" class="form-label">Jabatan</label>
-                            <select id="edit-jabatan" class="form-select" required>
-                                <option value="">Pilih Jabatan...</option>
-                                <option value="Head AR">Head AR</option>
-                                <option value="Head Admin">Head Admin</option>
-                                <option value="Head ACC">Head ACC</option>
-                                <option value="Admin FAT">Admin FAT</option>
-                                <option value="ITE">ITE</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit-role" class="form-label">Role</label>
-                            <select id="edit-role" class="form-select">
-                                <option value="user">User</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" form="edit-user-form" class="btn btn-primary">Simpan Perubahan</button>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
 
     <!-- Memuat Bootstrap JS -->
@@ -1115,8 +990,6 @@
             const salesOfficeInput = document.getElementById('sales-office-input');
             const cutoffDateInput = document.getElementById('cutoff-date-input');
             const reportBatchInfo = document.getElementById('report-batch-info');
-            const registerUserForm = document.getElementById('register-user-form');
-            const userListTable = document.getElementById('user-list-table');
             const activeBaSummaryContainer = document.getElementById('active-ba-summary-container');
             const baHistoryContainer = document.getElementById('ba-history-container');
             const baSearchInput = document.getElementById('ba-search-input');
@@ -1133,10 +1006,6 @@
             const salesOfficeList = document.getElementById('sales-office-list');
             const editAreaForm = document.getElementById('edit-area-form');
             let editAreaModal = new bootstrap.Modal(document.getElementById('editAreaModal'));
-            
-            // User Management Elements
-            const editUserForm = document.getElementById('edit-user-form');
-            let editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
 
 
             let excelData = [];
@@ -1151,7 +1020,6 @@
                 cutoffDate: '', 
                 creationDate: '' 
             };
-            let users = [];
             let businessAreas = [];
             let salesOffices = [];
             let baHistoryData = [];
@@ -1196,19 +1064,6 @@
                 });
             }
             
-            async function fetchUsers() {
-                try {
-                    const response = await fetch(`${API_BASE_URL}users.php`);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    users = await response.json();
-                    renderUserList();
-                } catch (error) {
-                    console.error('Error fetching users:', error);
-                }
-            }
-
             async function fetchAreas() {
                  try {
                     const response = await fetch(`${API_BASE_URL}areas.php`);
@@ -1452,11 +1307,6 @@
                 if (currentUser && currentUser.role === 'admin') {
                     document.body.classList.add('is-admin');
                     declineJoinBtn.style.display = 'inline-block';
-
-                    const canAddUser = currentUser.jabatan === 'ITE' || currentUser.jabatan === 'Head AR';
-
-                    const userPage = document.getElementById('user-management-page');
-                    if(userPage) userPage.querySelector('form').style.display = canAddUser ? 'block' : 'none';
                     
                 } else {
                     document.body.classList.remove('is-admin');
@@ -1467,7 +1317,7 @@
 
             function showPage(pageId) {
                 if (currentUser && currentUser.role !== 'admin') {
-                    if (['user-management-page', 'area-management-page', 'create-batch-page', 'ttd-management-page'].includes(pageId)) {
+                    if (['area-management-page', 'create-batch-page', 'ttd-management-page'].includes(pageId)) {
                         pageId = 'dashboard-page';
                     }
                 }
@@ -1496,8 +1346,6 @@
                     generateReport();
                 } else if (pageId === 'dashboard-page' && currentBatchId) {
                     updateDashboard();
-                } else if (pageId === 'user-management-page' && currentUser.role === 'admin') {
-                    fetchUsers();
                 } else if (pageId === 'download-ba-page') {
                     if (currentBatchId) {
                         generateActiveBaSummary();
@@ -2415,27 +2263,6 @@
                 renderBaHistory(filteredHistory);
             });
 
-            function renderUserList() {
-                userListTable.innerHTML = '';
-                const canEdit = currentUser && currentUser.jabatan === 'ITE';
-                users.forEach(user => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${user.fullname}</td>
-                        <td>${user.username}</td>
-                        <td>${user.jabatan || '-'}</td>
-                        <td><span class="badge bg-primary">${user.role}</span></td>
-                        <td>
-                            ${canEdit ? `
-                            <button class="btn btn-sm btn-warning edit-user-btn" data-user='${JSON.stringify(user)}'>Edit</button>
-                            <button class="btn btn-sm btn-danger delete-user-btn" data-id="${user.id}">Hapus</button>
-                            ` : ''}
-                        </td>
-                    `;
-                    userListTable.appendChild(tr);
-                });
-            }
-            
             function renderAreas() {
                 const canEdit = currentUser && currentUser.jabatan === 'ITE';
                 // Render Business Area List
@@ -2655,106 +2482,6 @@
                 }
             });
 
-            registerUserForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const payload = {
-                    action: 'create',
-                    fullname: document.getElementById('new-fullname').value,
-                    username: document.getElementById('new-username').value,
-                    password: document.getElementById('new-password').value,
-                    jabatan: document.getElementById('new-jabatan').value,
-                    role: document.getElementById('new-role').value,
-                    currentUserJabatan: currentUser.jabatan
-                };
-
-                if (payload.fullname && payload.username && payload.password && payload.jabatan) {
-                    try {
-                        const response = await fetch(`${API_BASE_URL}users.php`, {
-                           method: 'POST',
-                           headers: { 'Content-Type': 'application/json' },
-                           body: JSON.stringify(payload)
-                        });
-                        const result = await response.json();
-                        if (result.success) {
-                            registerUserForm.reset();
-                            fetchUsers();
-                        } else {
-                            alert(result.message || 'Gagal menambahkan pengguna.');
-                        }
-                    } catch(error) {
-                        console.error("Failed to register user", error);
-                        alert('Terjadi kesalahan saat mendaftarkan pengguna.');
-                    }
-                }
-            });
-
-            userListTable.addEventListener('click', async (e) => {
-                if (e.target.classList.contains('delete-user-btn')) {
-                    const id = e.target.dataset.id;
-                    if(confirm('Apakah Anda yakin ingin menghapus pengguna ini?')) {
-                        try {
-                            const response = await fetch(`${API_BASE_URL}users.php`, {
-                               method: 'DELETE',
-                               headers: { 'Content-Type': 'application/json' },
-                               body: JSON.stringify({ id: parseInt(id), currentUserJabatan: currentUser.jabatan })
-                            });
-                            const result = await response.json();
-                            if(!result.success) {
-                                alert(result.message);
-                            }
-                            fetchUsers();
-                        } catch(error) {
-                            console.error("Failed to delete user", error);
-                        }
-                    }
-                }
-                if (e.target.classList.contains('edit-user-btn')) {
-                    const userData = JSON.parse(e.target.dataset.user);
-                    
-                    document.getElementById('edit-user-id').value = userData.id;
-                    document.getElementById('edit-fullname').value = userData.fullname;
-                    document.getElementById('edit-username').value = userData.username;
-                    document.getElementById('edit-jabatan').value = userData.jabatan;
-                    document.getElementById('edit-role').value = userData.role;
-                    document.getElementById('edit-password').value = ''; // Clear password field
-                    
-                    editUserModal.show();
-                }
-            });
-
-            editUserForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const payload = {
-                    action: 'update',
-                    id: document.getElementById('edit-user-id').value,
-                    fullname: document.getElementById('edit-fullname').value,
-                    username: document.getElementById('edit-username').value,
-                    password: document.getElementById('edit-password').value, // Will be empty if not changed
-                    jabatan: document.getElementById('edit-jabatan').value,
-                    role: document.getElementById('edit-role').value,
-                    currentUserJabatan: currentUser.jabatan
-                };
-
-                try {
-                    const response = await fetch(`${API_BASE_URL}users.php`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                        editUserModal.hide();
-                        fetchUsers();
-                    } else {
-                        alert('Gagal memperbarui pengguna: ' + result.message);
-                    }
-                } catch (error) {
-                    console.error("Failed to update user", error);
-                    alert('Terjadi kesalahan saat memperbarui pengguna.');
-                }
-            });
-
             ttdForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const payload = {
@@ -2940,7 +2667,6 @@
             }
 
             async function loadInitialData() {
-                await fetchUsers();
                 await fetchAreas();
                 await fetchSignatures();
                 await fetchBaHistory();
