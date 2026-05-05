@@ -151,7 +151,8 @@
         #ttd-management-menu {
             display: none;
         }
-        body.is-admin #create-batch-menu,
+        body.is-head-ar #create-batch-menu,
+        body.is-head-ar #ttd-management-menu,
         body.is-admin #ttd-management-menu,
         body.is-superadmin #create-batch-menu,
         body.is-superadmin #area-management-menu,
@@ -1319,16 +1320,20 @@
             
             function updateUIVisibility() {
                 const declineJoinBtn = document.getElementById('decline-join-btn');
+                const role = currentUser ? currentUser.role : '';
 
-                if (currentUser && currentUser.role === 'superadmin') {
-                    document.body.classList.add('is-admin', 'is-superadmin');
+                document.body.classList.remove('is-admin', 'is-head-ar', 'is-superadmin');
+
+                if (role === 'superadmin') {
+                    document.body.classList.add('is-admin', 'is-head-ar', 'is-superadmin');
                     declineJoinBtn.style.display = 'inline-block';
-                } else if (currentUser && currentUser.role === 'admin') {
+                } else if (role === 'head_ar') {
+                    document.body.classList.add('is-head-ar');
+                    declineJoinBtn.style.display = 'inline-block';
+                } else if (role === 'admin') {
                     document.body.classList.add('is-admin');
-                    document.body.classList.remove('is-superadmin');
                     declineJoinBtn.style.display = 'inline-block';
                 } else {
-                    document.body.classList.remove('is-admin', 'is-superadmin');
                     declineJoinBtn.style.display = 'none';
                 }
             }
@@ -1336,11 +1341,17 @@
 
             function showPage(pageId) {
                 const role = currentUser ? currentUser.role : '';
-                if (role !== 'admin' && role !== 'superadmin') {
+                // Petugas & admin (KA Admin) cannot access batch creation, area/TTD management
+                if (role !== 'head_ar' && role !== 'admin' && role !== 'superadmin') {
                     if (['area-management-page', 'create-batch-page', 'ttd-management-page'].includes(pageId)) {
                         pageId = 'dashboard-page';
                     }
                 }
+                // create-batch: only head_ar and superadmin
+                if (role !== 'head_ar' && role !== 'superadmin' && pageId === 'create-batch-page') {
+                    pageId = 'dashboard-page';
+                }
+                // area-management: only superadmin
                 if (role !== 'superadmin' && pageId === 'area-management-page') {
                     pageId = 'dashboard-page';
                 }
@@ -1379,11 +1390,11 @@
                 } else if (pageId === 'area-management-page' && currentUser.role === 'superadmin') {
                     fetchAreas();
                     fetchSsoAreas();
-                } else if (pageId === 'ttd-management-page' && (currentUser.role === 'admin' || currentUser.role === 'superadmin')) {
+                } else if (pageId === 'ttd-management-page' && ['admin','head_ar','superadmin'].includes(currentUser.role)) {
                     fetchSignatures();
                 }
 
-                if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'superadmin')) {
+                if (currentUser && ['admin','head_ar','superadmin'].includes(currentUser.role)) {
                     updateUIVisibility();
                 }
             }
@@ -2591,6 +2602,28 @@
                     
                     if (result.success) {
                         const batch = result.batch;
+
+                        // --- Batasan akses batch berdasarkan area/SO user ---
+                        // Superadmin dapat mengakses semua batch. Head AR dan petugas
+                        // hanya bisa bergabung dengan batch yang ditujukan ke area/SO mereka.
+                        const userRole = currentUser ? currentUser.role : '';
+                        if (userRole !== 'superadmin') {
+                            const userArea = (currentUser.area || '').trim();
+                            // Cari nama area/SO dari tabel arsync berdasarkan kode batch
+                            const baMatch2 = businessAreas.find(a => a.area_name === batch.business_area);
+                            const soMatch2 = salesOffices.find(o => o.office_name === batch.sales_office);
+                            const batchAreaName = baMatch2 ? baMatch2.business_area_name : batch.business_area;
+                            const batchSoName   = soMatch2 ? soMatch2.sales_office_name  : batch.sales_office;
+                            // Cocokkan dengan area SSO user: area user harus sama dengan area batch atau SO batch
+                            const soData = ssoMasterSalesOffices.find(s => s.name === batchSoName);
+                            const batchParentArea = soData ? soData.area_name : batchAreaName;
+                            const allowed = !userArea || userArea === batchAreaName || userArea === batchSoName || userArea === batchParentArea;
+                            if (!allowed) {
+                                alert(`Anda tidak memiliki akses ke batch ini.\nBatch ini ditujukan untuk area: ${batchAreaName} / ${batchSoName}\nArea Anda: ${userArea || '(tidak diset)'}`);
+                                sessionStorage.removeItem('currentBatchId');
+                                return false;
+                            }
+                        }
                         currentBatchId = batch.id;
                         sessionStorage.setItem('currentBatchId', currentBatchId);
                         
@@ -2732,7 +2765,7 @@
                     showPage(success ? (sessionStorage.getItem('lastActivePage') || 'dashboard-page') : 'dashboard-page');
                 } else {
                     const lastPage = sessionStorage.getItem('lastActivePage');
-                    showPage(lastPage || (currentUser && (currentUser.role === 'admin' || currentUser.role === 'superadmin') ? 'dashboard-page' : 'pindai-page'));
+                    showPage(lastPage || (['admin','head_ar','superadmin'].includes(currentUser.role) ? 'dashboard-page' : 'pindai-page'));
                 }
             }
 
