@@ -3,21 +3,20 @@ require_once __DIR__ . '/../db_connect.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-// GET tanpa ?id → list batch aktif (belum difinalisasi), filter opsional by area/SO
+// GET tanpa ?id → list batch aktif (belum difinalisasi), filter opsional by area name (dari SSO)
 if ($method === 'GET' && !isset($_GET['id'])) {
-    $area = isset($_GET['area']) ? trim($_GET['area']) : '';
-    $so   = isset($_GET['so'])   ? trim($_GET['so'])   : '';
+    // area_name: nama area dari SSO (mis. "Sibolga", "Siantar"), bukan kode
+    $areaName = isset($_GET['area_name']) ? trim($_GET['area_name']) : '';
 
     $where  = ['b.is_finalized = 0'];
     $params = [];
 
-    if ($area !== '') {
-        $where[]          = 'b.business_area = :area';
-        $params[':area']  = $area;
-    }
-    if ($so !== '') {
-        $where[]       = 'b.sales_office = :so';
-        $params[':so'] = $so;
+    if ($areaName !== '') {
+        // Filter: batch yang business_area_name = areaName ATAU sales_office_name = areaName
+        // Menggunakan OR karena satu DC bisa jadi business area atau sales office dari batch
+        $where[] = '(ba.business_area_name = :area_name OR so.sales_office_name = :area_name2)';
+        $params[':area_name']  = $areaName;
+        $params[':area_name2'] = $areaName;
     }
 
     $sql = "SELECT b.id, b.petugas, b.business_area, b.sales_office, b.cutoff_date,
@@ -26,9 +25,9 @@ if ($method === 'GET' && !isset($_GET['id'])) {
                    COUNT(sd.id) AS total_records,
                    SUM(CASE WHEN sd.status = 'scanned' THEN 1 ELSE 0 END) AS scanned_records
             FROM arsync_batches b
-            LEFT JOIN arsync_business_areas ba ON ba.area_name  = b.business_area
+            LEFT JOIN arsync_business_areas ba ON ba.area_name   = b.business_area
             LEFT JOIN arsync_sales_offices  so ON so.office_name = b.sales_office
-            LEFT JOIN arsync_scan_data      sd ON sd.batch_id   = b.id
+            LEFT JOIN arsync_scan_data      sd ON sd.batch_id    = b.id
             WHERE " . implode(' AND ', $where) . "
             GROUP BY b.id, b.petugas, b.business_area, b.sales_office, b.cutoff_date,
                      b.excel_filename, b.created_at, ba.business_area_name, so.sales_office_name

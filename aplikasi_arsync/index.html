@@ -2738,10 +2738,10 @@
                 const userArea = currentUser ? (currentUser.area || '').trim() : '';
                 const role     = currentUser ? currentUser.role : '';
 
-                // Build query: admin/petugas filter by their area; superadmin shows all
+                // Build query: admin/petugas filter by their area name (dari SSO); superadmin shows all
                 let url = `${API_BASE_URL}batches.php`;
                 if (userArea && role !== 'superadmin') {
-                    url += `?area=${encodeURIComponent(userArea)}&so=${encodeURIComponent(userArea)}`;
+                    url += `?area_name=${encodeURIComponent(userArea)}`;
                 }
 
                 try {
