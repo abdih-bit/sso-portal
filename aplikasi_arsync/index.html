@@ -2489,19 +2489,38 @@
                 e.preventDefault();
                 const area_code = newBusinessAreaCodeInput.value.trim();
                 const area_name = newBusinessAreaNameInput.value.trim();
-                if (area_code && area_name) {
-                   try {
-                       await fetch(`${API_BASE_URL}areas.php`, {
-                           method: 'POST',
-                           headers: { 'Content-Type': 'application/json' },
-                           body: JSON.stringify({ area_code, area_name, currentUserJabatan: currentUser.jabatan })
-                       });
-                       addBusinessAreaForm.reset();
-                       fetchAreas();
-                       fetchSsoAreas();
-                   } catch(error) {
-                       console.error("Failed to add business area", error);
-                   }
+                if (!area_code || !area_name) return;
+                const btn = addBusinessAreaForm.querySelector('button[type="submit"]');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Menyimpan...';
+                try {
+                    const response = await fetch(`${API_BASE_URL}areas.php`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ area_code, area_name })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Tersimpan!';
+                        btn.classList.replace('btn-primary', 'btn-success');
+                        addBusinessAreaForm.reset();
+                        fetchAreas();
+                        fetchSsoAreas();
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="bi bi-floppy me-1"></i> Simpan';
+                            btn.classList.replace('btn-success', 'btn-primary');
+                        }, 2000);
+                    } else {
+                        alert(result.message || 'Gagal menyimpan.');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-floppy me-1"></i> Simpan';
+                    }
+                } catch(error) {
+                    console.error("Failed to add business area", error);
+                    alert('Terjadi kesalahan. Coba lagi.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-floppy me-1"></i> Simpan';
                 }
             });
 
@@ -2509,19 +2528,37 @@
                 e.preventDefault();
                 const office_code = newSalesOfficeCodeInput.value.trim();
                 const office_name = newSalesOfficeNameInput.value.trim();
-                if (office_code && office_name) {
-                    try {
-                       await fetch(`${API_BASE_URL}areas.php`, {
-                           method: 'POST',
-                           headers: { 'Content-Type': 'application/json' },
-                           body: JSON.stringify({ office_code, office_name, currentUserJabatan: currentUser.jabatan })
-                       });
-                       addSalesOfficeForm.reset();
-                       fetchAreas();
-                       fetchSsoAreas();
-                   } catch(error) {
-                       console.error("Failed to add sales office", error);
-                   }
+                if (!office_code || !office_name) return;
+                const btn = addSalesOfficeForm.querySelector('button[type="submit"]');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Menyimpan...';
+                try {
+                    const response = await fetch(`${API_BASE_URL}areas.php`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ office_code, office_name })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Tersimpan!';
+                        btn.classList.replace('btn-success', 'btn-success');
+                        addSalesOfficeForm.reset();
+                        fetchAreas();
+                        fetchSsoAreas();
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="bi bi-floppy me-1"></i> Simpan';
+                        }, 2000);
+                    } else {
+                        alert(result.message || 'Gagal menyimpan.');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-floppy me-1"></i> Simpan';
+                    }
+                } catch(error) {
+                    console.error("Failed to add sales office", error);
+                    alert('Terjadi kesalahan. Coba lagi.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-floppy me-1"></i> Simpan';
                 }
             });
             
@@ -2533,7 +2570,7 @@
                             const response = await fetch(`${API_BASE_URL}areas.php`, {
                                method: 'DELETE',
                                headers: { 'Content-Type': 'application/json' },
-                               body: JSON.stringify({ area_id: parseInt(area_id), currentUserJabatan: currentUser.jabatan })
+                               body: JSON.stringify({ area_id: parseInt(area_id) })
                             });
                             const result = await response.json();
                             if(result.success) {
@@ -2565,7 +2602,7 @@
                             const response = await fetch(`${API_BASE_URL}areas.php`, {
                                method: 'DELETE',
                                headers: { 'Content-Type': 'application/json' },
-                               body: JSON.stringify({ office_id: parseInt(office_id), currentUserJabatan: currentUser.jabatan })
+                               body: JSON.stringify({ office_id: parseInt(office_id) })
                             });
                             const result = await response.json();
                             if(result.success) {
@@ -2596,8 +2633,7 @@
                     id: parseInt(document.getElementById('edit-area-id').value),
                     type: document.getElementById('edit-area-type').value,
                     code: document.getElementById('edit-area-code').value,
-                    name: document.getElementById('edit-area-name').value,
-                    currentUserJabatan: currentUser.jabatan
+                    name: document.getElementById('edit-area-name').value
                 };
 
                 try {
