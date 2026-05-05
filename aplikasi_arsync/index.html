@@ -152,8 +152,10 @@
             display: none;
         }
         body.is-admin #create-batch-menu,
-        body.is-admin #area-management-menu,
-        body.is-admin #ttd-management-menu {
+        body.is-admin #ttd-management-menu,
+        body.is-superadmin #create-batch-menu,
+        body.is-superadmin #area-management-menu,
+        body.is-superadmin #ttd-management-menu {
             display: block;
         }
 
@@ -1318,22 +1320,29 @@
             function updateUIVisibility() {
                 const declineJoinBtn = document.getElementById('decline-join-btn');
 
-                if (currentUser && currentUser.role === 'admin') {
-                    document.body.classList.add('is-admin');
+                if (currentUser && currentUser.role === 'superadmin') {
+                    document.body.classList.add('is-admin', 'is-superadmin');
                     declineJoinBtn.style.display = 'inline-block';
-                    
+                } else if (currentUser && currentUser.role === 'admin') {
+                    document.body.classList.add('is-admin');
+                    document.body.classList.remove('is-superadmin');
+                    declineJoinBtn.style.display = 'inline-block';
                 } else {
-                    document.body.classList.remove('is-admin');
+                    document.body.classList.remove('is-admin', 'is-superadmin');
                     declineJoinBtn.style.display = 'none';
                 }
             }
 
 
             function showPage(pageId) {
-                if (currentUser && currentUser.role !== 'admin') {
+                const role = currentUser ? currentUser.role : '';
+                if (role !== 'admin' && role !== 'superadmin') {
                     if (['area-management-page', 'create-batch-page', 'ttd-management-page'].includes(pageId)) {
                         pageId = 'dashboard-page';
                     }
+                }
+                if (role !== 'superadmin' && pageId === 'area-management-page') {
+                    pageId = 'dashboard-page';
                 }
                 
                 pages.forEach(page => page.classList.remove('active'));
@@ -1367,14 +1376,14 @@
                         activeBaSummaryContainer.innerHTML = '<p class="text-secondary">Tidak ada batch aktif. Buat batch baru untuk melihat ringkasan.</p>';
                     }
                     fetchBaHistory();
-                } else if (pageId === 'area-management-page' && currentUser.role === 'admin') {
+                } else if (pageId === 'area-management-page' && currentUser.role === 'superadmin') {
                     fetchAreas();
                     fetchSsoAreas();
-                } else if (pageId === 'ttd-management-page' && currentUser.role === 'admin') {
+                } else if (pageId === 'ttd-management-page' && (currentUser.role === 'admin' || currentUser.role === 'superadmin')) {
                     fetchSignatures();
                 }
 
-                if(currentUser && currentUser.role === 'admin') {
+                if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'superadmin')) {
                     updateUIVisibility();
                 }
             }
@@ -2278,7 +2287,7 @@
             });
 
             function renderAreas() {
-                const canEdit = currentUser && currentUser.role === 'admin';
+                const canEdit = currentUser && currentUser.role === 'superadmin';
 
                 // Build allowed names Set for Create Batch dropdowns
                 const jabatan  = currentUser ? (currentUser.jabatan || '') : '';
@@ -2723,7 +2732,7 @@
                     showPage(success ? (sessionStorage.getItem('lastActivePage') || 'dashboard-page') : 'dashboard-page');
                 } else {
                     const lastPage = sessionStorage.getItem('lastActivePage');
-                    showPage(lastPage || (currentUser && currentUser.role !== 'admin' ? 'pindai-page' : 'dashboard-page'));
+                    showPage(lastPage || (currentUser && (currentUser.role === 'admin' || currentUser.role === 'superadmin') ? 'dashboard-page' : 'pindai-page'));
                 }
             }
 

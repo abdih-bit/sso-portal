@@ -13,7 +13,7 @@ if ($method === 'GET') {
 
 } elseif ($method === 'POST') {
     // Hanya admin yang boleh menambah atau mengubah (cek dari session, bukan dari client)
-    if ($currentUser['role'] !== 'admin') {
+    if ($currentUser['role'] !== 'superadmin') {
         json_response(['success' => false, 'message' => 'Anda tidak memiliki izin untuk melakukan aksi ini.'], 403);
     }
 
@@ -51,7 +51,7 @@ if ($method === 'GET') {
 
 } elseif ($method === 'DELETE') {
     // Hanya admin yang boleh menghapus
-    if ($currentUser['role'] !== 'admin') {
+    if ($currentUser['role'] !== 'superadmin') {
         json_response(['success' => false, 'message' => 'Anda tidak memiliki izin untuk melakukan aksi ini.'], 403);
     }
 
