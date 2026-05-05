@@ -2748,12 +2748,30 @@
                     const resp = await fetch(url);
                     const data = await resp.json();
 
-                    if (!data.success || data.batches.length === 0) {
+                    if (!data.success) {
                         list.innerHTML = '<p class="text-muted text-center py-3 mb-0"><i class="bi bi-inbox me-1"></i>Belum ada batch aktif untuk area Anda.</p>';
                         return;
                     }
 
-                    list.innerHTML = data.batches.map(b => {
+                    // Filter client-side dengan logika sama seperti joinBatch:
+                    // hanya tampilkan batch yang area/SO-nya cocok dengan area user
+                    let batches = data.batches;
+                    if (role !== 'superadmin' && role !== 'head_ar' && userArea) {
+                        batches = batches.filter(b => {
+                            const bAreaName = (b.business_area_name || b.business_area || '').trim();
+                            const bSoName   = (b.sales_office_name  || b.sales_office  || '').trim();
+                            const soData    = ssoMasterSalesOffices.find(s => s.name === bSoName);
+                            const bParentArea = soData ? soData.area_name : bAreaName;
+                            return userArea === bAreaName || userArea === bSoName || userArea === bParentArea;
+                        });
+                    }
+
+                    if (batches.length === 0) {
+                        list.innerHTML = '<p class="text-muted text-center py-3 mb-0"><i class="bi bi-inbox me-1"></i>Belum ada batch aktif untuk area Anda.</p>';
+                        return;
+                    }
+
+                    list.innerHTML = batches.map(b => {
                         const areaLabel = b.business_area_name || b.business_area;
                         const soLabel   = b.sales_office_name  || b.sales_office;
                         const scanned   = parseInt(b.scanned_records) || 0;
