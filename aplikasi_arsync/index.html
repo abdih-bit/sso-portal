@@ -544,27 +544,71 @@
                 </div>
 
                 <div id="report-page" class="page-content">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h1 class="h2 fw-bold text-dark mb-0">Laporan Batch</h1>
-                        <button id="export-button" class="btn btn-success" disabled>
-                            <svg style="width:20px; height:20px; margin-right: 8px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="d-inline-block align-text-top"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                            Ekspor ke Excel
-                        </button>
+                    <!-- Banner -->
+                    <div class="card border-0 mb-4 overflow-hidden" style="background:linear-gradient(150deg,#1e3a5f 0%,#1d4ed8 40%,#3b82f6 80%,#60a5fa 100%);border-radius:16px;position:relative;">
+                        <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,0.06);border-radius:50%;"></div>
+                        <div class="card-body p-4 d-flex justify-content-between align-items-center position-relative">
+                            <div class="text-white">
+                                <p class="mb-1 small fw-semibold" style="opacity:0.65;letter-spacing:1px;text-transform:uppercase;">ARsync</p>
+                                <h4 class="fw-bold mb-1">Laporan Batch</h4>
+                                <p class="mb-0 small" style="opacity:0.75;">Lihat dan ekspor hasil rekonsiliasi dari batch yang aktif.</p>
+                            </div>
+                            <i class="bi bi-bar-chart-line d-none d-md-block" style="font-size:4rem;opacity:0.15;color:#fff;"></i>
+                        </div>
                     </div>
                     <div id="report-batch-info" class="mb-4"></div>
-                    <div id="report-container" class="card">
-                        <div class="card-body p-4">
-                            <p class="text-secondary">Laporan akan muncul di sini setelah Anda memindai data. Jika Anda sudah memindai, klik menu "Report" lagi untuk memuat ulang.</p>
+                    <div class="card">
+                        <div class="card-header bg-white border-bottom py-3 px-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="d-flex align-items-center justify-content-center rounded-3" style="width:34px;height:34px;background:rgba(59,130,246,0.12);">
+                                        <i class="bi bi-bar-chart-line" style="color:#3b82f6;font-size:1rem;"></i>
+                                    </span>
+                                    <div>
+                                        <h6 class="fw-semibold mb-0">Data Laporan</h6>
+                                        <p class="text-muted mb-0" style="font-size:0.75rem;">Hasil rekonsiliasi batch aktif</p>
+                                    </div>
+                                </div>
+                                <button id="export-button" class="btn btn-success btn-sm" disabled>
+                                    <i class="bi bi-download me-1"></i> Ekspor ke Excel
+                                </button>
+                            </div>
+                        </div>
+                        <div id="report-container">
+                            <div class="card-body p-4">
+                                <p class="text-secondary">Laporan akan muncul di sini setelah Anda memindai data. Jika Anda sudah memindai, klik menu "Report" lagi untuk memuat ulang.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div id="download-ba-page" class="page-content">
-                    <h1 class="h2 fw-bold text-dark mb-4">Download Berita Acara</h1>
-                    
+                    <!-- Banner -->
+                    <div class="card border-0 mb-4 overflow-hidden" style="background:linear-gradient(150deg,#164e63 0%,#0e7490 40%,#06b6d4 80%,#67e8f9 100%);border-radius:16px;position:relative;">
+                        <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,0.06);border-radius:50%;"></div>
+                        <div class="card-body p-4 d-flex justify-content-between align-items-center position-relative">
+                            <div class="text-white">
+                                <p class="mb-1 small fw-semibold" style="opacity:0.65;letter-spacing:1px;text-transform:uppercase;">ARsync</p>
+                                <h4 class="fw-bold mb-1">Download Berita Acara</h4>
+                                <p class="mb-0 small" style="opacity:0.75;">Unduh dokumen Berita Acara dari batch yang telah selesai.</p>
+                            </div>
+                            <i class="bi bi-file-earmark-arrow-down d-none d-md-block" style="font-size:4rem;opacity:0.15;color:#fff;"></i>
+                        </div>
+                    </div>
+
                     <div class="card mb-4">
+                        <div class="card-header bg-white border-bottom py-3 px-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="d-flex align-items-center justify-content-center rounded-3" style="width:34px;height:34px;background:rgba(6,182,212,0.12);">
+                                    <i class="bi bi-activity" style="color:#06b6d4;font-size:1rem;"></i>
+                                </span>
+                                <div>
+                                    <h6 class="fw-semibold mb-0">Ringkasan Batch Aktif</h6>
+                                    <p class="text-muted mb-0" style="font-size:0.75rem;">Status rekonsiliasi dari sesi batch yang sedang berjalan</p>
+                                </div>
+                            </div>
+                        </div>
                         <div class="card-body p-4">
-                            <h2 class="card-title h4 mb-3">Ringkasan Batch Aktif</h2>
                             <div id="active-ba-summary-container">
                                 <p class="text-secondary">Tidak ada batch aktif. Buat batch baru untuk melihat ringkasan.</p>
                             </div>
@@ -572,13 +616,26 @@
                     </div>
 
                     <div class="card">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                 <h2 class="card-title h4 mb-0">Riwayat Berita Acara</h2>
-                                 <div class="w-50">
-                                    <input type="text" id="ba-search-input" class="form-control" placeholder="Cari Nomor BA, Area, Petugas...">
-                                 </div>
+                        <div class="card-header bg-white border-bottom py-3 px-4">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="d-flex align-items-center justify-content-center rounded-3" style="width:34px;height:34px;background:rgba(6,182,212,0.12);">
+                                        <i class="bi bi-clock-history" style="color:#06b6d4;font-size:1rem;"></i>
+                                    </span>
+                                    <div>
+                                        <h6 class="fw-semibold mb-0">Riwayat Berita Acara</h6>
+                                        <p class="text-muted mb-0" style="font-size:0.75rem;">Semua dokumen BA yang telah dibuat</p>
+                                    </div>
+                                </div>
+                                <div style="min-width:260px;">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                        <input type="text" id="ba-search-input" class="form-control" placeholder="Cari Nomor BA, Area, Petugas...">
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+                        <div class="card-body p-4">
                             <div id="ba-history-container" class="table-responsive">
                                 <p class="text-secondary">Memuat riwayat...</p>
                             </div>
@@ -587,82 +644,153 @@
                 </div>
                 
                 <div id="area-management-page" class="page-content">
-                    <h1 class="h2 fw-bold text-dark mb-4">Managemen Area</h1>
+                    <!-- Banner -->
+                    <div class="card border-0 mb-4 overflow-hidden" style="background:linear-gradient(150deg,#4c1d95 0%,#6d28d9 40%,#8b5cf6 80%,#a78bfa 100%);border-radius:16px;position:relative;">
+                        <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,0.06);border-radius:50%;"></div>
+                        <div class="card-body p-4 d-flex justify-content-between align-items-center position-relative">
+                            <div class="text-white">
+                                <p class="mb-1 small fw-semibold" style="opacity:0.65;letter-spacing:1px;text-transform:uppercase;">ARsync</p>
+                                <h4 class="fw-bold mb-1">Managemen Area</h4>
+                                <p class="mb-0 small" style="opacity:0.75;">Kelola Business Area dan Sales Office yang tersedia di sistem.</p>
+                            </div>
+                            <i class="bi bi-map d-none d-md-block" style="font-size:4rem;opacity:0.15;color:#fff;"></i>
+                        </div>
+                    </div>
                     <div class="row g-4">
                         <!-- Business Area Column -->
                         <div class="col-md-6">
                             <div class="card">
+                                <div class="card-header bg-white border-bottom py-3 px-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="d-flex align-items-center justify-content-center rounded-3" style="width:34px;height:34px;background:rgba(139,92,246,0.12);">
+                                            <i class="bi bi-building-add" style="color:#8b5cf6;font-size:1rem;"></i>
+                                        </span>
+                                        <div>
+                                            <h6 class="fw-semibold mb-0">Tambah Business Area</h6>
+                                            <p class="text-muted mb-0" style="font-size:0.75rem;">Daftarkan Business Area baru ke dalam sistem</p>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="card-body p-4">
-                                    <h2 class="card-title h4 mb-3">Tambah Business Area</h2>
                                     <form id="add-business-area-form">
                                         <div class="mb-3">
-                                            <label for="new-business-area-code-input" class="form-label">Kode Area</label>
-                                            <input type="text" id="new-business-area-code-input" class="form-control" placeholder="e.g., CPXX" required>
+                                            <label for="new-business-area-code-input" class="form-label fw-semibold">Kode Area</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                                                <input type="text" id="new-business-area-code-input" class="form-control" placeholder="e.g., CPXX" required>
+                                            </div>
                                         </div>
-                                        <div class="mb-3">
-                                            <label for="new-business-area-name-input" class="form-label">Business Area</label>
-                                            <input type="text" id="new-business-area-name-input" class="form-control" placeholder="e.g., Area Medan" required>
+                                        <div class="mb-4">
+                                            <label for="new-business-area-name-input" class="form-label fw-semibold">Business Area</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-building"></i></span>
+                                                <input type="text" id="new-business-area-name-input" class="form-control" placeholder="e.g., Area Medan" required>
+                                            </div>
                                         </div>
-                                        <button type="submit" class="btn btn-primary">Tambah</button>
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-plus-circle me-1"></i> Tambah Business Area
+                                            </button>
+                                        </div>
                                     </form>
                                 </div>
                             </div>
                             <div class="card mt-4">
-                                 <div class="card-body p-4">
-                                     <h2 class="card-title h4 mb-3">Daftar Business Area</h2>
-                                     <div class="table-responsive">
-                                         <table class="table table-hover">
-                                             <thead>
-                                                 <tr>
-                                                     <th>Kode Area</th>
-                                                     <th>Business Area</th>
-                                                     <th>Aksi</th>
-                                                 </tr>
-                                             </thead>
-                                             <tbody id="business-area-list">
-                                                 <!-- Data akan diisi oleh JavaScript -->
-                                             </tbody>
-                                         </table>
-                                     </div>
-                                 </div>
+                                <div class="card-header bg-white border-bottom py-3 px-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="d-flex align-items-center justify-content-center rounded-3" style="width:34px;height:34px;background:rgba(139,92,246,0.12);">
+                                            <i class="bi bi-building" style="color:#8b5cf6;font-size:1rem;"></i>
+                                        </span>
+                                        <div>
+                                            <h6 class="fw-semibold mb-0">Daftar Business Area</h6>
+                                            <p class="text-muted mb-0" style="font-size:0.75rem;">Semua Business Area yang terdaftar</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="px-4">Kode Area</th>
+                                                    <th class="px-4">Business Area</th>
+                                                    <th class="px-4 text-end">Aksi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="business-area-list">
+                                                <!-- Data akan diisi oleh JavaScript -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- Sales Office Column -->
                         <div class="col-md-6">
                             <div class="card">
+                                <div class="card-header bg-white border-bottom py-3 px-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="d-flex align-items-center justify-content-center rounded-3" style="width:34px;height:34px;background:rgba(16,185,129,0.12);">
+                                            <i class="bi bi-shop-window" style="color:#10b981;font-size:1rem;"></i>
+                                        </span>
+                                        <div>
+                                            <h6 class="fw-semibold mb-0">Tambah Sales Office</h6>
+                                            <p class="text-muted mb-0" style="font-size:0.75rem;">Daftarkan Sales Office baru ke dalam sistem</p>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="card-body p-4">
-                                    <h2 class="card-title h4 mb-3">Tambah Sales Office</h2>
                                     <form id="add-sales-office-form">
-                                         <div class="mb-3">
-                                            <label for="new-sales-office-code-input" class="form-label">Kode Office</label>
-                                            <input type="text" id="new-sales-office-code-input" class="form-control" placeholder="e.g., CXXX" required>
-                                        </div>
                                         <div class="mb-3">
-                                            <label for="new-sales-office-name-input" class="form-label">Sales Office</label>
-                                            <input type="text" id="new-sales-office-name-input" class="form-control" placeholder="e.g., Kantor Cabang Siantar" required>
+                                            <label for="new-sales-office-code-input" class="form-label fw-semibold">Kode Office</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                                                <input type="text" id="new-sales-office-code-input" class="form-control" placeholder="e.g., CXXX" required>
+                                            </div>
                                         </div>
-                                        <button type="submit" class="btn btn-primary">Tambah</button>
+                                        <div class="mb-4">
+                                            <label for="new-sales-office-name-input" class="form-label fw-semibold">Sales Office</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-shop"></i></span>
+                                                <input type="text" id="new-sales-office-name-input" class="form-control" placeholder="e.g., Kantor Cabang Siantar" required>
+                                            </div>
+                                        </div>
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="bi bi-plus-circle me-1"></i> Tambah Sales Office
+                                            </button>
+                                        </div>
                                     </form>
                                 </div>
                             </div>
-                             <div class="card mt-4">
-                                 <div class="card-body p-4">
-                                     <h2 class="card-title h4 mb-3">Daftar Sales Office</h2>
-                                     <div class="table-responsive">
-                                         <table class="table table-hover">
-                                             <thead>
-                                                 <tr>
-                                                     <th>Kode Office</th>
-                                                     <th>Sales Office</th>
-                                                     <th>Aksi</th>
-                                                 </tr>
-                                             </thead>
-                                             <tbody id="sales-office-list">
-                                                 <!-- Data akan diisi oleh JavaScript -->
-                                             </tbody>
-                                         </table>
-                                     </div>
-                                 </div>
+                            <div class="card mt-4">
+                                <div class="card-header bg-white border-bottom py-3 px-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="d-flex align-items-center justify-content-center rounded-3" style="width:34px;height:34px;background:rgba(16,185,129,0.12);">
+                                            <i class="bi bi-shop" style="color:#10b981;font-size:1rem;"></i>
+                                        </span>
+                                        <div>
+                                            <h6 class="fw-semibold mb-0">Daftar Sales Office</h6>
+                                            <p class="text-muted mb-0" style="font-size:0.75rem;">Semua Sales Office yang terdaftar</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="px-4">Kode Office</th>
+                                                    <th class="px-4">Sales Office</th>
+                                                    <th class="px-4 text-end">Aksi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="sales-office-list">
+                                                <!-- Data akan diisi oleh JavaScript -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
