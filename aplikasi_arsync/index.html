@@ -683,17 +683,15 @@
                                             </div>
                                             <div class="form-text">Daftar Area/DC dari SSO Portal</div>
                                         </div>
-                                        <div class="mb-4">
+                                        <div class="mb-0">
                                             <label for="new-business-area-code-input" class="form-label fw-semibold">Kode Area</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-hash"></i></span>
                                                 <input type="text" id="new-business-area-code-input" class="form-control" placeholder="e.g., CPXX" required>
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="bi bi-floppy me-1"></i> Simpan
+                                                </button>
                                             </div>
-                                        </div>
-                                        <div class="d-grid">
-                                            <button type="submit" class="btn btn-primary">
-                                                <i class="bi bi-plus-circle me-1"></i> Tambah Business Area
-                                            </button>
                                         </div>
                                     </form>
                                 </div>
@@ -754,17 +752,15 @@
                                             </div>
                                             <div class="form-text">Daftar Sales Office dari SSO Portal</div>
                                         </div>
-                                        <div class="mb-4">
+                                        <div class="mb-0">
                                             <label for="new-sales-office-code-input" class="form-label fw-semibold">Kode Office</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-hash"></i></span>
                                                 <input type="text" id="new-sales-office-code-input" class="form-control" placeholder="e.g., CXXX" required>
+                                                <button type="submit" class="btn btn-success">
+                                                    <i class="bi bi-floppy me-1"></i> Simpan
+                                                </button>
                                             </div>
-                                        </div>
-                                        <div class="d-grid">
-                                            <button type="submit" class="btn btn-success">
-                                                <i class="bi bi-plus-circle me-1"></i> Tambah Sales Office
-                                            </button>
                                         </div>
                                     </form>
                                 </div>
@@ -1435,13 +1431,9 @@
                     document.body.classList.add('is-admin');
                     declineJoinBtn.style.display = 'inline-block';
 
-                    const canEdit = currentUser.jabatan === 'ITE';
-                    const canAddUser = canEdit || currentUser.jabatan === 'Head AR';
+                    const canAddUser = currentUser.jabatan === 'ITE' || currentUser.jabatan === 'Head AR';
 
-                    const areaPage = document.getElementById('area-management-page');
                     const userPage = document.getElementById('user-management-page');
-                    
-                    if(areaPage) areaPage.querySelectorAll('form').forEach(form => form.style.display = canEdit ? 'block' : 'none');
                     if(userPage) userPage.querySelector('form').style.display = canAddUser ? 'block' : 'none';
                     
                 } else {
