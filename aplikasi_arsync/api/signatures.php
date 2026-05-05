@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/../db_connect.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -43,43 +43,3 @@ if ($method === 'GET') {
         json_response(['success' => false, 'message' => 'Database error: ' . $e->getMessage()], 500);
     }
 }
-?>
-
-} elseif ($method === 'POST') {
-    $data = json_decode(file_get_contents('php://input'), true);
-
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Invalid JSON received']);
-        exit;
-    }
-
-    $conn->begin_transaction();
-
-    try {
-        $positions = ['dibuat_oleh', 'diperiksa_oleh', 'disetujui_oleh'];
-        $stmt = $conn->prepare("INSERT INTO signatures (position, name, title) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), title = VALUES(title)");
-
-        foreach ($positions as $position) {
-            if (isset($data[$position])) {
-                $name = $data[$position]['name'];
-                $title = $data[$position]['title'];
-                $stmt->bind_param("sss", $position, $name, $title);
-                $stmt->execute();
-            }
-        }
-        
-        $stmt->close();
-        $conn->commit();
-        echo json_encode(['success' => true, 'message' => 'Data berhasil disimpan.']);
-
-    } catch (mysqli_sql_exception $exception) {
-        $conn->rollback();
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Database error: ' . $exception->getMessage()]);
-    }
-}
-
-$conn->close();
-?>
-
