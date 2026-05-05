@@ -71,7 +71,7 @@ try {
     $stmt->execute([
         ':sso_id'   => (string)$ssoUser['id'],
         ':username' => $ssoUser['username'] ?? $ssoUser['email'],
-        ':fullname' => $ssoUser['name'] ?? $ssoUser['username'],
+        ':fullname' => $ssoUser['fullName'] ?? $ssoUser['name'] ?? $ssoUser['username'],
         ':role'     => $arsyncRole,
         ':jabatan'  => $jabatan,
     ]);
