@@ -2307,14 +2307,18 @@
 
                 let allowedNames = null; // null = tampilkan semua
 
+                const userRole2 = currentUser ? currentUser.role : '';
                 if (jabatan === 'KA Admin' && userArea) {
                     // KA Admin: hanya area miliknya + SO di bawah area tersebut
                     allowedNames = new Set([userArea]);
                     ssoMasterSalesOffices.forEach(so => {
                         if (so.area_name === userArea) allowedNames.add(so.name);
                     });
+                } else if (userRole2 === 'head_ar') {
+                    // Head AR: tampilkan semua area & SO (bisa upload ke area mana saja)
+                    allowedNames = null;
                 } else if (userPt) {
-                    // Semua role lain dengan PT: tampilkan semua area & SO dalam PT yang sama
+                    // Role lain dengan PT: tampilkan semua area & SO dalam PT yang sama
                     allowedNames = new Set();
                     ssoMasterAreas.forEach(a => {
                         if ((a.pt || '').trim() === userPt) allowedNames.add(a.name);
@@ -2604,10 +2608,11 @@
                         const batch = result.batch;
 
                         // --- Batasan akses batch berdasarkan area/SO user ---
-                        // Superadmin dapat mengakses semua batch. Head AR dan petugas
-                        // hanya bisa bergabung dengan batch yang ditujukan ke area/SO mereka.
+                        // Superadmin dan head_ar dapat mengakses semua batch.
+                        // Admin (KA Admin) dan petugas hanya bisa bergabung dengan batch
+                        // yang ditujukan ke area/SO mereka.
                         const userRole = currentUser ? currentUser.role : '';
-                        if (userRole !== 'superadmin') {
+                        if (userRole !== 'superadmin' && userRole !== 'head_ar') {
                             const userArea = (currentUser.area || '').trim();
                             // Cari nama area/SO dari tabel arsync berdasarkan kode batch
                             const baMatch2 = businessAreas.find(a => a.area_name === batch.business_area);
