@@ -2307,18 +2307,15 @@
 
                 let allowedNames = null; // null = tampilkan semua
 
-                const userRole2 = currentUser ? currentUser.role : '';
                 if (jabatan === 'KA Admin' && userArea) {
                     // KA Admin: hanya area miliknya + SO di bawah area tersebut
                     allowedNames = new Set([userArea]);
                     ssoMasterSalesOffices.forEach(so => {
                         if (so.area_name === userArea) allowedNames.add(so.name);
                     });
-                } else if (userRole2 === 'head_ar') {
-                    // Head AR: tampilkan semua area & SO (bisa upload ke area mana saja)
-                    allowedNames = null;
                 } else if (userPt) {
-                    // Role lain dengan PT: tampilkan semua area & SO dalam PT yang sama
+                    // Head AR & role lain dengan PT: tampilkan semua area & SO dalam PT yang sama
+                    // Head AR bisa upload ke area mana saja dalam PT-nya, tiap batch ditujukan ke area berbeda
                     allowedNames = new Set();
                     ssoMasterAreas.forEach(a => {
                         if ((a.pt || '').trim() === userPt) allowedNames.add(a.name);
@@ -2327,7 +2324,7 @@
                         if ((so.area_pt || '').trim() === userPt) allowedNames.add(so.name);
                     });
                 }
-                // Jika userPt kosong (misal ITE cross-PT): allowedNames tetap null = tampilkan semua
+                // Jika userPt kosong (misal ITE/superadmin cross-PT): allowedNames tetap null = tampilkan semua
 
                 // Render Business Area List
                 businessAreaList.innerHTML = '';
