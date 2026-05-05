@@ -1079,12 +1079,18 @@
                 }
             }
 
+            // SSO master data — used for Head AR filtering in Create Batch
+            let ssoMasterAreas = [];
+            let ssoMasterSalesOffices = [];
+
             async function fetchSsoAreas() {
                 try {
                     const response = await fetch(`${API_BASE_URL}sso_areas.php`);
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const data = await response.json();
-                    populateSsoDropdowns(data.areas || [], data.sales_offices || []);
+                    ssoMasterAreas = data.areas || [];
+                    ssoMasterSalesOffices = data.sales_offices || [];
+                    populateSsoDropdowns(ssoMasterAreas, ssoMasterSalesOffices);
                 } catch (error) {
                     console.error('Error fetching SSO areas:', error);
                 }
@@ -2273,6 +2279,19 @@
 
             function renderAreas() {
                 const canEdit = currentUser && currentUser.role === 'admin';
+
+                // Build the set of allowed names for Head AR filtering in Create Batch
+                const isHeadAR = currentUser && currentUser.jabatan === 'Head AR';
+                let allowedNames = null; // null = show all; Set = filter to these names
+                if (isHeadAR && currentUser.area) {
+                    const headArArea = currentUser.area.trim();
+                    // Include the area/DC name itself + all sales offices under that area
+                    allowedNames = new Set([headArArea]);
+                    ssoMasterSalesOffices.forEach(so => {
+                        if (so.area_name === headArArea) allowedNames.add(so.name);
+                    });
+                }
+
                 // Render Business Area List
                 businessAreaList.innerHTML = '';
                 businessAreaInput.innerHTML = '<option value="">Pilih Kode Area</option>';
@@ -2289,11 +2308,14 @@
                         </td>
                     `;
                     businessAreaList.appendChild(tr);
-                    
-                    const option = document.createElement('option');
-                    option.value = area.area_name;
-                    option.textContent = `${area.area_name} - ${area.business_area_name}`;
-                    businessAreaInput.appendChild(option);
+
+                    // Create Batch dropdown: filter for Head AR
+                    if (!allowedNames || allowedNames.has(area.business_area_name)) {
+                        const option = document.createElement('option');
+                        option.value = area.area_name;
+                        option.textContent = `${area.area_name} - ${area.business_area_name}`;
+                        businessAreaInput.appendChild(option);
+                    }
                 });
 
                 // Render Sales Office List
@@ -2313,10 +2335,13 @@
                     `;
                     salesOfficeList.appendChild(tr);
 
-                    const option = document.createElement('option');
-                    option.value = office.office_name;
-                    option.textContent = `${office.office_name} - ${office.sales_office_name}`;
-                    salesOfficeInput.appendChild(option);
+                    // Create Batch dropdown: filter for Head AR
+                    if (!allowedNames || allowedNames.has(office.sales_office_name)) {
+                        const option = document.createElement('option');
+                        option.value = office.office_name;
+                        option.textContent = `${office.office_name} - ${office.sales_office_name}`;
+                        salesOfficeInput.appendChild(option);
+                    }
                 });
             }
 
@@ -2675,6 +2700,7 @@
             }
 
             async function loadInitialData() {
+                await fetchSsoAreas(); // load SSO master area data first (needed for Head AR filtering)
                 await fetchAreas();
                 await fetchSignatures();
                 await fetchBaHistory();

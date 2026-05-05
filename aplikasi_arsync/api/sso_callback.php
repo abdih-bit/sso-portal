@@ -93,6 +93,8 @@ $_SESSION['arsync_user'] = [
     'fullname' => $arsyncUser['fullname'],
     'role'     => $arsyncUser['role'],
     'jabatan'  => $arsyncUser['jabatan'],
+    'area'     => trim($ssoUser['area'] ?? ''),
+    'pt'       => trim($ssoUser['pt']   ?? ''),
 ];
 
 json_response([
