@@ -2280,17 +2280,30 @@
             function renderAreas() {
                 const canEdit = currentUser && currentUser.role === 'admin';
 
-                // Build the set of allowed names for Head AR filtering in Create Batch
-                const isHeadAR = currentUser && currentUser.jabatan === 'Head AR';
-                let allowedNames = null; // null = show all; Set = filter to these names
-                if (isHeadAR && currentUser.area) {
-                    const headArArea = currentUser.area.trim();
-                    // Include the area/DC name itself + all sales offices under that area
-                    allowedNames = new Set([headArArea]);
+                // Build allowed names Set for Create Batch dropdowns
+                const jabatan  = currentUser ? (currentUser.jabatan || '') : '';
+                const userPt   = currentUser ? (currentUser.pt   || '').trim() : '';
+                const userArea = currentUser ? (currentUser.area || '').trim() : '';
+
+                let allowedNames = null; // null = tampilkan semua
+
+                if (jabatan === 'KA Admin' && userArea) {
+                    // KA Admin: hanya area miliknya + SO di bawah area tersebut
+                    allowedNames = new Set([userArea]);
                     ssoMasterSalesOffices.forEach(so => {
-                        if (so.area_name === headArArea) allowedNames.add(so.name);
+                        if (so.area_name === userArea) allowedNames.add(so.name);
+                    });
+                } else if (userPt) {
+                    // Semua role lain dengan PT: tampilkan semua area & SO dalam PT yang sama
+                    allowedNames = new Set();
+                    ssoMasterAreas.forEach(a => {
+                        if ((a.pt || '').trim() === userPt) allowedNames.add(a.name);
+                    });
+                    ssoMasterSalesOffices.forEach(so => {
+                        if ((so.area_pt || '').trim() === userPt) allowedNames.add(so.name);
                     });
                 }
+                // Jika userPt kosong (misal ITE cross-PT): allowedNames tetap null = tampilkan semua
 
                 // Render Business Area List
                 businessAreaList.innerHTML = '';
@@ -2309,7 +2322,7 @@
                     `;
                     businessAreaList.appendChild(tr);
 
-                    // Create Batch dropdown: filter for Head AR
+                    // Create Batch dropdown: filter by PT (or area for KA Admin)
                     if (!allowedNames || allowedNames.has(area.business_area_name)) {
                         const option = document.createElement('option');
                         option.value = area.area_name;
@@ -2335,7 +2348,7 @@
                     `;
                     salesOfficeList.appendChild(tr);
 
-                    // Create Batch dropdown: filter for Head AR
+                    // Create Batch dropdown: filter by PT (or area for KA Admin)
                     if (!allowedNames || allowedNames.has(office.sales_office_name)) {
                         const option = document.createElement('option');
                         option.value = office.office_name;

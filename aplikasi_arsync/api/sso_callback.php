@@ -49,7 +49,7 @@ function mapSsoRoleToArsync(array $ssoUser): string {
     $ssoRole = $ssoUser['role']    ?? 'USER';
     $jabatan = trim($ssoUser['jabatan'] ?? '');
     if ($ssoRole === 'SUPERADMIN')               return 'admin';
-    if (in_array($jabatan, ['ITE', 'Head AR', 'Head Admin'], true)) return 'admin';
+    if (in_array($jabatan, ['ITE', 'Head AR', 'Head Admin', 'KA Admin'], true)) return 'admin';
     if ($ssoRole === 'ADMIN')                    return 'admin';
     return 'petugas';
 }
