@@ -17,14 +17,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 try {
     $areas = $pdo->query(
-        "SELECT id, name, pt, is_ho FROM areas ORDER BY name ASC"
+        "SELECT id, name, pt, is_ho FROM areas ORDER BY pt ASC NULLS LAST, is_ho DESC, name ASC"
     )->fetchAll(PDO::FETCH_ASSOC);
 
     $salesOffices = $pdo->query(
-        "SELECT s.id, s.name, a.name AS area_name
+        "SELECT s.id, s.name, a.name AS area_name, a.pt AS area_pt
          FROM sales_offices s
          JOIN areas a ON s.area_id = a.id
-         ORDER BY a.name ASC, s.name ASC"
+         ORDER BY a.pt ASC NULLS LAST, a.name ASC, s.name ASC"
     )->fetchAll(PDO::FETCH_ASSOC);
 
     json_response([

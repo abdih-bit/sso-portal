@@ -1236,42 +1236,64 @@
             }
 
             function populateSsoDropdowns(areas, salesOffices) {
-                // Populate Business Area dropdown
+                // Populate Business Area dropdown — grouped by PT
                 const baSelect = document.getElementById('new-business-area-name-input');
                 if (baSelect && baSelect.tagName === 'SELECT') {
                     const currentVal = baSelect.value;
                     baSelect.innerHTML = '<option value="" disabled selected>-- Pilih Area / DC --</option>';
+
+                    // Group areas by PT
+                    const grouped = {};
                     areas.forEach(area => {
-                        const opt = document.createElement('option');
-                        opt.value = area.name;
-                        opt.textContent = area.pt ? `${area.name} (${area.pt})` : area.name;
-                        baSelect.appendChild(opt);
+                        const ptKey = area.pt || 'Lainnya';
+                        if (!grouped[ptKey]) grouped[ptKey] = [];
+                        grouped[ptKey].push(area);
                     });
+
+                    Object.keys(grouped).forEach(pt => {
+                        const optgroup = document.createElement('optgroup');
+                        optgroup.label = pt;
+                        grouped[pt].forEach(area => {
+                            const opt = document.createElement('option');
+                            opt.value = area.name;
+                            opt.textContent = area.is_ho == 1 || area.is_ho === true ? `${area.name} (HO)` : area.name;
+                            optgroup.appendChild(opt);
+                        });
+                        baSelect.appendChild(optgroup);
+                    });
+
                     if (currentVal) baSelect.value = currentVal;
                 }
 
-                // Populate Sales Office dropdown, grouped by area
+                // Populate Sales Office dropdown — grouped by PT > Area
                 const soSelect = document.getElementById('new-sales-office-name-input');
                 if (soSelect && soSelect.tagName === 'SELECT') {
                     const currentVal = soSelect.value;
                     soSelect.innerHTML = '<option value="" disabled selected>-- Pilih Sales Office --</option>';
-                    // Group by area_name
+
+                    // Group by pt, then area_name
                     const grouped = {};
                     salesOffices.forEach(so => {
-                        if (!grouped[so.area_name]) grouped[so.area_name] = [];
-                        grouped[so.area_name].push(so);
+                        const ptKey = so.area_pt || 'Lainnya';
+                        if (!grouped[ptKey]) grouped[ptKey] = {};
+                        if (!grouped[ptKey][so.area_name]) grouped[ptKey][so.area_name] = [];
+                        grouped[ptKey][so.area_name].push(so);
                     });
-                    Object.keys(grouped).sort().forEach(areaName => {
-                        const optgroup = document.createElement('optgroup');
-                        optgroup.label = areaName;
-                        grouped[areaName].forEach(so => {
-                            const opt = document.createElement('option');
-                            opt.value = so.name;
-                            opt.textContent = so.name;
-                            optgroup.appendChild(opt);
+
+                    Object.keys(grouped).forEach(pt => {
+                        Object.keys(grouped[pt]).forEach(areaName => {
+                            const optgroup = document.createElement('optgroup');
+                            optgroup.label = `${pt} — ${areaName}`;
+                            grouped[pt][areaName].forEach(so => {
+                                const opt = document.createElement('option');
+                                opt.value = so.name;
+                                opt.textContent = so.name;
+                                optgroup.appendChild(opt);
+                            });
+                            soSelect.appendChild(optgroup);
                         });
-                        soSelect.appendChild(optgroup);
                     });
+
                     if (currentVal) soSelect.value = currentVal;
                 }
             }
