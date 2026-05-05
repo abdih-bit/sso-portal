@@ -2774,7 +2774,7 @@
                                     <span class="badge bg-light text-dark border ms-1">${b.excel_filename}</span>
                                 </div>
                             </div>
-                            <button class="btn btn-sm btn-success flex-shrink-0" onclick="openAvailableBatch(${b.id})">
+                            <button class="btn btn-sm btn-success flex-shrink-0 open-batch-btn" data-batch-id="${b.id}">
                                 <i class="bi bi-box-arrow-in-right me-1"></i>Buka
                             </button>
                         </div>`;
@@ -2785,14 +2785,23 @@
                 }
             }
 
-            async function openAvailableBatch(batchId) {
+            // Event delegation untuk tombol Buka di panel batch tersedia
+            document.getElementById('available-batches-list').addEventListener('click', async (e) => {
+                const btn = e.target.closest('.open-batch-btn');
+                if (!btn) return;
+                const batchId = parseInt(btn.dataset.batchId, 10);
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
                 sessionStorage.setItem('currentBatchId', batchId);
                 const success = await joinBatch(batchId);
                 if (success) {
                     document.getElementById('available-batches-panel').style.display = 'none';
                     showPage('pindai-page');
+                } else {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-box-arrow-in-right me-1"></i>Buka';
                 }
-            }
+            });
 
             async function updateScanDataFromServer(batchId) {
                 try {
