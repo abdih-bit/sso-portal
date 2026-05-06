@@ -64,6 +64,62 @@ if ($method === 'POST') {
     echo json_encode(['success' => true, 'id' => $ba_id]);
 
 } elseif ($method === 'GET') {
-    $stmt = $pdo->query("SELECT * FROM arsync_berita_acara ORDER BY creation_date DESC, id DESC");
-    echo json_encode($stmt->fetchAll());
+    $currentUser = require_auth();
+    $role        = $currentUser['role'] ?? '';
+    $userArea    = trim($currentUser['area'] ?? '');
+    $userPt      = trim($currentUser['pt']   ?? '');
+
+    if ($role === 'superadmin') {
+        // Superadmin: semua riwayat
+        $stmt = $pdo->query("SELECT * FROM arsync_berita_acara ORDER BY creation_date DESC, id DESC");
+        echo json_encode($stmt->fetchAll());
+
+    } elseif ($role === 'head_ar') {
+        // Head AR: semua area/DC dalam PT-nya
+        // Ambil semua nama area dan sales_office yang ter-PT sama
+        $stmtAreas = $pdo->prepare(
+            "SELECT a.name AS aname, s.name AS sname
+             FROM areas a
+             LEFT JOIN sales_offices s ON s.area_id = a.id
+             WHERE a.pt = :pt"
+        );
+        $stmtAreas->execute([':pt' => $userPt]);
+        $rows = $stmtAreas->fetchAll();
+
+        $names = [];
+        foreach ($rows as $r) {
+            if ($r['aname']) $names[] = $r['aname'];
+            if ($r['sname']) $names[] = $r['sname'];
+        }
+        $names = array_unique(array_filter($names));
+
+        if (empty($names)) {
+            // PT tidak diset atau tidak ada area — kembalikan array kosong
+            echo json_encode([]);
+        } else {
+            $ph = implode(',', array_fill(0, count($names), '?'));
+            $valsPairs = array_merge(array_values($names), array_values($names));
+            $stmt = $pdo->prepare(
+                "SELECT * FROM arsync_berita_acara
+                 WHERE business_area_name IN ($ph) OR sales_office_name IN ($ph)
+                 ORDER BY creation_date DESC, id DESC"
+            );
+            $stmt->execute($valsPairs);
+            echo json_encode($stmt->fetchAll());
+        }
+
+    } else {
+        // admin / petugas: hanya area DC mereka sendiri
+        if ($userArea === '') {
+            echo json_encode([]);
+        } else {
+            $stmt = $pdo->prepare(
+                "SELECT * FROM arsync_berita_acara
+                 WHERE business_area_name = :area OR sales_office_name = :area
+                 ORDER BY creation_date DESC, id DESC"
+            );
+            $stmt->execute([':area' => $userArea]);
+            echo json_encode($stmt->fetchAll());
+        }
+    }
 }
