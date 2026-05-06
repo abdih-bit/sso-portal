@@ -6,9 +6,12 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    // Hanya Head Admin yang boleh finalisasi
-    if (!isset($data['currentUserJabatan']) || $data['currentUserJabatan'] !== 'Head Admin') {
-        json_response(['success' => false, 'message' => 'Anda tidak memiliki izin untuk finalisasi batch. Hanya Head Admin yang diizinkan.'], 403);
+    // Hanya KA Admin (role: admin) yang boleh finalisasi
+    $currentRole    = $_SESSION['role']    ?? '';
+    $currentJabatan = $_SESSION['jabatan'] ?? '';
+    $allowedRoles   = ['admin', 'superadmin'];
+    if (!in_array($currentRole, $allowedRoles, true)) {
+        json_response(['success' => false, 'message' => 'Anda tidak memiliki izin untuk finalisasi batch. Hanya KA Admin yang diizinkan.'], 403);
     }
 
     // Konversi format tanggal dari dd/mm/yyyy ke yyyy-mm-dd

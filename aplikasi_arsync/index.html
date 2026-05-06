@@ -935,6 +935,9 @@
         </div>
     </div>
     
+    <!-- Toast Notification -->
+    <div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none;"></div>
+
     <!-- Modal untuk Join Batch -->
     <div class="modal fade" id="joinBatchModal" tabindex="-1" aria-labelledby="joinBatchModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -1066,6 +1069,29 @@
             let currentBatchId = null;
             let pollingInterval = null;
             let joinBatchModal = new bootstrap.Modal(document.getElementById('joinBatchModal'));
+
+            // Toast notification utility
+            function showToast(message, type = 'success', duration = 4000) {
+                const container = document.getElementById('toast-container');
+                const id = 'toast-' + Date.now();
+                const icons = { success: 'bi-check-circle-fill', error: 'bi-x-circle-fill', warning: 'bi-exclamation-triangle-fill', info: 'bi-info-circle-fill' };
+                const colors = { success: '#22c55e', error: '#ef4444', warning: '#f59e0b', info: '#6366f1' };
+                const icon  = icons[type]  || icons.info;
+                const color = colors[type] || colors.info;
+                const el = document.createElement('div');
+                el.id = id;
+                el.style.cssText = `pointer-events:auto;display:flex;align-items:flex-start;gap:12px;background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 8px 32px rgba(0,0,0,0.15);min-width:280px;max-width:360px;border-left:4px solid ${color};opacity:0;transform:translateX(40px);transition:opacity .3s,transform .3s;`;
+                el.innerHTML = `
+                    <i class="bi ${icon}" style="color:${color};font-size:1.25rem;flex-shrink:0;margin-top:1px;"></i>
+                    <span style="font-size:0.88rem;line-height:1.4;color:#1f2937;flex-grow:1;">${message}</span>
+                    <button onclick="this.parentElement.remove()" style="border:none;background:none;color:#9ca3af;font-size:1rem;padding:0;line-height:1;cursor:pointer;flex-shrink:0;">&times;</button>`;
+                container.appendChild(el);
+                requestAnimationFrame(() => { el.style.opacity = '1'; el.style.transform = 'translateX(0)'; });
+                setTimeout(() => {
+                    el.style.opacity = '0'; el.style.transform = 'translateX(40px)';
+                    setTimeout(() => el.remove(), 300);
+                }, duration);
+            }
 
             const synth = new Tone.Synth().toDestination();
             
@@ -2283,19 +2309,19 @@
                     });
                     const result = await response.json();
                     if (result.success) {
-                        alert('✅ Berita Acara berhasil difinalisasi!\n\nBatch telah dikunci. Data tidak akan tampil di dashboard.');
+                        showToast('Berita Acara berhasil difinalisasi! Batch telah dikunci.', 'success', 5000);
                         fetchBaHistory();
                         stopPolling();
                         resetApp();
                         showPage('download-ba-page');
                     } else {
-                         alert(`Gagal menyimpan: ${result.message}`);
-                         saveButton.disabled = false;
-                         saveButton.innerHTML = '<i class="bi bi-check2-circle me-1"></i>Simpan & Finalisasi';
+                        showToast(`Gagal menyimpan: ${result.message}`, 'error', 6000);
+                        saveButton.disabled = false;
+                        saveButton.innerHTML = '<i class="bi bi-check2-circle me-1"></i>Simpan & Finalisasi';
                     }
                 } catch (error) {
                     console.error("Failed to save BA:", error);
-                    alert('Terjadi error saat menyimpan Berita Acara.');
+                    showToast('Terjadi error saat menyimpan Berita Acara.', 'error', 5000);
                     saveButton.disabled = false;
                     saveButton.innerHTML = '<i class="bi bi-check2-circle me-1"></i>Simpan & Finalisasi';
                 }
