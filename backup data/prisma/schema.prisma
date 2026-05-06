@@ -28,20 +28,16 @@ model User {
   isActive      Boolean   @default(true) @map("is_active")
   isVerified    Boolean   @default(false) @map("is_verified")
   lastLoginAt   DateTime? @map("last_login_at")
-  // Two-Factor Authentication
-  totpSecret    String?   @map("totp_secret")
-  totpEnabled   Boolean   @default(false) @map("totp_enabled")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  sessions       UserSession[]
-  ssoTokens      SSOToken[]
-  auditLogs      AuditLog[]
+  sessions      UserSession[]
+  ssoTokens     SSOToken[]
+  auditLogs     AuditLog[]
   passwordResets PasswordReset[]
   resetRequests  PasswordResetRequest[]
-  spdAuditLogs   SpdAuditLog[]
-  trustedDevices TotpTrustedDevice[]
+  spdAuditLogs  SpdAuditLog[]
 
   @@map("users")
 }
@@ -50,21 +46,6 @@ enum UserRole {
   SUPERADMIN
   ADMIN
   USER
-}
-
-// ===========================
-// TOTP TRUSTED DEVICE MODEL
-// ===========================
-model TotpTrustedDevice {
-  id          String    @id @default(uuid())
-  userId      String    @map("user_id")
-  deviceToken String    @unique @map("device_token")
-  expiresAt   DateTime  @map("expires_at")
-  createdAt   DateTime  @default(now()) @map("created_at")
-
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("totp_trusted_devices")
 }
 
 // ===========================

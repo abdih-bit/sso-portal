@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const authController  = require('../controllers/auth.controller');
-const twofaController = require('../controllers/twofa.controller');
+const authController = require('../controllers/auth.controller');
 const { authenticate } = require('../middleware/auth.middleware');
 
 // Public routes
@@ -11,18 +10,9 @@ router.post('/reset-password', authController.resetPassword);
 router.post('/request-password-reset', authController.requestPasswordReset);
 router.post('/refresh', authController.refreshToken);
 
-// 2FA verify — public (menggunakan temp token hasil login)
-router.post('/2fa/verify', twofaController.verify);
-
 // Protected routes
 router.post('/logout', authenticate, authController.logout);
 router.get('/me', authenticate, authController.getProfile);
 router.put('/change-password', authenticate, authController.changePassword);
-
-// 2FA management — protected
-router.get('/2fa/status',   authenticate, twofaController.status);
-router.post('/2fa/setup',   authenticate, twofaController.setup);
-router.post('/2fa/confirm', authenticate, twofaController.confirm);
-router.post('/2fa/disable', authenticate, twofaController.disable);
 
 module.exports = router;

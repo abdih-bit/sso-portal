@@ -8,11 +8,6 @@ router.get('/login', redirectIfAuthenticated, (req, res) => {
   res.sendFile(path.join(__dirname, '../../public/login.html'));
 });
 
-// Halaman verifikasi 2FA (tidak perlu auth, cukup memiliki temp_token)
-router.get('/verify-2fa', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../public/verify-2fa.html'));
-});
-
 // Reset password page
 router.get('/reset-password', (req, res) => {
   res.sendFile(path.join(__dirname, '../../public/reset-password.html'));

@@ -1,11 +1,9 @@
 const bcrypt = require('bcryptjs');
-const jwt    = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { prisma } = require('../database/client');
 const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../utils/jwt.utils');
 const { createAuditLog } = require('../utils/audit.utils');
 const { sendPasswordResetEmail } = require('../utils/email.utils');
-const { DEVICE_COOKIE, DEVICE_TTL_MS } = require('./twofa.controller');
 
 /**
  * POST /api/auth/login
@@ -45,30 +43,6 @@ async function login(req, res) {
       return res.status(401).json({ error: 'Username atau password salah.' });
     }
 
-    // ── Cek 2FA untuk SUPERADMIN ──
-    if (user.role === 'SUPERADMIN' && user.totpEnabled) {
-      let deviceTrusted = false;
-      const deviceToken = req.cookies?.[DEVICE_COOKIE];
-      if (deviceToken) {
-        const trusted = await prisma.totpTrustedDevice.findFirst({
-          where: { userId: user.id, deviceToken, expiresAt: { gt: new Date() } },
-        });
-        if (trusted) deviceTrusted = true;
-      }
-
-      if (!deviceTrusted) {
-        // Belum ada device token valid — minta OTP
-        const tempToken = jwt.sign(
-          { userId: user.id, purpose: '2fa_pending' },
-          process.env.JWT_SECRET,
-          { expiresIn: '5m', issuer: 'portal.hqmedan.com', audience: 'hqmedan-apps' }
-        );
-        return res.json({ requires_2fa: true, temp_token: tempToken });
-      }
-      // Device dipercaya — lanjut login normal
-    }
-
-    // ── Normal login (no 2FA required or device is trusted) ──
     // Generate tokens
     const tokenPayload = {
       userId: user.id,

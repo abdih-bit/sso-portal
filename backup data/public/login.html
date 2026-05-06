@@ -592,18 +592,6 @@
           localStorage.removeItem(REMEMBER_KEY);
         }
 
-        // ── Cek apakah server meminta verifikasi 2FA ──
-        if (data.requires_2fa && data.temp_token) {
-          sessionStorage.setItem('_2fa_tmp', data.temp_token);
-          // Simpan redirect target agar setelah 2FA bisa diarahkan ke tujuan
-          const dest = (appParam && redirectParam)
-            ? `/api/sso/authorize?app=${appParam}&redirect=${encodeURIComponent(redirectParam)}`
-            : '/dashboard';
-          sessionStorage.setItem('_2fa_redirect', dest);
-          window.location.href = '/verify-2fa';
-          return;
-        }
-
         if (appParam && redirectParam) {
           window.location.href = `/api/sso/authorize?app=${appParam}&redirect=${encodeURIComponent(redirectParam)}`;
         } else {
