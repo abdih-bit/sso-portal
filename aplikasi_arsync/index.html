@@ -1850,17 +1850,18 @@
                 filterDiv.style.display = 'block';
                 summary.style.display   = 'block';
 
-                // Populate dropdown dari area di PT user
+                // Populate dropdown dari area di PT user (tanpa opsi "semua")
                 const userPt = (currentUser.pt || '').trim();
-                select.innerHTML = '<option value="">Semua Area dalam PT</option>';
-                ssoMasterAreas
-                    .filter(a => !userPt || (a.pt || '').trim() === userPt)
-                    .forEach(a => {
-                        const opt = document.createElement('option');
-                        opt.value = a.name;
-                        opt.textContent = a.name;
-                        select.appendChild(opt);
-                    });
+                select.innerHTML = '';
+                const ptAreas = ssoMasterAreas.filter(a => !userPt || (a.pt || '').trim() === userPt);
+                ptAreas.forEach(a => {
+                    const opt = document.createElement('option');
+                    opt.value = a.name;
+                    opt.textContent = a.name;
+                    select.appendChild(opt);
+                });
+                // Auto-pilih area pertama
+                if (ptAreas.length > 0) select.value = ptAreas[0].name;
 
                 await renderHeadArBatchSummary();
                 select.onchange = renderHeadArBatchSummary;
@@ -1889,7 +1890,7 @@
                         return !aData || !userPt || (aData.pt || '').trim() === userPt;
                     });
 
-                    // Filter tambahan by area terpilih
+                    // Filter by area terpilih (wajib karena tidak ada opsi "semua")
                     if (selectedArea) {
                         batches = batches.filter(b => {
                             const bArea = (b.business_area_name || b.business_area || '').trim();
@@ -1898,32 +1899,73 @@
                         });
                     }
 
+                    // Agregasi total untuk kartu & donut chart
+                    const aggTotal     = batches.reduce((s, b) => s + (parseInt(b.total_excel_rows)    || 0), 0);
+                    const aggConfirmed = batches.reduce((s, b) => s + (parseInt(b.confirmed_count)    || 0), 0);
+                    const aggUnconfirm = batches.reduce((s, b) => s + (parseInt(b.unconfirmed_count)  || 0), 0);
+                    const aggPaid      = batches.reduce((s, b) => s + (parseInt(b.paid_count)         || 0), 0);
+                    const aggNotScan   = Math.max(0, aggTotal - aggConfirmed - aggUnconfirm);
+
+                    // Update kartu summary
+                    document.getElementById('total-data').textContent        = aggTotal;
+                    document.getElementById('total-paid').textContent        = aggPaid;
+                    document.getElementById('total-cocok').textContent       = aggConfirmed;
+                    document.getElementById('total-tidak-sesuai').textContent = aggUnconfirm;
+                    document.getElementById('total-belum-scan').textContent  = aggNotScan;
+
+                    // Update donut chart
+                    const ctx = document.getElementById('statusChart').getContext('2d');
+                    if (chartInstance) chartInstance.destroy();
+                    chartInstance = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Paid', 'Confirmed', 'Unconfirmed', 'Not Scanned'],
+                            datasets: [{ label: 'Status Rekonsiliasi',
+                                data: [aggPaid, aggConfirmed, aggUnconfirm, aggNotScan],
+                                backgroundColor: ['#22c55e', '#8b5cf6', '#f59e0b', '#6b7280'],
+                                borderColor: '#fff', borderWidth: 4, borderRadius: 4 }]
+                        },
+                        options: { responsive: true, cutout: '70%',
+                            plugins: {
+                                legend: { position: 'bottom', labels: { padding: 20 } },
+                                title: { display: true, text: `Distribusi Status — ${selectedArea || 'Semua Area'}`,
+                                    padding: { bottom: 20 }, font: { size: 16 } }
+                            }
+                        }
+                    });
+
                     if (batches.length === 0) {
                         summary.innerHTML = `
                             <div class="card border-0 shadow-sm">
                                 <div class="card-body text-muted text-center py-4">
                                     <i class="bi bi-inbox fs-4 d-block mb-2"></i>
-                                    Tidak ada batch aktif${selectedArea ? ' untuk area ' + selectedArea : ' dalam PT ini'}.
+                                    Tidak ada batch aktif untuk area ${selectedArea}.
                                 </div>
                             </div>`;
                         return;
                     }
 
                     const rows = batches.map(b => {
-                        const areaLabel = b.business_area_name || b.business_area;
-                        const soLabel   = b.sales_office_name  || b.sales_office;
-                        const total     = parseInt(b.total_records)   || 0;
-                        const scanned   = parseInt(b.scanned_records) || 0;
-                        const pct       = total > 0 ? Math.round(scanned / total * 100) : 0;
-                        const barColor  = pct >= 100 ? '#22c55e' : pct >= 50 ? '#f59e0b' : '#6366f1';
+                        const areaLabel  = b.business_area_name || b.business_area;
+                        const soLabel    = b.sales_office_name  || b.sales_office;
+                        const totalRows  = parseInt(b.total_excel_rows)   || 0;
+                        const confirmed  = parseInt(b.confirmed_count)    || 0;
+                        const unconfirm  = parseInt(b.unconfirmed_count)  || 0;
+                        const paid       = parseInt(b.paid_count)         || 0;
+                        const scanned    = confirmed + unconfirm + paid;
+                        const pct        = totalRows > 0 ? Math.round(scanned / totalRows * 100) : 0;
+                        const barColor   = pct >= 100 ? '#22c55e' : pct >= 50 ? '#f59e0b' : '#6366f1';
                         return `
                         <tr>
-                            <td class="fw-semibold">${areaLabel}</td>
+                            <td class="fw-semibold px-3">${areaLabel}</td>
                             <td class="text-muted">${soLabel}</td>
                             <td>${b.petugas}</td>
                             <td>${b.cutoff_date}</td>
-                            <td class="text-center">${total}</td>
-                            <td class="text-center">${scanned}</td>
+                            <td class="text-center">${totalRows}</td>
+                            <td class="text-center" style="color:#22c55e;">${paid}</td>
+                            <td class="text-center" style="color:#8b5cf6;">${confirmed}</td>
+                            <td class="text-center" style="color:#f59e0b;">${unconfirm}</td>
+                            <td class="text-center" style="color:#6b7280;">${Math.max(0, totalRows - confirmed - unconfirm)}</td>
                             <td style="min-width:120px;">
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="flex-grow-1 rounded" style="height:8px;background:#e5e7eb;">
@@ -1958,7 +2000,10 @@
                                                 <th>Petugas</th>
                                                 <th>Cutoff</th>
                                                 <th class="text-center">Total</th>
-                                                <th class="text-center">Scan</th>
+                                                <th class="text-center" style="color:#22c55e;">Paid</th>
+                                                <th class="text-center" style="color:#8b5cf6;">Confirmed</th>
+                                                <th class="text-center" style="color:#f59e0b;">Unconfirmed</th>
+                                                <th class="text-center" style="color:#6b7280;">Not Scanned</th>
                                                 <th>Progress</th>
                                             </tr>
                                         </thead>

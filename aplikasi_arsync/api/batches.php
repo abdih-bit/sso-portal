@@ -22,8 +22,10 @@ if ($method === 'GET' && !isset($_GET['id'])) {
     $sql = "SELECT b.id, b.petugas, b.business_area, b.sales_office, b.cutoff_date,
                    b.excel_filename, b.created_at,
                    ba.business_area_name, so.sales_office_name,
-                   COUNT(sd.id) AS total_records,
-                   SUM(CASE WHEN sd.status = 'scanned' THEN 1 ELSE 0 END) AS scanned_records
+                   json_array_length(b.excel_data::json) AS total_excel_rows,
+                   SUM(CASE WHEN sd.status = 'Confirmed'   THEN 1 ELSE 0 END) AS confirmed_count,
+                   SUM(CASE WHEN sd.status = 'Unconfirmed' THEN 1 ELSE 0 END) AS unconfirmed_count,
+                   SUM(CASE WHEN sd.status = 'Paid'        THEN 1 ELSE 0 END) AS paid_count
             FROM arsync_batches b
             LEFT JOIN arsync_business_areas ba ON ba.area_name   = b.business_area
             LEFT JOIN arsync_sales_offices  so ON so.office_name = b.sales_office
