@@ -935,6 +935,52 @@
         </div>
     </div>
     
+    <!-- Modal Konfirmasi Finalisasi -->
+    <div class="modal fade" id="finalizeConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="p-4 text-center" style="background:linear-gradient(135deg,#312e81,#4f46e5);">
+                    <div class="d-flex align-items-center justify-content-center mx-auto mb-3" style="width:64px;height:64px;background:rgba(255,255,255,0.15);border-radius:50%;">
+                        <i class="bi bi-shield-lock-fill text-white" style="font-size:1.8rem;"></i>
+                    </div>
+                    <h5 class="text-white fw-bold mb-1">Konfirmasi Finalisasi</h5>
+                    <p class="text-white mb-0" style="opacity:0.75;font-size:0.85rem;">Tindakan ini tidak dapat dibatalkan</p>
+                </div>
+                <div class="p-4">
+                    <div class="mb-3">
+                        <p class="fw-semibold text-dark mb-2">Setelah difinalisasi:</p>
+                        <ul class="list-unstyled mb-0" style="font-size:0.875rem;">
+                            <li class="d-flex align-items-start gap-2 mb-2">
+                                <span class="d-flex align-items-center justify-content-center flex-shrink-0 rounded-circle mt-1" style="width:20px;height:20px;background:#fef2f2;">
+                                    <i class="bi bi-lock-fill" style="color:#ef4444;font-size:0.6rem;"></i>
+                                </span>
+                                <span class="text-muted">Batch akan <strong class="text-dark">dikunci</strong> dan tidak bisa diubah</span>
+                            </li>
+                            <li class="d-flex align-items-start gap-2 mb-2">
+                                <span class="d-flex align-items-center justify-content-center flex-shrink-0 rounded-circle mt-1" style="width:20px;height:20px;background:#fef2f2;">
+                                    <i class="bi bi-eye-slash-fill" style="color:#ef4444;font-size:0.6rem;"></i>
+                                </span>
+                                <span class="text-muted">Data <strong class="text-dark">tidak tampil</strong> di dashboard lagi</span>
+                            </li>
+                            <li class="d-flex align-items-start gap-2">
+                                <span class="d-flex align-items-center justify-content-center flex-shrink-0 rounded-circle mt-1" style="width:20px;height:20px;background:#fef2f2;">
+                                    <i class="bi bi-x-circle-fill" style="color:#ef4444;font-size:0.6rem;"></i>
+                                </span>
+                                <span class="text-muted">Petugas <strong class="text-dark">tidak bisa scan</strong> barcode baru</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="button" class="btn btn-light flex-fill fw-semibold" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" id="finalize-confirm-btn" class="btn flex-fill fw-semibold text-white" style="background:linear-gradient(135deg,#312e81,#4f46e5);">
+                            <i class="bi bi-check2-circle me-1"></i>Ya, Finalisasi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none;"></div>
 
@@ -2257,74 +2303,92 @@
 
             async function saveActiveBa() {
                 if (!currentBatchId) {
-                    alert('Tidak ada batch aktif untuk disimpan.');
+                    showToast('Tidak ada batch aktif untuk disimpan.', 'warning');
                     return;
                 }
 
-                // Konfirmasi sebelum finalisasi
-                const confirmed = confirm(
-                    'Yakin ingin melakukan Simpan & Finalisasi?\n\n' +
-                    'Setelah difinalisasi:\n' +
-                    '• Batch akan dikunci dan tidak bisa diubah\n' +
-                    '• Data tidak akan tampil di dashboard lagi\n' +
-                    '• Petugas tidak bisa scan barcode baru\n\n' +
-                    'Tindakan ini tidak bisa dibatalkan.'
-                );
-                if (!confirmed) return;
+                // Tampilkan modal konfirmasi modern
+                const confirmModal = new bootstrap.Modal(document.getElementById('finalizeConfirmModal'));
+                confirmModal.show();
 
-                const saveButton = document.getElementById('save-ba-btn');
-                saveButton.disabled = true;
-                saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Menyimpan...';
+                // Tunggu keputusan user via Promise
+                await new Promise(resolve => {
+                    const confirmBtn = document.getElementById('finalize-confirm-btn');
+                    const modalEl    = document.getElementById('finalizeConfirmModal');
 
-                const baData = getBaData();
-                const currentDate = new Date();
-                const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-                const year = currentDate.getFullYear();
+                    const onConfirm = () => {
+                        cleanup();
+                        confirmModal.hide();
+                        resolve(true);
+                    };
+                    const onDismiss = () => {
+                        cleanup();
+                        resolve(false);
+                    };
+                    const cleanup = () => {
+                        confirmBtn.removeEventListener('click', onConfirm);
+                        modalEl.removeEventListener('hidden.bs.modal', onDismiss);
+                    };
 
-                const payload = {
-                    batch_id: currentBatchId, 
-                    nomor_ba: `${month}/AR/${batchInfo.businessArea}/${batchInfo.salesOffice}/${year}`,
-                    creation_date: batchInfo.creationDate,
-                    business_area: batchInfo.businessArea,
-                    business_area_name: batchInfo.businessAreaName,
-                    sales_office: batchInfo.salesOffice,
-                    sales_office_name: batchInfo.salesOfficeName,
-                    petugas: batchInfo.nama,
-                    cutoff_date: batchInfo.cutoffDate,
-                    system_qty: baData.systemQty,
-                    opname_qty: baData.opnameQty,
-                    difference_qty: baData.differenceQty,
-                    system_amount: baData.systemAmount,
-                    opname_amount: baData.opnameAmount,
-                    difference_amount: baData.differenceAmount,
-                    is_finalized: 1,
-                    currentUserJabatan: currentUser.jabatan 
-                };
+                    confirmBtn.addEventListener('click', onConfirm);
+                    modalEl.addEventListener('hidden.bs.modal', onDismiss);
+                }).then(async (confirmed) => {
+                    if (!confirmed) return;
 
-                try {
-                    const response = await fetch(`${API_BASE_URL}berita_acara.php`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                        showToast('Berita Acara berhasil difinalisasi! Batch telah dikunci.', 'success', 5000);
-                        fetchBaHistory();
-                        stopPolling();
-                        resetApp();
-                        showPage('download-ba-page');
-                    } else {
-                        showToast(`Gagal menyimpan: ${result.message}`, 'error', 6000);
+                    const saveButton = document.getElementById('save-ba-btn');
+                    saveButton.disabled = true;
+                    saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Menyimpan...';
+
+                    const baData = getBaData();
+                    const currentDate = new Date();
+                    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                    const year = currentDate.getFullYear();
+
+                    const payload = {
+                        batch_id: currentBatchId, 
+                        nomor_ba: `${month}/AR/${batchInfo.businessArea}/${batchInfo.salesOffice}/${year}`,
+                        creation_date: batchInfo.creationDate,
+                        business_area: batchInfo.businessArea,
+                        business_area_name: batchInfo.businessAreaName,
+                        sales_office: batchInfo.salesOffice,
+                        sales_office_name: batchInfo.salesOfficeName,
+                        petugas: batchInfo.nama,
+                        cutoff_date: batchInfo.cutoffDate,
+                        system_qty: baData.systemQty,
+                        opname_qty: baData.opnameQty,
+                        difference_qty: baData.differenceQty,
+                        system_amount: baData.systemAmount,
+                        opname_amount: baData.opnameAmount,
+                        difference_amount: baData.differenceAmount,
+                        is_finalized: 1,
+                        currentUserJabatan: currentUser.jabatan 
+                    };
+
+                    try {
+                        const response = await fetch(`${API_BASE_URL}berita_acara.php`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            showToast('Berita Acara berhasil difinalisasi! Batch telah dikunci.', 'success', 5000);
+                            fetchBaHistory();
+                            stopPolling();
+                            resetApp();
+                            showPage('download-ba-page');
+                        } else {
+                            showToast(`Gagal menyimpan: ${result.message}`, 'error', 6000);
+                            saveButton.disabled = false;
+                            saveButton.innerHTML = '<i class="bi bi-check2-circle me-1"></i>Simpan & Finalisasi';
+                        }
+                    } catch (error) {
+                        console.error("Failed to save BA:", error);
+                        showToast('Terjadi error saat menyimpan Berita Acara.', 'error', 5000);
                         saveButton.disabled = false;
                         saveButton.innerHTML = '<i class="bi bi-check2-circle me-1"></i>Simpan & Finalisasi';
                     }
-                } catch (error) {
-                    console.error("Failed to save BA:", error);
-                    showToast('Terjadi error saat menyimpan Berita Acara.', 'error', 5000);
-                    saveButton.disabled = false;
-                    saveButton.innerHTML = '<i class="bi bi-check2-circle me-1"></i>Simpan & Finalisasi';
-                }
+                });
             }
             
             function renderBaHistory(history) {
