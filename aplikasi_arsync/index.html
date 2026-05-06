@@ -310,7 +310,15 @@
             <!-- Main Content -->
             <main class="main-content p-3 pt-0">
                 <div id="dashboard-page" class="page-content">
-                    <h1 class="h2 fw-bold text-dark mb-4">Dashboard</h1>
+                    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+                        <h1 class="h2 fw-bold text-dark mb-0">Dashboard</h1>
+                        <!-- Filter area: hanya tampil untuk head_ar -->
+                        <div id="dashboard-area-filter" style="display:none;">
+                            <select id="dashboard-area-select" class="form-select form-select-sm" style="min-width:200px;">
+                                <option value="">Semua Area dalam PT</option>
+                            </select>
+                        </div>
+                    </div>
                     <!-- Summary Cards -->
                     <div class="row g-2 mb-4">
                         <div class="col">
@@ -377,6 +385,8 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Ringkasan batch per area (hanya untuk head_ar) -->
+                    <div id="head-ar-batch-summary" class="mt-4" style="display:none;"></div>
                     <!-- Panel Batch Tersedia (hanya untuk admin & petugas saat tidak ada batch aktif) -->
                     <div id="available-batches-panel" class="mt-4" style="display:none;">
                         <div class="card border-0 shadow-sm">
@@ -1404,7 +1414,15 @@
                     generateReport();
                 } else if (pageId === 'dashboard-page' && currentBatchId) {
                     updateDashboard();
+                    // Head AR: juga tampilkan ringkasan semua batch
+                    if (currentUser && currentUser.role === 'head_ar') {
+                        initHeadArDashboard();
+                    }
                 } else if (pageId === 'dashboard-page' && !currentBatchId) {
+                    // Head AR tanpa batch aktif: tampilkan ringkasan per area
+                    if (currentUser && currentUser.role === 'head_ar') {
+                        initHeadArDashboard();
+                    }
                     // Tampilkan panel batch tersedia untuk admin/petugas yang belum punya batch aktif
                     const role = currentUser ? currentUser.role : '';
                     const panel = document.getElementById('available-batches-panel');
@@ -1822,7 +1840,139 @@
                     }
                 });
             }
-            
+
+            async function initHeadArDashboard() {
+                const filterDiv = document.getElementById('dashboard-area-filter');
+                const select    = document.getElementById('dashboard-area-select');
+                const summary   = document.getElementById('head-ar-batch-summary');
+                if (!filterDiv || !select || !summary) return;
+
+                filterDiv.style.display = 'block';
+                summary.style.display   = 'block';
+
+                // Populate dropdown dari area di PT user
+                const userPt = (currentUser.pt || '').trim();
+                select.innerHTML = '<option value="">Semua Area dalam PT</option>';
+                ssoMasterAreas
+                    .filter(a => !userPt || (a.pt || '').trim() === userPt)
+                    .forEach(a => {
+                        const opt = document.createElement('option');
+                        opt.value = a.name;
+                        opt.textContent = a.name;
+                        select.appendChild(opt);
+                    });
+
+                await renderHeadArBatchSummary();
+                select.onchange = renderHeadArBatchSummary;
+            }
+
+            async function renderHeadArBatchSummary() {
+                const select    = document.getElementById('dashboard-area-select');
+                const summary   = document.getElementById('head-ar-batch-summary');
+                if (!summary) return;
+
+                const selectedArea = select ? select.value : '';
+                const userPt       = (currentUser.pt || '').trim();
+
+                summary.innerHTML = '<p class="text-muted">Memuat data batch...</p>';
+
+                try {
+                    const resp = await fetch(`${API_BASE_URL}batches.php`);
+                    const data = await resp.json();
+                    if (!data.success) { summary.innerHTML = ''; return; }
+
+                    // Filter: hanya batch dalam PT user
+                    let batches = data.batches.filter(b => {
+                        const bAreaName = (b.business_area_name || b.business_area || '').trim();
+                        const aData = ssoMasterAreas.find(a => a.name === bAreaName);
+                        // Jika area ditemukan di SSO, cocokkan PT; jika tidak ditemukan, tetap tampilkan
+                        return !aData || !userPt || (aData.pt || '').trim() === userPt;
+                    });
+
+                    // Filter tambahan by area terpilih
+                    if (selectedArea) {
+                        batches = batches.filter(b => {
+                            const bArea = (b.business_area_name || b.business_area || '').trim();
+                            const bSo   = (b.sales_office_name  || b.sales_office  || '').trim();
+                            return bArea === selectedArea || bSo === selectedArea;
+                        });
+                    }
+
+                    if (batches.length === 0) {
+                        summary.innerHTML = `
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body text-muted text-center py-4">
+                                    <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                                    Tidak ada batch aktif${selectedArea ? ' untuk area ' + selectedArea : ' dalam PT ini'}.
+                                </div>
+                            </div>`;
+                        return;
+                    }
+
+                    const rows = batches.map(b => {
+                        const areaLabel = b.business_area_name || b.business_area;
+                        const soLabel   = b.sales_office_name  || b.sales_office;
+                        const total     = parseInt(b.total_records)   || 0;
+                        const scanned   = parseInt(b.scanned_records) || 0;
+                        const pct       = total > 0 ? Math.round(scanned / total * 100) : 0;
+                        const barColor  = pct >= 100 ? '#22c55e' : pct >= 50 ? '#f59e0b' : '#6366f1';
+                        return `
+                        <tr>
+                            <td class="fw-semibold">${areaLabel}</td>
+                            <td class="text-muted">${soLabel}</td>
+                            <td>${b.petugas}</td>
+                            <td>${b.cutoff_date}</td>
+                            <td class="text-center">${total}</td>
+                            <td class="text-center">${scanned}</td>
+                            <td style="min-width:120px;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="flex-grow-1 rounded" style="height:8px;background:#e5e7eb;">
+                                        <div style="width:${pct}%;height:8px;background:${barColor};border-radius:4px;transition:width .4s;"></div>
+                                    </div>
+                                    <span style="font-size:0.75rem;min-width:35px;">${pct}%</span>
+                                </div>
+                            </td>
+                        </tr>`;
+                    }).join('');
+
+                    summary.innerHTML = `
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white border-bottom py-3 px-4">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="d-flex align-items-center justify-content-center rounded-3" style="width:34px;height:34px;background:rgba(99,102,241,0.12);">
+                                        <i class="bi bi-bar-chart-line" style="color:#6366f1;font-size:1rem;"></i>
+                                    </span>
+                                    <div>
+                                        <h6 class="fw-semibold mb-0">Progress Batch per Area</h6>
+                                        <p class="text-muted mb-0" style="font-size:0.75rem;">Batch aktif (belum difinalisasi)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0" style="font-size:0.85rem;">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="px-3">Area/DC</th>
+                                                <th>Sales Office</th>
+                                                <th>Petugas</th>
+                                                <th>Cutoff</th>
+                                                <th class="text-center">Total</th>
+                                                <th class="text-center">Scan</th>
+                                                <th>Progress</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>${rows}</tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>`;
+                } catch(e) {
+                    summary.innerHTML = '<p class="text-danger">Gagal memuat ringkasan batch.</p>';
+                    console.error('renderHeadArBatchSummary error:', e);
+                }
+            }
+
             function generateReport() {
                 if(batchInfo.nama || batchInfo.businessArea || batchInfo.cutoffDate) {
                     reportBatchInfo.innerHTML = `
@@ -1985,10 +2135,10 @@
                 const formatNumber = (value) => new Intl.NumberFormat('id-ID').format(value);
 
                 let finalizeButtonHtml = '';
-                if (currentUser && currentUser.jabatan === 'Head Admin') {
-                    finalizeButtonHtml = `<button id="save-ba-btn" class="btn btn-primary">Simpan & Finalisasi</button>`;
+                if (currentUser && currentUser.role === 'admin') {
+                    finalizeButtonHtml = `<button id="save-ba-btn" class="btn btn-primary"><i class="bi bi-check2-circle me-1"></i>Simpan & Finalisasi</button>`;
                 } else {
-                    finalizeButtonHtml = `<button class="btn btn-primary" disabled title="Hanya Head Admin yang bisa finalisasi">Simpan & Finalisasi</button>`;
+                    finalizeButtonHtml = `<button class="btn btn-primary" disabled title="Hanya KA Admin yang bisa finalisasi">Simpan & Finalisasi</button>`;
                 }
 
                 const tableHtml = `
@@ -2039,9 +2189,21 @@
                     alert('Tidak ada batch aktif untuk disimpan.');
                     return;
                 }
+
+                // Konfirmasi sebelum finalisasi
+                const confirmed = confirm(
+                    'Yakin ingin melakukan Simpan & Finalisasi?\n\n' +
+                    'Setelah difinalisasi:\n' +
+                    '• Batch akan dikunci dan tidak bisa diubah\n' +
+                    '• Data tidak akan tampil di dashboard lagi\n' +
+                    '• Petugas tidak bisa scan barcode baru\n\n' +
+                    'Tindakan ini tidak bisa dibatalkan.'
+                );
+                if (!confirmed) return;
+
                 const saveButton = document.getElementById('save-ba-btn');
                 saveButton.disabled = true;
-                saveButton.textContent = 'Menyimpan...';
+                saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Menyimpan...';
 
                 const baData = getBaData();
                 const currentDate = new Date();
@@ -2076,20 +2238,21 @@
                     });
                     const result = await response.json();
                     if (result.success) {
-                        alert('Berita Acara berhasil disimpan!');
-                        fetchBaHistory(); 
-                        resetApp(true);
-                        generateActiveBaSummary();
+                        alert('✅ Berita Acara berhasil difinalisasi!\n\nBatch telah dikunci. Data tidak akan tampil di dashboard.');
+                        fetchBaHistory();
+                        stopPolling();
+                        resetApp();
+                        showPage('download-ba-page');
                     } else {
                          alert(`Gagal menyimpan: ${result.message}`);
                          saveButton.disabled = false;
-                         saveButton.textContent = 'Simpan & Finalisasi';
+                         saveButton.innerHTML = '<i class="bi bi-check2-circle me-1"></i>Simpan & Finalisasi';
                     }
                 } catch (error) {
                     console.error("Failed to save BA:", error);
                     alert('Terjadi error saat menyimpan Berita Acara.');
                     saveButton.disabled = false;
-                    saveButton.textContent = 'Simpan & Finalisasi';
+                    saveButton.innerHTML = '<i class="bi bi-check2-circle me-1"></i>Simpan & Finalisasi';
                 }
             }
             
