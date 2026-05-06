@@ -15,8 +15,14 @@ if ($method === 'POST') {
     }
 
     // Konversi format tanggal dari dd/mm/yyyy ke yyyy-mm-dd
-    $parts = explode('/', $data['creation_date']);
-    $creation_date_sql = sprintf('%s-%s-%s', $parts[2], $parts[1], $parts[0]);
+    // Fallback ke tanggal hari ini jika format tidak valid
+    $rawDate = $data['creation_date'] ?? '';
+    $parts = explode('/', $rawDate);
+    if (count($parts) === 3 && strlen($parts[2]) === 4) {
+        $creation_date_sql = sprintf('%s-%s-%s', $parts[2], $parts[1], $parts[0]);
+    } else {
+        $creation_date_sql = date('Y-m-d'); // fallback ke tanggal server
+    }
 
     $stmt = $pdo->prepare(
         "INSERT INTO arsync_berita_acara

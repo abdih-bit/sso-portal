@@ -2998,7 +2998,7 @@
                             salesOffice: batch.sales_office,
                             salesOfficeName: soMatch ? soMatch.sales_office_name : batch.sales_office,
                             cutoffDate: batch.cutoff_date,
-                            creationDate: new Date(batch.creation_date).toLocaleDateString('id-ID')
+                            creationDate: new Date(batch.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\./g, '/')
                         };
                         
                         namaInput.value = batchInfo.nama;
