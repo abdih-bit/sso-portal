@@ -938,7 +938,7 @@
                 const scanInputColumn = document.getElementById('scan-input-column');
                 const scanBatchColumn = document.getElementById('scan-batch-column');
 
-                userInfo.textContent = `${currentUser.fullName || currentUser.username} (${currentUser.role})`;
+                userInfo.textContent = `${currentUser.fullName || currentUser.username} (${currentUser.jabatan || currentUser.role})`;
 
                 leadTimeKpiTab.classList.toggle('hidden-tab', role !== 'Super Admin');
 

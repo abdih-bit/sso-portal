@@ -28,6 +28,8 @@ function json_response(string $status, $data = null): void {
  */
 function mapSsoRole(array $user): string {
     if ($user['role'] === 'SUPERADMIN') return 'Super Admin';
+    // Role ADMIN (jabatan kepala / HO) → Super Admin di SPD
+    if ($user['role'] === 'ADMIN') return 'Super Admin';
     // Sub-jabatan Admin FAT dikirim langsung oleh SSO sebagai jabatan efektif
     $jabatan = trim($user['jabatan'] ?? '');
     if ($jabatan === 'Admin Transport') return 'Admin Transport';
