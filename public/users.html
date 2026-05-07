@@ -117,7 +117,7 @@
               <option value="ADMIN">ADMIN</option>
               <option value="SUPERADMIN">SUPERADMIN</option>
             </select>
-            <button onclick="showUserModal()" class="btn-primary">
+            <button id="btnTambahUser" onclick="showUserModal()" class="btn-primary hidden">
               <i class="fa-solid fa-plus text-xs"></i> Tambah User
             </button>
           </div>
@@ -578,6 +578,7 @@
         if (user.role === 'SUPERADMIN') {
           document.getElementById('currentRoleBadge').className = 'tag bg-red-100 text-red-700 border border-red-200';
           document.getElementById('navAdminPanel').classList.remove('hidden');
+          document.getElementById('btnTambahUser').classList.remove('hidden');
         }
         setupRoleSelect(user.role);
         await loadMasterData();
@@ -670,9 +671,9 @@
         const roleColor = u.role === 'SUPERADMIN' ? 'bg-red-100 text-red-700' : u.role === 'ADMIN' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600';
         const stColor = u.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
         const ud = JSON.stringify(u).replace(/"/g, '&quot;');
-        const canEdit   = currentUserRole === 'SUPERADMIN' || u.role === 'USER';
-        const canToggle = u.role !== 'SUPERADMIN' && (currentUserRole === 'SUPERADMIN' || u.role === 'USER');
-        const canDelete = u.role !== 'SUPERADMIN' && (currentUserRole === 'SUPERADMIN' || u.role === 'USER');
+        const canEdit   = currentUserRole === 'SUPERADMIN' && u.role !== 'SUPERADMIN';
+        const canToggle = currentUserRole === 'SUPERADMIN' && u.role !== 'SUPERADMIN';
+        const canDelete = currentUserRole === 'SUPERADMIN' && u.role !== 'SUPERADMIN';
         const toggleBtn = canToggle
           ? `<button onclick="toggleUserStatus('${u.id}', ${u.isActive})" class="text-xs font-semibold px-2 py-1 rounded transition-all ${u.isActive ? 'text-red-500 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'}">${u.isActive ? 'Nonaktifkan' : 'Aktifkan'}</button>`
           : '';

@@ -9,11 +9,11 @@ router.use(authenticate, requireRole('ADMIN', 'SUPERADMIN'));
 // Statistics
 router.get('/stats', adminController.getStats);
 
-// Users
+// Users — GET dapat diakses ADMIN & SUPERADMIN, perubahan data hanya SUPERADMIN
 router.get('/users', adminController.getUsers);
-router.post('/users', adminController.createUser);
-router.put('/users/:id', adminController.updateUser);
-router.delete('/users/:id', adminController.deleteUser);
+router.post('/users', requireRole('SUPERADMIN'), adminController.createUser);
+router.put('/users/:id', requireRole('SUPERADMIN'), adminController.updateUser);
+router.delete('/users/:id', requireRole('SUPERADMIN'), adminController.deleteUser);
 
 // Applications
 router.get('/applications', adminController.getApplications);
