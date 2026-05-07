@@ -291,22 +291,6 @@
             </div>
           </div>
 
-          <!-- Jabatan Card -->
-          <div class="panel">
-            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center"><i class="fa-solid fa-id-badge text-purple-600 text-xs"></i></div>
-                <span class="text-sm font-bold text-gray-800">Jabatan</span>
-              </div>
-              <button onclick="openMasterModal('jabatan')" class="btn-primary text-xs py-1.5 px-3">
-                <i class="fa-solid fa-plus text-xs"></i> Tambah
-              </button>
-            </div>
-            <div id="masterJabatanList" class="divide-y divide-gray-50 max-h-60 overflow-y-auto">
-              <div class="text-center py-8 text-gray-400 text-xs">Memuat...</div>
-            </div>
-          </div>
-
           <!-- Departemen Card -->
           <div class="panel">
             <div class="p-4 border-b border-gray-100 flex items-center justify-between">
@@ -319,6 +303,22 @@
               </button>
             </div>
             <div id="masterDepartemenList" class="divide-y divide-gray-50 max-h-60 overflow-y-auto">
+              <div class="text-center py-8 text-gray-400 text-xs">Memuat...</div>
+            </div>
+          </div>
+
+          <!-- Jabatan Card -->
+          <div class="panel">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center"><i class="fa-solid fa-id-badge text-purple-600 text-xs"></i></div>
+                <span class="text-sm font-bold text-gray-800">Jabatan</span>
+              </div>
+              <button onclick="openMasterModal('jabatan')" class="btn-primary text-xs py-1.5 px-3">
+                <i class="fa-solid fa-plus text-xs"></i> Tambah
+              </button>
+            </div>
+            <div id="masterJabatanList" class="divide-y divide-gray-50 max-h-60 overflow-y-auto">
               <div class="text-center py-8 text-gray-400 text-xs">Memuat...</div>
             </div>
           </div>
@@ -493,6 +493,15 @@
           <label class="block text-xs font-medium text-gray-500 mb-1">Departemen</label>
           <select id="masterJabatanDept" class="input-field">
             <option value="">— Pilih Departemen —</option>
+          </select>
+        </div>
+        <!-- Untuk Jabatan: pilih Role -->
+        <div id="masterJabatanRoleField" class="hidden">
+          <label class="block text-xs font-medium text-gray-500 mb-1">Role</label>
+          <select id="masterJabatanRole" class="input-field">
+            <option value="">— Semua Role —</option>
+            <option value="USER">USER</option>
+            <option value="ADMIN">ADMIN</option>
           </select>
         </div>
         <div class="flex gap-3 pt-2">
@@ -1858,7 +1867,12 @@
             ? `<span class="tag bg-amber-50 text-amber-600 text-[10px]"><i class="fa-solid fa-crown text-[9px] mr-0.5"></i>${item.head_office}</span>`
             : '<span class="tag bg-gray-100 text-gray-400 text-[10px]">HO belum diatur</span>';
         } },
-        jabatan: { listId: 'masterJabatanList', color: 'purple', icon: 'fa-id-badge', badge: function(item) { return item.departemen ? `<span class="tag bg-orange-50 text-orange-600 text-[10px]">${item.departemen}</span>` : ''; } },
+        jabatan: { listId: 'masterJabatanList', color: 'purple', icon: 'fa-id-badge', badge: function(item) {
+          var b = '';
+          if (item.departemen) b += `<span class="tag bg-orange-50 text-orange-600 text-[10px]">${item.departemen}</span>`;
+          if (item.role) b += `<span class="tag ${item.role === 'ADMIN' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'} text-[10px] ml-1">${item.role}</span>`;
+          return b;
+        } },
         departemen: { listId: 'masterDepartemenList', color: 'orange', icon: 'fa-sitemap', badge: function(item) { return ''; } }
       };
 
@@ -1910,23 +1924,14 @@
       document.getElementById('masterPtParentField').classList.add('hidden');
       document.getElementById('masterPtHoField').classList.add('hidden');
       document.getElementById('masterJabatanDeptField').classList.add('hidden');
+      document.getElementById('masterJabatanRoleField').classList.add('hidden');
       var _isHoField = document.getElementById('masterAreaIsHoField');
       if (_isHoField) _isHoField.classList.add('hidden');
 
       var data = getMasterData();
       if (type === 'pt') {
-        // Populate HO area dropdown dari DB cache
-        var ptName = editIdx >= 0 ? data.pt[editIdx].name : null;
-        var hoSel = document.getElementById('masterPtHo');
-        hoSel.innerHTML = '<option value="">— Pilih Area sebagai Head Office —</option>';
-        var ptAreas = _dbAreasCache.filter(function(a) { return !ptName || a.pt === ptName; });
-        if (!ptAreas.length) ptAreas = _dbAreasCache;
-        ptAreas.forEach(function(a) {
-          var o = document.createElement('option'); o.value = a.name; o.textContent = a.name;
-          hoSel.appendChild(o);
-        });
-        document.getElementById('masterPtHoField').classList.remove('hidden');
-        if (editIdx >= 0) hoSel.value = data.pt[editIdx].head_office || '';
+        // PT: hanya nama, tanpa HO (HO ditentukan dari Area/DC)
+        // masterPtHoField tetap hidden
       }
       if (type === 'area') {
         // Buka modal untuk tambah area baru (edit via editDbArea())
@@ -1954,6 +1959,11 @@
         });
         document.getElementById('masterJabatanDeptField').classList.remove('hidden');
         if (editIdx >= 0) dSel.value = data.jabatan[editIdx].departemen || '';
+        // Show role field
+        document.getElementById('masterJabatanRoleField').classList.remove('hidden');
+        var rSel = document.getElementById('masterJabatanRole');
+        if (editIdx >= 0) rSel.value = data.jabatan[editIdx].role || '';
+        else rSel.value = '';
       }
       if (editIdx >= 0) {
         document.getElementById('masterName').value = data[type][editIdx].name;
@@ -2061,8 +2071,10 @@
       // ── Tipe lain: simpan ke localStorage ──
       var data = getMasterData();
       var item = { name: name };
-      if (type === 'pt') item.head_office = document.getElementById('masterPtHo').value;
-      if (type === 'jabatan') item.departemen = document.getElementById('masterJabatanDept').value;
+      if (type === 'jabatan') {
+        item.departemen = document.getElementById('masterJabatanDept').value;
+        item.role = document.getElementById('masterJabatanRole').value || null;
+      }
 
       if (editIdx >= 0) {
         data[type][editIdx] = item;

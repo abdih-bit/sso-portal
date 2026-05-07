@@ -419,9 +419,12 @@
       document.getElementById('userSubJabatan').value = '';
       if (dept) {
         var data = getMasterData();
-        var roleList = role === 'ADMIN' ? JABATAN_ADMIN : JABATAN_USER;
+        // Filter: jabatan yang role-nya cocok (atau tidak ada role = tampil semua),
+        // AND departemen-nya cocok (atau null = tampil di semua dept)
         var matching = data.jabatan.filter(function(j) {
-          return roleList.includes(j.name) && (j.departemen === dept || j.departemen === null);
+          var roleMatch = !j.role || j.role === role;
+          var deptMatch = j.departemen === dept || j.departemen === null || j.departemen === '';
+          return roleMatch && deptMatch;
         });
         matching.forEach(function(j) {
           var o = document.createElement('option'); o.value = j.name; o.textContent = j.name; jabatanEl.appendChild(o);
@@ -521,13 +524,16 @@
       var roleList = role === 'ADMIN' ? JABATAN_ADMIN : JABATAN_USER;
       if (selectedDept) {
         var matching = data.jabatan.filter(function(j) {
-          return roleList.includes(j.name) && (j.departemen === selectedDept || j.departemen === null);
+          var roleMatch = !j.role || j.role === role;
+          var deptMatch = j.departemen === selectedDept || j.departemen === null || j.departemen === '';
+          return roleMatch && deptMatch;
         });
         matching.forEach(function(j) { var o = document.createElement('option'); o.value = j.name; o.textContent = j.name; jabEl.appendChild(o); });
         jabEl.disabled = false;
       } else {
         // Fallback: tampilkan semua jabatan sesuai role (untuk data lama tanpa dept)
-        roleList.forEach(function(j) { var o = document.createElement('option'); o.value = j; o.textContent = j; jabEl.appendChild(o); });
+        data.jabatan.filter(function(j) { return !j.role || j.role === role; })
+          .forEach(function(j) { var o = document.createElement('option'); o.value = j.name; o.textContent = j.name; jabEl.appendChild(o); });
         jabEl.disabled = false;
       }
 
