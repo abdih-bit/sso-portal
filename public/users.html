@@ -243,33 +243,29 @@
               <span class="text-xs font-bold text-gray-700 uppercase tracking-wider">Penempatan</span>
             </div>
             <div class="space-y-2">
-              <div class="grid grid-cols-2 gap-2">
-                <div>
-                  <label class="block text-xs font-medium text-gray-500 mb-1">PT <span class="text-red-500" id="ptRequired">*</span></label>
-                  <select id="userPt" class="input-field" onchange="onPtChange()">
-                    <option value="">— Pilih PT —</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-gray-500 mb-1">Area / DC <span class="text-red-500" id="areaRequired">*</span></label>
-                  <select id="userArea" class="input-field" onchange="onAreaChange()" disabled>
-                    <option value="">— Pilih Area —</option>
-                  </select>
-                </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">PT <span class="text-red-500" id="ptRequired">*</span></label>
+                <select id="userPt" class="input-field" onchange="onPtChange()">
+                  <option value="">— Pilih PT —</option>
+                </select>
               </div>
-              <div class="grid grid-cols-2 gap-2">
-                <div>
-                  <label class="block text-xs font-medium text-gray-500 mb-1">Jabatan <span class="text-red-500">*</span></label>
-                  <select id="userJabatan" class="input-field" onchange="onJabatanChange()" disabled>
-                    <option value="">— Pilih Jabatan —</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-gray-500 mb-1">Departemen <span class="text-red-500">*</span></label>
-                  <select id="userDivisi" class="input-field" disabled>
-                    <option value="">— Pilih Departemen —</option>
-                  </select>
-                </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Area / DC <span class="text-red-500" id="areaRequired">*</span></label>
+                <select id="userArea" class="input-field" onchange="onAreaChange()" disabled>
+                  <option value="">— Pilih Area —</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Departemen <span class="text-red-500">*</span></label>
+                <select id="userDivisi" class="input-field" onchange="onDivisiChange()" disabled>
+                  <option value="">— Pilih Departemen —</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Jabatan <span class="text-red-500">*</span></label>
+                <select id="userJabatan" class="input-field" onchange="onJabatanChange()" disabled>
+                  <option value="">— Pilih Jabatan —</option>
+                </select>
               </div>
               <!-- Sub-jabatan untuk Admin FAT -->
               <div id="subJabatanRow" class="hidden">
@@ -395,42 +391,58 @@
       var area = document.getElementById('userArea').value;
       var jabatanEl = document.getElementById('userJabatan');
       var deptEl = document.getElementById('userDivisi');
-      jabatanEl.disabled = !area; jabatanEl.value = '';
-      deptEl.innerHTML = '<option value="">— Pilih Departemen —</option>'; deptEl.value = ''; deptEl.disabled = true;
-      onJabatanChange();
+      // Reset jabatan
+      jabatanEl.innerHTML = '<option value="">— Pilih Jabatan —</option>';
+      jabatanEl.value = ''; jabatanEl.disabled = true;
+      // Populate/enable dept setelah area dipilih
+      deptEl.innerHTML = '<option value="">— Pilih Departemen —</option>';
+      deptEl.value = '';
+      if (area) {
+        var data = getMasterData();
+        data.departemen.forEach(function(d) {
+          var o = document.createElement('option'); o.value = d.name; o.textContent = d.name; deptEl.appendChild(o);
+        });
+        deptEl.disabled = false;
+      } else { deptEl.disabled = true; }
+      document.getElementById('jabatanNote').classList.add('hidden');
+      document.getElementById('subJabatanRow').classList.add('hidden');
+      document.getElementById('userSubJabatan').value = '';
     }
 
-    // Dipanggil saat role berubah — rebuild jabatan list dan update PT/Area visibility
-    function onRoleChange() {
+    function onDivisiChange() {
+      var dept = document.getElementById('userDivisi').value;
       var role = document.getElementById('userRole').value;
       var jabatanEl = document.getElementById('userJabatan');
-      var ptEl = document.getElementById('userPt');
-      var areaEl = document.getElementById('userArea');
-      var note = document.getElementById('jabatanNote');
-
-      // Reset jabatan dropdown
       jabatanEl.innerHTML = '<option value="">— Pilih Jabatan —</option>';
-      var jabList = role === 'ADMIN' ? JABATAN_ADMIN : JABATAN_USER;
-      jabList.forEach(function(j) {
-        var o = document.createElement('option'); o.value = j; o.textContent = j; jabatanEl.appendChild(o);
-      });
-      jabatanEl.value = '';
-      jabatanEl.disabled = !(document.getElementById('userArea').value) && role !== 'ADMIN';
-
-      // Untuk ADMIN: jabatan langsung bisa dipilih tanpa harus pilih area dulu
-      if (role === 'ADMIN') {
-        jabatanEl.disabled = false;
+      document.getElementById('jabatanNote').classList.add('hidden');
+      document.getElementById('subJabatanRow').classList.add('hidden');
+      document.getElementById('userSubJabatan').value = '';
+      if (dept) {
+        var data = getMasterData();
+        var roleList = role === 'ADMIN' ? JABATAN_ADMIN : JABATAN_USER;
+        var matching = data.jabatan.filter(function(j) {
+          return roleList.includes(j.name) && (j.departemen === dept || j.departemen === null);
+        });
+        matching.forEach(function(j) {
+          var o = document.createElement('option'); o.value = j.name; o.textContent = j.name; jabatanEl.appendChild(o);
+        });
+        jabatanEl.disabled = matching.length === 0;
+      } else {
+        jabatanEl.disabled = true;
       }
+    }
 
-      note.classList.add('hidden');
-      resetDeptField();
+    // Dipanggil saat role berubah — repopulate jabatan sesuai dept & role baru
+    function onRoleChange() {
+      document.getElementById('jabatanNote').classList.add('hidden');
+      document.getElementById('subJabatanRow').classList.add('hidden');
+      document.getElementById('userSubJabatan').value = '';
+      onDivisiChange();
     }
 
     function onJabatanChange() {
       var jab = document.getElementById('userJabatan').value;
       var role = document.getElementById('userRole').value;
-      var opts = JABATAN_DEPARTEMEN[jab];
-      var deptEl = document.getElementById('userDivisi');
       var note = document.getElementById('jabatanNote');
       var noteText = document.getElementById('jabatanNoteText');
       var subRow = document.getElementById('subJabatanRow');
@@ -456,20 +468,6 @@
         noteText.textContent = 'Head AR dapat melihat seluruh aplikasi dalam 1 PT berdasarkan Area/DC yang didaftarkan.';
         note.classList.remove('hidden');
       }
-
-      deptEl.innerHTML = '<option value="">— Pilih Departemen —</option>';
-      if (jab) {
-        deptEl.disabled = false;
-        var data = getMasterData();
-        // Untuk jabatan IT: tidak ada departemen otomatis → tampilkan semua
-        var deptList = opts || data.departemen.map(function(d){ return d.name; });
-        deptList.forEach(function(d) {
-          var o = document.createElement('option'); o.value = d; o.textContent = d; deptEl.appendChild(o);
-        });
-        if (opts && opts.length === 1) deptEl.value = opts[0];
-      } else {
-        deptEl.disabled = true;
-      }
     }
 
     function resetDeptField() {
@@ -480,16 +478,12 @@
 
     function resetUserDropdowns() {
       buildCascadeData();
-      var role = document.getElementById('userRole').value || 'USER';
       var areaEl = document.getElementById('userArea');
       areaEl.innerHTML = '<option value="">— Pilih Area —</option>'; areaEl.disabled = true;
 
       var jabEl = document.getElementById('userJabatan');
       jabEl.innerHTML = '<option value="">— Pilih Jabatan —</option>';
-      var jabList = role === 'ADMIN' ? JABATAN_ADMIN : JABATAN_USER;
-      jabList.forEach(function(j) { var o = document.createElement('option'); o.value = j; o.textContent = j; jabEl.appendChild(o); });
-      jabEl.value = '';
-      jabEl.disabled = role !== 'ADMIN'; // ADMIN: langsung bisa pilih jabatan
+      jabEl.value = ''; jabEl.disabled = true;
 
       resetDeptField();
       document.getElementById('jabatanNote').classList.add('hidden');
@@ -502,6 +496,8 @@
       var data = getMasterData();
       var role = u.role || 'USER';
       document.getElementById('userPt').value = u.pt || '';
+
+      // Populate Area
       var areaEl = document.getElementById('userArea');
       areaEl.innerHTML = '<option value="">— Pilih Area —</option>';
       if (u.pt && PT_AREAS[u.pt]) {
@@ -509,11 +505,31 @@
         areaEl.disabled = false; areaEl.value = u.area || '';
       } else { areaEl.disabled = true; }
 
+      // Populate Departemen
+      var deptEl = document.getElementById('userDivisi');
+      deptEl.innerHTML = '<option value="">— Pilih Departemen —</option>';
+      if (u.area || u.pt) {
+        data.departemen.forEach(function(d) { var o = document.createElement('option'); o.value = d.name; o.textContent = d.name; deptEl.appendChild(o); });
+        deptEl.disabled = false;
+        deptEl.value = u.divisi || '';
+      } else { deptEl.disabled = true; }
+
+      // Populate Jabatan filtered by dept + role
       var jabEl = document.getElementById('userJabatan');
       jabEl.innerHTML = '<option value="">— Pilih Jabatan —</option>';
-      var jabList = role === 'ADMIN' ? JABATAN_ADMIN : JABATAN_USER;
-      jabList.forEach(function(j) { var o = document.createElement('option'); o.value = j; o.textContent = j; jabEl.appendChild(o); });
-      jabEl.disabled = false;
+      var selectedDept = deptEl.value;
+      var roleList = role === 'ADMIN' ? JABATAN_ADMIN : JABATAN_USER;
+      if (selectedDept) {
+        var matching = data.jabatan.filter(function(j) {
+          return roleList.includes(j.name) && (j.departemen === selectedDept || j.departemen === null);
+        });
+        matching.forEach(function(j) { var o = document.createElement('option'); o.value = j.name; o.textContent = j.name; jabEl.appendChild(o); });
+        jabEl.disabled = false;
+      } else {
+        // Fallback: tampilkan semua jabatan sesuai role (untuk data lama tanpa dept)
+        roleList.forEach(function(j) { var o = document.createElement('option'); o.value = j; o.textContent = j; jabEl.appendChild(o); });
+        jabEl.disabled = false;
+      }
 
       // Restore jabatan: jika 'Admin FAT - X', set jabatan ke 'Admin FAT' dan sub ke 'X'
       var storedJab = u.jabatan || '';
@@ -529,21 +545,8 @@
         subEl.value = '';
       }
 
-      var deptEl = document.getElementById('userDivisi');
-      var jabatanBase = jabEl.value;
-      var opts = jabatanBase ? JABATAN_DEPARTEMEN[jabatanBase] : null;
-      deptEl.innerHTML = '<option value="">— Pilih Departemen —</option>';
-      if (jabatanBase) {
-        deptEl.disabled = false;
-        (opts || data.departemen.map(function(d){return d.name;})).forEach(function(d) { var o = document.createElement('option'); o.value = d; o.textContent = d; deptEl.appendChild(o); });
-        deptEl.value = u.divisi || (opts && opts.length === 1 ? opts[0] : '');
-      } else { deptEl.disabled = true; }
-
-      // Simpan sub jabatan sebelum onJabatanChange() karena onJabatanChange() akan reset nilainya
       var savedSubJabatan = subEl.value;
-      // Show note if needed
       onJabatanChange();
-      // Restore sub jabatan setelah onJabatanChange()
       if (savedSubJabatan) subEl.value = savedSubJabatan;
     }
 
@@ -847,11 +850,11 @@
       // Kecuali Head ACC: tidak wajib area (akses semua PT)
       if (!id) {
         if (!pt)        { showFormError('PT wajib dipilih.'); return; }
-        if (!jabatanRaw){ showFormError('Jabatan wajib dipilih.'); return; }
-        if (jabatanRaw === 'Admin FAT' && !subJabatan) { showFormError('Sub Jabatan Admin FAT wajib dipilih.'); return; }
-        if (!divisi)    { showFormError('Departemen wajib dipilih.'); return; }
         // Head ACC tidak wajib area, jabatan lain wajib area
         if (jabatanRaw !== HEAD_ACC_JABATAN && !area) { showFormError('Area / DC wajib dipilih.'); return; }
+        if (!divisi)    { showFormError('Departemen wajib dipilih.'); return; }
+        if (!jabatanRaw){ showFormError('Jabatan wajib dipilih.'); return; }
+        if (jabatanRaw === 'Admin FAT' && !subJabatan) { showFormError('Sub Jabatan Admin FAT wajib dipilih.'); return; }
       }
 
       const opts = JABATAN_DEPARTEMEN[jabatanRaw];
