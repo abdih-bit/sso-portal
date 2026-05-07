@@ -876,7 +876,9 @@
         document.getElementById('sidebarRole').textContent = user.role;
         document.getElementById('sidebarAvatarCircle').textContent = initials;
         document.getElementById('adminRoleText').textContent = user.role;
-      } catch { window.location.href = '/login'; }
+      } catch { window.location.href = '/login'; return; }
+      // Muat master data dari DB agar dropdown Add User sudah terisi
+      loadMasterData();
     }
 
     async function loadStats() {
@@ -1151,7 +1153,7 @@
       if (tab === 'links') loadLinks();
       if (tab === 'appnames') renderAppNamesList();
       if (tab === 'logs') loadLogs();
-      if (tab === 'master') { renderMasterLists(); loadDbAreas(); loadDbSalesOffices(); }
+      if (tab === 'master') { loadMasterData(); loadDbAreas(); loadDbSalesOffices(); }
       if (tab === 'reset') loadResetRequests('PENDING');
     }
 
@@ -1771,56 +1773,68 @@
     }
 
     // ── MASTER DATA ────────────────────────────────────────
-    // Struktur master data: { pt, area, jabatan, departemen, linkAppNames }
-    function getMasterData() {
-      const defaults = {
-        pt: [
-          { name: 'MDR 1', head_office: '' }, { name: 'MDR 2', head_office: '' }, { name: 'MDR 3', head_office: '' }, { name: 'MDR 4', head_office: '' }
-        ],
-        area: [
-          { name: 'DC Medan', pt: 'MDR 1' }, { name: 'DC Stabat', pt: 'MDR 1' },
-          { name: 'DC Siantar', pt: 'MDR 2' }, { name: 'DC Tanjung Balai Asahan', pt: 'MDR 2' }, { name: 'DC Kabanjahe', pt: 'MDR 2' },
-          { name: 'DC Sibolga', pt: 'MDR 3' }, { name: 'DC Padang Sidimpuan', pt: 'MDR 3' }, { name: 'DC Rantau Prapat', pt: 'MDR 3' },
-          { name: 'DC Pancur Batu', pt: 'MDR 4' }, { name: 'DC Nias', pt: 'MDR 4' }, { name: 'DC Sei Rampah', pt: 'MDR 4' }
-        ],
-        jabatan: [
-          { name: 'Head ACC', departemen: 'FAT' }, { name: 'Head AR', departemen: 'FAT' },
-          { name: 'KA Admin', departemen: 'FAT' }, { name: 'Admin FAT', departemen: 'FAT' },
-          { name: 'KA Transport', departemen: 'TRP' }, { name: 'Admin Transport', departemen: 'TRP' },
-          { name: 'KA WRH FG', departemen: 'WRH' }, { name: 'KA WRH BS', departemen: 'WRH' },
-          { name: 'Admin FG', departemen: 'WRH' }, { name: 'Admin BS', departemen: 'WRH' }
-        ],
-        departemen: [
-          { name: 'FAT' }, { name: 'TRP' }, { name: 'WRH' }
-        ],
-        linkAppNames: [
-          { name: 'E-TU Food', desc: 'E-TU Food' },
-          { name: 'E-TU Non Food', desc: 'E-TU Non Food' },
-          { name: 'E-TU Frozen', desc: 'E-TU Frozen' },
-          { name: 'E-TU Kosmetik', desc: 'E-TU Kosmetik' },
-        ]
-      };
+    // PT, Jabatan, Departemen disimpan di database via API.
+    // _masterDataCache diisi oleh loadMasterData() saat init.
+    var _masterDataCache = { pt: [], jabatan: [], departemen: [] };
+
+    async function loadMasterData() {
       try {
-        const saved = localStorage.getItem('sso_master_data');
-        if (!saved) return defaults;
-        const parsed = JSON.parse(saved);
-        // Backward compat: jika belum ada linkAppNames, tambahkan default
-        if (!parsed.linkAppNames) parsed.linkAppNames = defaults.linkAppNames;
-        return parsed;
-      } catch { return defaults; }
+        var [ptRes, deptRes, jabRes] = await Promise.all([
+          fetch('/api/admin/pt', { credentials: 'include' }),
+          fetch('/api/admin/departemen', { credentials: 'include' }),
+          fetch('/api/admin/jabatan', { credentials: 'include' }),
+        ]);
+        var ptData   = ptRes.ok   ? await ptRes.json()   : { ptList: [] };
+        var deptData = deptRes.ok ? await deptRes.json() : { departemenList: [] };
+        var jabData  = jabRes.ok  ? await jabRes.json()  : { jabatanList: [] };
+        _masterDataCache = {
+          pt:        ptData.ptList        || [],
+          departemen: deptData.departemenList || [],
+          jabatan:   jabData.jabatanList  || [],
+        };
+      } catch(e) {
+        console.error('loadMasterData error', e);
+      }
+      renderMasterLists();
+      rebuildDropdownsFromMaster(getMasterData());
     }
 
-    function saveMasterData(data) {
-      localStorage.setItem('sso_master_data', JSON.stringify(data));
-      // Sinkronisasi ke dropdown Add User
-      rebuildDropdownsFromMaster(data);
+    function getMasterData() {
+      // linkAppNames tetap dari localStorage
+      var linkAppNames = [
+        { name: 'E-TU Food', desc: 'E-TU Food' },
+        { name: 'E-TU Non Food', desc: 'E-TU Non Food' },
+        { name: 'E-TU Frozen', desc: 'E-TU Frozen' },
+        { name: 'E-TU Kosmetik', desc: 'E-TU Kosmetik' },
+      ];
+      try {
+        var saved = localStorage.getItem('sso_master_data');
+        if (saved) { var parsed = JSON.parse(saved); if (parsed.linkAppNames) linkAppNames = parsed.linkAppNames; }
+      } catch {}
+      return {
+        pt:         _masterDataCache.pt,
+        departemen: _masterDataCache.departemen,
+        jabatan:    _masterDataCache.jabatan,
+        area:       _dbAreasCache || [],
+        linkAppNames: linkAppNames,
+      };
+    }
+
+    // Simpan linkAppNames ke localStorage (satu-satunya yang masih pakai localStorage)
+    function saveLinkAppNames(names) {
+      try {
+        var saved = localStorage.getItem('sso_master_data');
+        var data = saved ? JSON.parse(saved) : {};
+        data.linkAppNames = names;
+        localStorage.setItem('sso_master_data', JSON.stringify(data));
+      } catch {}
     }
 
     function rebuildDropdownsFromMaster(data) {
       // Rebuild PT_AREAS dari master data
       PT_AREAS = {};
       data.pt.forEach(function(p) {
-        PT_AREAS[p.name] = data.area.filter(function(a) { return a.pt === p.name; }).map(function(a) { return a.name; });
+        PT_AREAS[p.name] = (data.area || []).filter(function(a) { return a.pt === p.name; }).map(function(a) { return a.name; });
       });
       // Rebuild JABATAN_DEPARTEMEN dari master data
       JABATAN_DEPARTEMEN = {};
@@ -1836,15 +1850,6 @@
           ptEl.appendChild(o);
         });
       }
-      // Rebuild Jabatan select di Add User modal
-      var jabEl = document.getElementById('userJabatan');
-      if (jabEl) {
-        jabEl.innerHTML = '<option value="">— Pilih Jabatan —</option>';
-        data.jabatan.forEach(function(j) {
-          var o = document.createElement('option'); o.value = j.name; o.textContent = j.name;
-          jabEl.appendChild(o);
-        });
-      }
       // Rebuild Departemen select di Add User modal
       var deptEl = document.getElementById('userDivisi');
       if (deptEl) {
@@ -1858,46 +1863,66 @@
 
     function renderMasterLists() {
       var data = getMasterData();
-      // Sinkronisasi dropdown juga
-      rebuildDropdownsFromMaster(data);
 
-      var typeMap = {
-        pt: { listId: 'masterPtList', color: 'blue', icon: 'fa-building', badge: function(item) {
-          return item.head_office
-            ? `<span class="tag bg-amber-50 text-amber-600 text-[10px]"><i class="fa-solid fa-crown text-[9px] mr-0.5"></i>${item.head_office}</span>`
-            : '';
-        } },
-        jabatan: { listId: 'masterJabatanList', color: 'purple', icon: 'fa-id-badge', badge: function(item) {
-          var b = '';
-          if (item.departemen) b += `<span class="tag bg-orange-50 text-orange-600 text-[10px]">${item.departemen}</span>`;
-          if (item.role) b += `<span class="tag ${item.role === 'ADMIN' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'} text-[10px] ml-1">${item.role}</span>`;
-          return b;
-        } },
-        departemen: { listId: 'masterDepartemenList', color: 'orange', icon: 'fa-sitemap', badge: function(item) { return ''; } }
-      };
-
-      Object.keys(typeMap).forEach(function(type) {
-        var cfg = typeMap[type];
-        var listEl = document.getElementById(cfg.listId);
-        var items = data[type] || [];
-        if (!items.length) {
-          listEl.innerHTML = '<div class="text-center py-6 text-gray-400 text-xs">Belum ada data</div>';
-          return;
-        }
-        listEl.innerHTML = items.map(function(item, idx) {
+      // ── PT ──
+      var ptListEl = document.getElementById('masterPtList');
+      if (!data.pt.length) {
+        ptListEl.innerHTML = '<div class="text-center py-6 text-gray-400 text-xs">Belum ada data</div>';
+      } else {
+        ptListEl.innerHTML = data.pt.map(function(item) {
           return `<div class="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 group">
             <div class="flex items-center gap-2">
-              <i class="fa-solid ${cfg.icon} text-${cfg.color}-400 text-xs w-4"></i>
+              <i class="fa-solid fa-building text-blue-400 text-xs w-4"></i>
               <span class="text-sm text-gray-700 font-medium">${item.name}</span>
-              ${cfg.badge(item)}
             </div>
             <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onclick="editMasterItem('${type}', ${idx})" class="text-xs text-blue-500 hover:bg-blue-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-pen text-xs"></i></button>
-              <button onclick="deleteMasterItem('${type}', ${idx})" class="text-xs text-red-400 hover:bg-red-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-trash text-xs"></i></button>
+              <button onclick="editMasterItem('pt', ${item.id})" class="text-xs text-blue-500 hover:bg-blue-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-pen text-xs"></i></button>
+              <button onclick="deleteMasterItem('pt', ${item.id}, '${item.name.replace(/'/g,"\\'")}', null)" class="text-xs text-red-400 hover:bg-red-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-trash text-xs"></i></button>
             </div>
           </div>`;
         }).join('');
-      });
+      }
+
+      // ── Departemen ──
+      var deptListEl = document.getElementById('masterDepartemenList');
+      if (!data.departemen.length) {
+        deptListEl.innerHTML = '<div class="text-center py-6 text-gray-400 text-xs">Belum ada data</div>';
+      } else {
+        deptListEl.innerHTML = data.departemen.map(function(item) {
+          return `<div class="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 group">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-sitemap text-orange-400 text-xs w-4"></i>
+              <span class="text-sm text-gray-700 font-medium">${item.name}</span>
+            </div>
+            <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button onclick="editMasterItem('departemen', ${item.id})" class="text-xs text-blue-500 hover:bg-blue-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-pen text-xs"></i></button>
+              <button onclick="deleteMasterItem('departemen', ${item.id}, '${item.name.replace(/'/g,"\\'")}', null)" class="text-xs text-red-400 hover:bg-red-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-trash text-xs"></i></button>
+            </div>
+          </div>`;
+        }).join('');
+      }
+
+      // ── Jabatan ──
+      var jabListEl = document.getElementById('masterJabatanList');
+      if (!data.jabatan.length) {
+        jabListEl.innerHTML = '<div class="text-center py-6 text-gray-400 text-xs">Belum ada data</div>';
+      } else {
+        jabListEl.innerHTML = data.jabatan.map(function(item) {
+          var depBadge = item.departemen ? `<span class="tag bg-orange-50 text-orange-600 text-[10px]">${item.departemen}</span>` : '';
+          var roleBadge = item.role ? `<span class="tag ${item.role === 'ADMIN' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'} text-[10px] ml-1">${item.role}</span>` : '';
+          return `<div class="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 group">
+            <div class="flex items-center gap-2 flex-wrap">
+              <i class="fa-solid fa-id-badge text-purple-400 text-xs w-4"></i>
+              <span class="text-sm text-gray-700 font-medium">${item.name}</span>
+              ${depBadge}${roleBadge}
+            </div>
+            <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button onclick="editMasterItem('jabatan', ${item.id})" class="text-xs text-blue-500 hover:bg-blue-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-pen text-xs"></i></button>
+              <button onclick="deleteMasterItem('jabatan', ${item.id}, '${item.name.replace(/'/g,"\\'")}', '${(item.departemen||'').replace(/'/g,"\\'")}' )" class="text-xs text-red-400 hover:bg-red-50 px-2 py-1 rounded transition-all"><i class="fa-solid fa-trash text-xs"></i></button>
+            </div>
+          </div>`;
+        }).join('');
+      }
 
       // Area/DC dirender oleh renderDbAreaList() yang dipanggil via loadDbAreas()
     }
@@ -1909,15 +1934,17 @@
       departemen: { title: 'Departemen', sub: 'Tambah departemen baru', label: 'Nama Departemen', icon: 'fa-sitemap', placeholder: 'Contoh: LOG' }
     };
 
-    function openMasterModal(type, editIdx) {
+    // editId: DB id item yang sedang diedit (-1 = tambah baru)
+    function openMasterModal(type, editId) {
+      editId = editId || -1;
       var cfg = masterModalConfig[type];
-      document.getElementById('masterModalTitle').textContent = (editIdx >= 0 ? 'Edit ' : 'Tambah ') + cfg.title;
+      document.getElementById('masterModalTitle').textContent = (editId > 0 ? 'Edit ' : 'Tambah ') + cfg.title;
       document.getElementById('masterModalSub').textContent = cfg.sub;
       document.getElementById('masterModalIcon').className = 'fa-solid ' + cfg.icon + ' text-indigo-600 text-sm';
       document.getElementById('masterNameLabel').textContent = cfg.label;
       document.getElementById('masterName').placeholder = cfg.placeholder;
       document.getElementById('masterType').value = type;
-      document.getElementById('masterEditIndex').value = editIdx >= 0 ? editIdx : -1;
+      document.getElementById('masterEditIndex').value = editId;
       document.getElementById('masterName').value = '';
 
       // Reset sub-fields
@@ -1929,12 +1956,7 @@
       if (_isHoField) _isHoField.classList.add('hidden');
 
       var data = getMasterData();
-      if (type === 'pt') {
-        // PT: hanya nama, tanpa HO (HO ditentukan dari Area/DC)
-        // masterPtHoField tetap hidden
-      }
       if (type === 'area') {
-        // Buka modal untuk tambah area baru (edit via editDbArea())
         document.getElementById('masterAreaDbId').value = '';
         var ptSel = document.getElementById('masterPtParent');
         ptSel.innerHTML = '<option value="">— Pilih PT —</option>';
@@ -1943,14 +1965,12 @@
           ptSel.appendChild(o);
         });
         document.getElementById('masterPtParentField').classList.remove('hidden');
-        // Checkbox Head Office
         var isHoField = document.getElementById('masterAreaIsHoField');
         if (isHoField) isHoField.classList.remove('hidden');
         var isHoCheck = document.getElementById('masterAreaIsHo');
         if (isHoCheck) isHoCheck.checked = false;
       }
       if (type === 'jabatan') {
-        // Populate Departemen select
         var dSel = document.getElementById('masterJabatanDept');
         dSel.innerHTML = '<option value="">— Pilih Departemen —</option>';
         data.departemen.forEach(function(d) {
@@ -1958,92 +1978,60 @@
           dSel.appendChild(o);
         });
         document.getElementById('masterJabatanDeptField').classList.remove('hidden');
-        if (editIdx >= 0) dSel.value = data.jabatan[editIdx].departemen || '';
-        // Show role field
         document.getElementById('masterJabatanRoleField').classList.remove('hidden');
         var rSel = document.getElementById('masterJabatanRole');
-        if (editIdx >= 0) rSel.value = data.jabatan[editIdx].role || '';
-        else rSel.value = '';
+        if (editId > 0) {
+          var existing = data.jabatan.find(function(j) { return j.id === editId; });
+          if (existing) { dSel.value = existing.departemen || ''; rSel.value = existing.role || ''; }
+        } else { rSel.value = ''; }
       }
-      if (editIdx >= 0) {
-        document.getElementById('masterName').value = data[type][editIdx].name;
+      if (editId > 0 && type !== 'area') {
+        var existingItem = data[type].find(function(item) { return item.id === editId; });
+        if (existingItem) document.getElementById('masterName').value = existingItem.name;
       }
 
       document.getElementById('masterModal').classList.add('show');
     }
 
-    function editMasterItem(type, idx) {
+    function editMasterItem(type, id) {
       if (type === 'area') return; // area dihandle oleh editDbArea()
-      openMasterModal(type, idx);
+      openMasterModal(type, id);
     }
 
-    function deleteMasterItem(type, idx) {
-      var data = getMasterData();
-      var item = data[type][idx];
-      if (!item) return;
+    function deleteMasterItem(type, id, name, badge) {
+      var typeLabel = { pt: 'PT / Perusahaan', jabatan: 'Jabatan', departemen: 'Departemen' };
+      var typeIcon  = { pt: 'fa-building', jabatan: 'fa-id-badge', departemen: 'fa-sitemap' };
+      var apiPath   = { pt: '/api/admin/pt/', jabatan: '/api/admin/jabatan/', departemen: '/api/admin/departemen/' };
 
-      var typeLabel = { pt: 'PT / Perusahaan', area: 'Area / DC', jabatan: 'Jabatan', departemen: 'Departemen' };
-      var typeIcon  = { pt: 'fa-building', area: 'fa-location-dot', jabatan: 'fa-id-badge', departemen: 'fa-sitemap' };
-
-      // Cek dampak / dependensi
-      var warnings = [];
-      if (type === 'pt') {
-        var affectedArea = (data.area || []).filter(function(a) { return a.pt === item.name; });
-        if (affectedArea.length) {
-          warnings.push(affectedArea.length + ' Area/DC yang terhubung ke PT ini (' + affectedArea.map(function(a){ return a.name; }).join(', ') + ') akan kehilangan referensi PT-nya.');
-        }
-      }
-      if (type === 'departemen') {
-        var affectedJabatan = (data.jabatan || []).filter(function(j) { return j.departemen === item.name; });
-        if (affectedJabatan.length) {
-          warnings.push(affectedJabatan.length + ' Jabatan yang terhubung (' + affectedJabatan.map(function(j){ return j.name; }).join(', ') + ') akan kehilangan referensi Departemen-nya.');
-        }
-      }
-
-      // Isi modal
       document.getElementById('deleteConfirmSub').textContent = 'Hapus data ' + typeLabel[type];
       document.getElementById('deleteConfirmIcon').className = 'fa-solid ' + typeIcon[type] + ' text-gray-400 text-sm w-4';
-      document.getElementById('deleteConfirmName').textContent = item.name;
+      document.getElementById('deleteConfirmName').textContent = name;
 
-      // Badge (PT induk untuk area, departemen induk untuk jabatan)
-      var badge = document.getElementById('deleteConfirmBadge');
-      if (type === 'area' && item.pt) {
-        badge.textContent = item.pt;
-        badge.classList.remove('hidden');
-      } else if (type === 'jabatan' && item.departemen) {
-        badge.textContent = item.departemen;
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
-      }
+      var badgeEl = document.getElementById('deleteConfirmBadge');
+      if (badge) { badgeEl.textContent = badge; badgeEl.classList.remove('hidden'); }
+      else { badgeEl.classList.add('hidden'); }
 
-      // Warning dependensi
-      var warnBox = document.getElementById('deleteConfirmWarning');
-      var warnText = document.getElementById('deleteConfirmWarningText');
-      if (warnings.length) {
-        warnText.textContent = '⚠ ' + warnings.join(' ');
-        warnBox.classList.remove('hidden');
-        warnBox.style.display = 'flex';
-      } else {
-        warnBox.classList.add('hidden');
-      }
-
-      // Tombol konfirmasi — pasang handler baru setiap kali
-      var confirmBtn = document.getElementById('deleteConfirmBtn');
-      confirmBtn.onclick = function() {
-        data[type].splice(idx, 1);
-        saveMasterData(data);
-        renderMasterLists();
-        closeModal('deleteConfirmModal');
-      };
-
+      document.getElementById('deleteConfirmWarning').classList.add('hidden');
       document.getElementById('deleteConfirmModal').classList.add('show');
+
+      document.getElementById('deleteConfirmBtn').onclick = async function() {
+        try {
+          var res = await fetch(apiPath[type] + id, { method: 'DELETE', credentials: 'include' });
+          if (res.ok) {
+            closeModal('deleteConfirmModal');
+            await loadMasterData();
+          } else {
+            var d = await res.json();
+            alert(d.error || 'Gagal menghapus data.');
+          }
+        } catch(e) { alert('Error: ' + e.message); }
+      };
     }
 
     async function submitMasterForm(e) {
       e.preventDefault();
       var type = document.getElementById('masterType').value;
-      var editIdx = parseInt(document.getElementById('masterEditIndex').value);
+      var editId = parseInt(document.getElementById('masterEditIndex').value);
       var name = document.getElementById('masterName').value.trim();
       if (!name) return;
 
@@ -2058,33 +2046,27 @@
             ? await fetch('/api/admin/areas/' + areaDbId, { method: 'PUT', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(payload) })
             : await fetch('/api/admin/areas', { method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(payload) });
           var d = await res.json();
-          if (res.ok) {
-            closeModal('masterModal');
-            await loadDbAreas();
-          } else {
-            alert(d.error || 'Gagal menyimpan area.');
-          }
+          if (res.ok) { closeModal('masterModal'); await loadDbAreas(); }
+          else { alert(d.error || 'Gagal menyimpan area.'); }
         } catch(err) { alert('Error: ' + err.message); }
         return;
       }
 
-      // ── Tipe lain: simpan ke localStorage ──
-      var data = getMasterData();
-      var item = { name: name };
+      // ── PT, Jabatan, Departemen: simpan ke DB via API ──
+      var apiPath = { pt: '/api/admin/pt', jabatan: '/api/admin/jabatan', departemen: '/api/admin/departemen' };
+      var body = { name: name };
       if (type === 'jabatan') {
-        item.departemen = document.getElementById('masterJabatanDept').value;
-        item.role = document.getElementById('masterJabatanRole').value || null;
+        body.departemen = document.getElementById('masterJabatanDept').value || null;
+        body.role = document.getElementById('masterJabatanRole').value || null;
       }
-
-      if (editIdx >= 0) {
-        data[type][editIdx] = item;
-      } else {
-        data[type].push(item);
-      }
-
-      saveMasterData(data);
-      renderMasterLists();
-      closeModal('masterModal');
+      try {
+        var url = editId > 0 ? apiPath[type] + '/' + editId : apiPath[type];
+        var method = editId > 0 ? 'PUT' : 'POST';
+        var res = await fetch(url, { method: method, headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(body) });
+        var d = await res.json();
+        if (res.ok) { closeModal('masterModal'); await loadMasterData(); }
+        else { alert(d.error || 'Gagal menyimpan data.'); }
+      } catch(err) { alert('Error: ' + err.message); }
     }
     // ────────────────────────────────────────────────────────
 
@@ -2166,7 +2148,7 @@
         data.linkAppNames.push(item);
       }
 
-      saveMasterData(data);
+      saveLinkAppNames(data.linkAppNames);
       renderAppNamesList();
       closeModal('appNameModal');
     }
@@ -2193,7 +2175,7 @@
 
       document.getElementById('deleteAppNameConfirmBtn').onclick = function() {
         data.linkAppNames.splice(idx, 1);
-        saveMasterData(data);
+        saveLinkAppNames(data.linkAppNames);
         renderAppNamesList();
         closeModal('deleteAppNameModal');
       };

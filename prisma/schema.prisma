@@ -259,3 +259,43 @@ model SalesOffice {
 
   @@map("sales_offices")
 }
+
+// ===========================
+// PT / PERUSAHAAN MASTER DATA
+// ===========================
+model PtList {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("pt_list")
+}
+
+// ===========================
+// DEPARTEMEN MASTER DATA
+// ===========================
+model DepartemenList {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("departemen_list")
+}
+
+// ===========================
+// JABATAN MASTER DATA
+// departemen: nama departemen (string, bukan FK)
+// role: USER | ADMIN | null (null = semua role)
+// ===========================
+model JabatanList {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  departemen String?
+  role       String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("jabatan_list")
+}

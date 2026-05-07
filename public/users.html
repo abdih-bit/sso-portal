@@ -320,41 +320,37 @@
     const HEAD_ACC_JABATAN = 'Head ACC'; // Lihat semua PT
     const HEAD_AR_JABATAN  = 'Head AR';  // Lihat semua area dalam 1 PT
 
-    // ── Master Data (sync dengan localStorage dari admin.html) ──
+    // ── Master Data (dimuat dari DB via API) ──
     var PT_AREAS = {};
     var JABATAN_DEPARTEMEN = {};
+    var _masterDataCache = { pt: [], jabatan: [], departemen: [], area: [] };
 
-    function getMasterData() {
-      const defaults = {
-        pt: [
-          { name: 'MDR 1' }, { name: 'MDR 2' }, { name: 'MDR 3' }, { name: 'MDR 4' }
-        ],
-        area: [
-          { name: 'DC Medan', pt: 'MDR 1' }, { name: 'DC Stabat', pt: 'MDR 1' },
-          { name: 'DC Siantar', pt: 'MDR 2' }, { name: 'DC Tanjung Balai Asahan', pt: 'MDR 2' }, { name: 'DC Kabanjahe', pt: 'MDR 2' },
-          { name: 'DC Sibolga', pt: 'MDR 3' }, { name: 'DC Padang Sidimpuan', pt: 'MDR 3' }, { name: 'DC Rantau Prapat', pt: 'MDR 3' },
-          { name: 'DC Pancur Batu', pt: 'MDR 4' }, { name: 'DC Nias', pt: 'MDR 4' }, { name: 'DC Sei Rampah', pt: 'MDR 4' }
-        ],
-        jabatan: [
-          { name: 'Head ACC', departemen: 'FAT' }, { name: 'Head AR', departemen: 'FAT' },
-          { name: 'KA Admin', departemen: 'FAT' }, { name: 'Admin FAT', departemen: 'FAT' },
-          { name: 'KA Transport', departemen: 'TRP' }, { name: 'Admin Transport', departemen: 'TRP' },
-          { name: 'KA WRH FG', departemen: 'WRH' }, { name: 'KA WRH BS', departemen: 'WRH' },
-          { name: 'Admin FG', departemen: 'WRH' }, { name: 'Admin BS', departemen: 'WRH' },
-          { name: 'IT', departemen: null }
-        ],
-        departemen: [
-          { name: 'FAT' }, { name: 'TRP' }, { name: 'WRH' }
-        ]
-      };
+    function getMasterData() { return _masterDataCache; }
+
+    async function loadMasterData() {
       try {
-        const saved = localStorage.getItem('sso_master_data');
-        return saved ? JSON.parse(saved) : defaults;
-      } catch { return defaults; }
+        var [ptRes, deptRes, jabRes, areaRes] = await Promise.all([
+          fetch('/api/admin/pt', { credentials: 'include' }),
+          fetch('/api/admin/departemen', { credentials: 'include' }),
+          fetch('/api/admin/jabatan', { credentials: 'include' }),
+          fetch('/api/admin/areas', { credentials: 'include' }),
+        ]);
+        var ptData   = ptRes.ok   ? await ptRes.json()   : { ptList: [] };
+        var deptData = deptRes.ok ? await deptRes.json() : { departemenList: [] };
+        var jabData  = jabRes.ok  ? await jabRes.json()  : { jabatanList: [] };
+        var areaData = areaRes.ok ? await areaRes.json() : { areas: [] };
+        _masterDataCache = {
+          pt:         ptData.ptList        || [],
+          departemen: deptData.departemenList || [],
+          jabatan:    jabData.jabatanList  || [],
+          area:       areaData.areas       || [],
+        };
+      } catch(e) { console.error('loadMasterData error', e); }
+      buildCascadeData();
     }
 
     function buildCascadeData() {
-      const data = getMasterData();
+      var data = _masterDataCache;
       PT_AREAS = {};
       data.pt.forEach(function(p) {
         PT_AREAS[p.name] = data.area.filter(function(a) { return a.pt === p.name; }).map(function(a) { return a.name; });
@@ -584,7 +580,7 @@
           document.getElementById('navAdminPanel').classList.remove('hidden');
         }
         setupRoleSelect(user.role);
-        buildCascadeData();
+        await loadMasterData();
       } catch { window.location.href = '/login'; }
     }
 

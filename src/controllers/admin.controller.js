@@ -849,4 +849,196 @@ module.exports = {
   createSalesOffice,
   updateSalesOffice,
   deleteSalesOffice,
+  getPtList,
+  createPt,
+  updatePt,
+  deletePt,
+  getDepartemenList,
+  createDepartemen,
+  updateDepartemen,
+  deleteDepartemen,
+  getJabatanList,
+  createJabatan,
+  updateJabatan,
+  deleteJabatan,
 };
+
+// ── PT / Perusahaan ─────────────────────────────────────────
+
+async function getPtList(req, res) {
+  try {
+    const ptList = await prisma.ptList.findMany({ orderBy: { name: 'asc' } });
+    return res.json({ ptList });
+  } catch (error) {
+    console.error('Get ptList error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+async function createPt(req, res) {
+  try {
+    const { name } = req.body;
+    if (!name || !name.trim()) return res.status(400).json({ error: 'Nama PT wajib diisi.' });
+    const pt = await prisma.ptList.create({ data: { name: name.trim() } });
+    await createAuditLog({ userId: req.user.id, action: 'PT_CREATED', resource: pt.name, req });
+    return res.status(201).json({ message: 'PT berhasil ditambahkan.', pt });
+  } catch (error) {
+    if (error.code === 'P2002') return res.status(400).json({ error: 'Nama PT sudah ada.' });
+    console.error('Create PT error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+async function updatePt(req, res) {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+    const pt = await prisma.ptList.update({
+      where: { id: parseInt(id) },
+      data: { ...(name && { name: name.trim() }) }
+    });
+    await createAuditLog({ userId: req.user.id, action: 'PT_UPDATED', resource: pt.name, req });
+    return res.json({ message: 'PT berhasil diperbarui.', pt });
+  } catch (error) {
+    if (error.code === 'P2025') return res.status(404).json({ error: 'PT tidak ditemukan.' });
+    if (error.code === 'P2002') return res.status(400).json({ error: 'Nama PT sudah ada.' });
+    console.error('Update PT error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+async function deletePt(req, res) {
+  try {
+    const { id } = req.params;
+    const pt = await prisma.ptList.findUnique({ where: { id: parseInt(id) } });
+    if (!pt) return res.status(404).json({ error: 'PT tidak ditemukan.' });
+    await prisma.ptList.delete({ where: { id: parseInt(id) } });
+    await createAuditLog({ userId: req.user.id, action: 'PT_DELETED', resource: pt.name, req });
+    return res.json({ message: 'PT berhasil dihapus.' });
+  } catch (error) {
+    console.error('Delete PT error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+// ── Departemen ───────────────────────────────────────────────
+
+async function getDepartemenList(req, res) {
+  try {
+    const departemenList = await prisma.departemenList.findMany({ orderBy: { name: 'asc' } });
+    return res.json({ departemenList });
+  } catch (error) {
+    console.error('Get departemenList error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+async function createDepartemen(req, res) {
+  try {
+    const { name } = req.body;
+    if (!name || !name.trim()) return res.status(400).json({ error: 'Nama departemen wajib diisi.' });
+    const dep = await prisma.departemenList.create({ data: { name: name.trim() } });
+    await createAuditLog({ userId: req.user.id, action: 'DEPARTEMEN_CREATED', resource: dep.name, req });
+    return res.status(201).json({ message: 'Departemen berhasil ditambahkan.', departemen: dep });
+  } catch (error) {
+    if (error.code === 'P2002') return res.status(400).json({ error: 'Nama departemen sudah ada.' });
+    console.error('Create departemen error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+async function updateDepartemen(req, res) {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+    const dep = await prisma.departemenList.update({
+      where: { id: parseInt(id) },
+      data: { ...(name && { name: name.trim() }) }
+    });
+    await createAuditLog({ userId: req.user.id, action: 'DEPARTEMEN_UPDATED', resource: dep.name, req });
+    return res.json({ message: 'Departemen berhasil diperbarui.', departemen: dep });
+  } catch (error) {
+    if (error.code === 'P2025') return res.status(404).json({ error: 'Departemen tidak ditemukan.' });
+    if (error.code === 'P2002') return res.status(400).json({ error: 'Nama departemen sudah ada.' });
+    console.error('Update departemen error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+async function deleteDepartemen(req, res) {
+  try {
+    const { id } = req.params;
+    const dep = await prisma.departemenList.findUnique({ where: { id: parseInt(id) } });
+    if (!dep) return res.status(404).json({ error: 'Departemen tidak ditemukan.' });
+    await prisma.departemenList.delete({ where: { id: parseInt(id) } });
+    await createAuditLog({ userId: req.user.id, action: 'DEPARTEMEN_DELETED', resource: dep.name, req });
+    return res.json({ message: 'Departemen berhasil dihapus.' });
+  } catch (error) {
+    console.error('Delete departemen error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+// ── Jabatan ──────────────────────────────────────────────────
+
+async function getJabatanList(req, res) {
+  try {
+    const jabatanList = await prisma.jabatanList.findMany({ orderBy: [{ departemen: 'asc' }, { name: 'asc' }] });
+    return res.json({ jabatanList });
+  } catch (error) {
+    console.error('Get jabatanList error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+async function createJabatan(req, res) {
+  try {
+    const { name, departemen, role } = req.body;
+    if (!name || !name.trim()) return res.status(400).json({ error: 'Nama jabatan wajib diisi.' });
+    const jab = await prisma.jabatanList.create({
+      data: { name: name.trim(), departemen: departemen || null, role: role || null }
+    });
+    await createAuditLog({ userId: req.user.id, action: 'JABATAN_CREATED', resource: jab.name, req });
+    return res.status(201).json({ message: 'Jabatan berhasil ditambahkan.', jabatan: jab });
+  } catch (error) {
+    if (error.code === 'P2002') return res.status(400).json({ error: 'Nama jabatan sudah ada.' });
+    console.error('Create jabatan error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+async function updateJabatan(req, res) {
+  try {
+    const { id } = req.params;
+    const { name, departemen, role } = req.body;
+    const jab = await prisma.jabatanList.update({
+      where: { id: parseInt(id) },
+      data: {
+        ...(name && { name: name.trim() }),
+        ...(departemen !== undefined && { departemen: departemen || null }),
+        ...(role !== undefined && { role: role || null }),
+      }
+    });
+    await createAuditLog({ userId: req.user.id, action: 'JABATAN_UPDATED', resource: jab.name, req });
+    return res.json({ message: 'Jabatan berhasil diperbarui.', jabatan: jab });
+  } catch (error) {
+    if (error.code === 'P2025') return res.status(404).json({ error: 'Jabatan tidak ditemukan.' });
+    if (error.code === 'P2002') return res.status(400).json({ error: 'Nama jabatan sudah ada.' });
+    console.error('Update jabatan error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}
+
+async function deleteJabatan(req, res) {
+  try {
+    const { id } = req.params;
+    const jab = await prisma.jabatanList.findUnique({ where: { id: parseInt(id) } });
+    if (!jab) return res.status(404).json({ error: 'Jabatan tidak ditemukan.' });
+    await prisma.jabatanList.delete({ where: { id: parseInt(id) } });
+    await createAuditLog({ userId: req.user.id, action: 'JABATAN_DELETED', resource: jab.name, req });
+    return res.json({ message: 'Jabatan berhasil dihapus.' });
+  } catch (error) {
+    console.error('Delete jabatan error:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+}

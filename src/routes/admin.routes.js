@@ -42,4 +42,22 @@ router.post('/sales-offices', requireRole('SUPERADMIN'), adminController.createS
 router.put('/sales-offices/:id', requireRole('SUPERADMIN'), adminController.updateSalesOffice);
 router.delete('/sales-offices/:id', requireRole('SUPERADMIN'), adminController.deleteSalesOffice);
 
+// PT / Perusahaan
+router.get('/pt', adminController.getPtList);
+router.post('/pt', requireRole('SUPERADMIN'), adminController.createPt);
+router.put('/pt/:id', requireRole('SUPERADMIN'), adminController.updatePt);
+router.delete('/pt/:id', requireRole('SUPERADMIN'), adminController.deletePt);
+
+// Departemen
+router.get('/departemen', adminController.getDepartemenList);
+router.post('/departemen', requireRole('SUPERADMIN'), adminController.createDepartemen);
+router.put('/departemen/:id', requireRole('SUPERADMIN'), adminController.updateDepartemen);
+router.delete('/departemen/:id', requireRole('SUPERADMIN'), adminController.deleteDepartemen);
+
+// Jabatan
+router.get('/jabatan', adminController.getJabatanList);
+router.post('/jabatan', requireRole('SUPERADMIN'), adminController.createJabatan);
+router.put('/jabatan/:id', requireRole('SUPERADMIN'), adminController.updateJabatan);
+router.delete('/jabatan/:id', requireRole('SUPERADMIN'), adminController.deleteJabatan);
+
 module.exports = router;
