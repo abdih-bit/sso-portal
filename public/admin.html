@@ -879,6 +879,8 @@
       } catch { window.location.href = '/login'; return; }
       // Muat master data dari DB agar dropdown Add User sudah terisi
       loadMasterData();
+      // Muat data Area/DC agar dropdown linkAppArea sudah terisi saat Add Link App dibuka
+      loadDbAreas();
     }
 
     async function loadStats() {
